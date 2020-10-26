@@ -107,12 +107,11 @@
   </div>
 
 </div>
-
 <div *ngIf="show" class="card my-height">
   <div class="card-body my-vertical">
     <div class="row">
       <div class="col-md-12">
-        <h2 class="text-center text-danger">{{ 'GLUE_NAME' | translate }}: {{makeGlue.name}} </h2>
+        <h2 class="text-center text-danger"> {{ 'GLUE_NAME' | translate }}: {{makeGlue.name}} </h2>
       </div>
     </div>
     <div class="row">
@@ -135,10 +134,10 @@
           <div class="col-md-6">
             <div class="row">
               <div class="col-md-8 text-center">
-                <label class="font-weight-bold" for="">{{ 'EXPECTED' | translate }}</label>
+                <label class="font-weight-bold" for="">{{ 'EXPECTED' | translate }} ({{unit}}) </label>
               </div>
               <div class="col-md-4 text-center">
-                <label class="font-weight-bold" for="">{{ 'ACTUAL' | translate }}</label>
+                <label class="font-weight-bold" for="">{{ 'ACTUAL' | translate }} ({{unit}})</label>
               </div>
             </div>
           </div>
@@ -159,8 +158,8 @@
                     [class]="item.info" [ngClass]="lockClass(item)"
                     (ngModelChange)='onNgModelChangeScanQRCode($event, item)' type="text">
                   <ng-template #scanBlock>
-                    <input class="form-control form-control-lg rounded-pill" [(ngModel)]="item.scanCode" [name]="item.code"
-                      [class]="item.info" [ngClass]="lockClass(item)"
+                    <input class="form-control form-control-lg rounded-pill" [(ngModel)]="item.scanCode"
+                      [name]="item.code" [class]="item.info" [ngClass]="lockClass(item)"
                       (ngModelChange)='onNgModelChangeScanQRCode($event, item)' type="text">
                   </ng-template>
                 </div>
@@ -174,12 +173,13 @@
             <div class="col-md-6">
               <div class="row">
                 <div class="col-md-8">
-                  <input *ngIf="item.focusExpected; else expectedBlock" class="form-control form-control-lg rounded-pill"
-                    [value]='item.expected' [autofocus]='item.focusExpected' [class]="item.info"
-                    (keyup)='onKeyupExpected(item, $event)' type="text">
+                  <input *ngIf="item.focusExpected; else expectedBlock"
+                    class="form-control form-control-lg rounded-pill" [value]='item.expected'
+                    [autofocus]='item.focusExpected' [class]="item.info" (keyup)='onKeyupExpected(item, $event)'
+                    type="text">
                   <ng-template #expectedBlock>
-                    <input class="form-control form-control-lg rounded-pill lock" [value]='item.expected' [class]="item.info"
-                      (keyup)='onKeyupExpected(item, $event)' type="text">
+                    <input class="form-control form-control-lg rounded-pill lock" [value]='item.expected'
+                      [class]="item.info" (keyup)='onKeyupExpected(item, $event)' type="text">
                   </ng-template>
                 </div>
                 <div class="col-md-4">
@@ -189,8 +189,8 @@
                     (keyup)='onKeyupReal(item, $event)' type="text">
                   <ng-template #realElse>
                     <input class="form-control form-control-lg rounded-pill lock mixing" data-toggle="tooltip"
-                      title="tooltip on second input!" [value]='item.real' [id]='item.position' [class]="realClass(item)"
-                      (keyup)='onKeyupReal(item, $event)' type="text">
+                      title="tooltip on second input!" [value]='item.real' [id]='item.position'
+                      [class]="realClass(item)" (keyup)='onKeyupReal(item, $event)' type="text">
                   </ng-template>
                 </div>
               </div>
@@ -199,15 +199,17 @@
         </ng-container>
 
         <div class="text-center mb-1">
-          
-          <button type="button" (click)="back()" class="btn btn-primary rounded-pill"><i class="fa fa-arrow-circle-left"></i>
+
+          <button type="button" (click)="back()" class="btn btn-primary rounded-pill"><i
+              class="fa fa-arrow-circle-left"></i>
             {{ 'BACK' | translate }}</button>
           <button type="button" [disabled]="disabled" (click)="Finish()" class="btn btn-success rounded-pill ml-2"><i
-                class="fas fa-save"></i>
-              {{ 'FINISHED' | translate }}</button>
-          <button type="button" (click)="gotoStir()" [disabled]="!showQRCode" class="btn btn-warning rounded-pill ml-2"><i class="fa fa-arrow-circle-right"></i>
-              {{ 'STIR' | translate }}</button>
-            
+              class="fas fa-save"></i>
+            {{ 'FINISHED' | translate }}</button>
+          <button type="button" (click)="gotoStir()" [disabled]="!showQRCode"
+            class="btn btn-warning rounded-pill ml-2"><i class="fa fa-arrow-circle-right"></i>
+            {{ 'STIR' | translate }}</button>
+
         </div>
         <p class="text-center my-2 text-danger" *ngIf="!disabled">{{ 'NOTE' | translate }}</p>
       </div>

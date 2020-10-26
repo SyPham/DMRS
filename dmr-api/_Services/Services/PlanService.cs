@@ -531,7 +531,7 @@ namespace DMR_API._Services.Services
             {
                 //var currentDate = new DateTime(2020, 10, 22).Date;
                 var currentDate = DateTime.Now.Date;
-                var lines =await _repoBuilding.FindAll(x => x.ParentID == building).Select(x => x.ID).ToListAsync();
+                var lines = await _repoBuilding.FindAll(x => x.ParentID == building).Select(x => x.ID).ToListAsync();
                 var plans = await _repoPlan.FindAll()
                 .Include(x => x.BPFCEstablish)
                 .ThenInclude(x => x.ModelName)
@@ -552,7 +552,7 @@ namespace DMR_API._Services.Services
                     x.BPFCEstablish.Glues
                 }).ToListAsync();
 
-                var gluesList = plans.SelectMany(x => x.Glues).Select(x=>x.Name);
+                var gluesList = plans.SelectMany(x => x.Glues).Select(x => x.Name);
                 var mixingInfoModel = await _repoMixingInfo.FindAll()
                     .Where(x => gluesList.Contains(x.GlueName) && x.BuildingID == building && x.CreatedTime.Date == currentDate).ToListAsync();
                 var buildingGlueModel = await _repoBuildingGlue.FindAll()
@@ -629,7 +629,7 @@ namespace DMR_API._Services.Services
 
                     var mixingInfos = mixingInfoModel.Where(x => x.GlueName.Equals(glue.Name));
 
-                    var delivered =     buildingGlueModel
+                    var delivered = buildingGlueModel
                                         .Where(x => x.GlueName.Equals(glue.Name))
                                         .OrderBy(x => x.CreatedDate)
                                         .Select(x => new DeliveredInfo
@@ -738,9 +738,14 @@ namespace DMR_API._Services.Services
                 // End Data
                 return new { header = header.DistinctBy(x => x.field), rowParents, modelNameList = modelNameHeader };
             }
-            catch (Exception ex)
+            catch
             {
-                return new { };
+                return new
+                {
+                    header = new List<HeaderForSummary> { },
+                    rowParents = new List<RowParentDto> { },
+                    modelNameList = new List<HeaderForSummary> { }
+                };
 
             }
 
@@ -944,7 +949,7 @@ namespace DMR_API._Services.Services
             var headers = new ReportHeaderDto();
             headers.Ingredients = ingredientsHeader;
             var bodyList = new List<ReportBodyDto>();
-            var planModel = plans.OrderBy(x => x.DueDate.Date).ThenBy(x=>x.Line).ToList();
+            var planModel = plans.OrderBy(x => x.DueDate.Date).ThenBy(x => x.Line).ToList();
             foreach (var plan in planModel)
             {
                 var body = new ReportBodyDto
@@ -964,7 +969,7 @@ namespace DMR_API._Services.Services
                 {
                     foreach (var glue in plan.Glues)
                     {
-                        if (glue.GlueIngredients.Any(x=> x.IngredientID == ingredient.ID) && plan.BPFCEstablishID == glue.BPFCEstablishID)
+                        if (glue.GlueIngredients.Any(x => x.IngredientID == ingredient.ID) && plan.BPFCEstablishID == glue.BPFCEstablishID)
                         {
                             var buildingGlue = buildingGlueModel.Where(x => x.BuildingID == body.LineID && x.IngredientIDList.Contains(ingredient.ID) && x.CreatedDate.Date == plan.DueDate.Date && x.BPFCEstablishID == glue.BPFCEstablishID)
                             .Distinct().ToList();
@@ -985,7 +990,8 @@ namespace DMR_API._Services.Services
                     if (model != null)
                     {
                         ingredientsBody.Add(model.Value);
-                    } else
+                    }
+                    else
                     {
                         ingredientsBody.Add(0);
 
@@ -1129,11 +1135,11 @@ namespace DMR_API._Services.Services
                         double realRowTotal = body.Ingredients.Sum();
                         double CBD = 0, real = 0;
                         if (cbdRowTotal > 0 && body.Quantity > 0)
-                         CBD = Math.Round((cbdTotal + cbdRowTotal) / body.Quantity, 3, MidpointRounding.AwayFromZero);
-                        if (realRowTotal > 0 && body.Quantity > 0) 
+                            CBD = Math.Round((cbdTotal + cbdRowTotal) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+                        if (realRowTotal > 0 && body.Quantity > 0)
                             real = Math.Round((realTotal + realRowTotal) / body.Quantity, 3, MidpointRounding.AwayFromZero);
 
-                        ws.Cells[rowIndex, colIndex++].Value =  CBD == 0 ? string.Empty : CBD.ToString();
+                        ws.Cells[rowIndex, colIndex++].Value = CBD == 0 ? string.Empty : CBD.ToString();
                         ws.Cells[rowIndex, colIndex++].Value = real == 0 ? string.Empty : real.ToString();
 
                         foreach (var ingredient in body.Ingredients)
