@@ -27,6 +27,7 @@ namespace DMR_API._Services.Interface
         Task<bool> EditDelivered(int id, string qty );
         Task<bool> EditQuantity(int id, int qty );
         Task<bool> DeleteDelivered(int id);
+        Task<object> OldSummary(int building);
 
     }
 }

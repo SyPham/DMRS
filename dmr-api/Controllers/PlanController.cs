@@ -120,6 +120,12 @@ namespace DMR_API.Controllers
             var model = await _planService.Summary(buildingID);
             return Ok(model);
         }
+        [HttpGet("{buildingID}")]
+        public async Task<IActionResult> OldSummary(int buildingID)
+        {
+            var model = await _planService.OldSummary(buildingID);
+            return Ok(model);
+        }
         [HttpPost]
         public async Task<IActionResult> ClonePlan(List<PlanForCloneDto> create)
         {

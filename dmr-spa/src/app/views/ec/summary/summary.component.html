@@ -2,14 +2,16 @@
   <p class="loading">Loading data...</p>
 </ngx-spinner>
 
-<div class="card" *ngIf="existGlue" #fullScreen style="overflow: auto;" >
+<div class="card" *ngIf="existGlue" #fullScreen style="overflow: auto;">
   <div class="card-header d-flex p-1" *ngIf="existGlue">
     <h4>{{ 'TODOLIST' | translate }}</h4>
     <div class="d-inline-flex ml-auto">
       <button class="btn btn-xs p-2 mr-1 my-bg-warning">{{ 'DELIVERED_TOTAL_COUNT_LABEL' | translate }}</button>
       <button class="btn btn-xs p-2 mr-1 my-bg-primary">{{ 'ACTUAL_NOTE_LABEL' | translate }}</button>
-      <button (click)="openFullscreen()" class="btn btn-xs p-2 mr-1 bg-secondary" *ngIf="!hasFullScreen"><i class="fa fa-expand-arrows-alt"></i> Fullscreen</button>
-      <button (click)='closeFullscreen()' class="btn btn-xs p-2 mr-1 bg-info" *ngIf="hasFullScreen"><i class="fa fa-times"></i> Close Fullscreen</button>
+      <button (click)="openFullscreen()" class="btn btn-xs p-2 mr-1 bg-secondary" *ngIf="!hasFullScreen"><i
+          class="fa fa-expand-arrows-alt"></i> Fullscreen</button>
+      <button (click)='closeFullscreen()' class="btn btn-xs p-2 mr-1 bg-info" *ngIf="hasFullScreen"><i
+          class="fa fa-times"></i> Close Fullscreen</button>
     </div>
   </div>
   <div class="row" *ngIf="existGlue">
@@ -26,18 +28,18 @@
             <thead class="thead-dark">
               <tr>
                 <ng-container *ngFor="let item of lineColumns; let i = index">
-                  <th scope="col" *ngIf="item.hasRowspan" [attr.rowspan]="item.rowspanValue" [attr.colspan]="item.colspanValue" class="my-align my-sticky text-center">
-                    {{ labelLang(item.field) | translate }}</th>
-                  <th scope="col" *ngIf="!item.hasRowspan"  [attr.colspan]="item.colspanValue"
-                    class="my-align my-sticky text-center">
+                  <th scope="col" class="my-align my-sticky text-center">
                     {{ labelLang(item.field) | translate }}</th>
                 </ng-container>
+                <th scope="col" class="my-align my-sticky text-center">{{ 'OPTION' | translate }}</th>
               </tr>
               <tr>
-                <ng-container *ngFor="let item of modelNameList; let i = index">
-                  <th scope="col" class="text-center my-sticky-top">
-                    {{ item.field}}</th>
-                </ng-container>
+                <th scope="col" class="text-center my-sticky-top"></th>
+                <th scope="col" class="text-center my-sticky-top"></th>
+                <th scope="col" class="text-center my-sticky-top" *ngFor="let item of modelNameList">{{item}}</th>
+                <th scope="col" class="text-center my-sticky-top"></th>
+                <th scope="col" class="text-center my-sticky-top"></th>
+                <th scope="col" class="text-center my-sticky-top"></th>
               </tr>
             </thead>
             <tbody>
@@ -45,17 +47,19 @@
                 <!-- row1 -->
                 <tr>
                   <!-- Cell Left -->
-                    <td class="text-center" style="vertical-align: middle;" rowspan='2'>{{values.row1.supplier.supplier}}</td>
-                    <td class="text-center" style="vertical-align: middle;" rowspan='2'>
-                      <ejs-tooltip #tooltip class="fix-css" position='RightCenter' (beforeRender)="onBeforeRender($event, values.row1, j)"
-                        content="loading...">
-                        {{values.row1.glueName.glueName}}
-                      </ejs-tooltip>
-                    </td>
+                  <td class="text-center" style="vertical-align: middle;" rowspan='2'>{{values.row1.supplier.supplier}}
+                  </td>
+                  <td class="text-center" style="vertical-align: middle;" rowspan='2'>
+                    <ejs-tooltip #tooltip class="fix-css" position='RightCenter'
+                      (beforeRender)="onBeforeRender($event, values.row1, j)" content="loading...">
+                      {{values.row1.glueName.glueName}}
+                    </ejs-tooltip>
+                  </td>
                   <!-- End Cell Left -->
 
                   <!-- Cell Center -->
-                  <td class="table-primary my-align" (click)='editDomain(value)' *ngFor="let value of values.row1.cellsCenter; let i = index">
+                  <td class="table-primary my-align" (click)='editDomain(value)'
+                    *ngFor="let value of values.row1.cellsCenter; let i = index">
                     <input type="text" *ngIf="!value.editable"
                       [value]="value.value == 0 || value.value === '0kg' ? 0 : value.value + 'kg'"
                       class="form-control my-align summaryhide real">
@@ -64,20 +68,24 @@
                       [value]="value.value" class="form-control my-align summary real">
                   </td>
                   <!-- End Cell Center -->
-                    
+
                   <!-- Cell Right -->
-                  <td rowspan='2' class="text-center" style="vertical-align: middle; width: 150px;">{{values.row1.actual.real}}</td>
+                  <td rowspan='2' class="text-center" style="vertical-align: middle; width: 150px;">
+                    {{values.row1.actual.real}}</td>
                   <td rowspan='2' class="text-center" style="vertical-align: middle;">{{values.row1.count.count}}</td>
                   <!-- End Cell Right -->
                   <td rowspan=2 class="my-align">
-                    <button type="button" style="width: 90px;" (click)="mixingSection(values.row1)" class="btn btn-success btn-sm">
+                    <button type="button" style="width: 90px;" (click)="mixingSection(values.row1)"
+                      class="btn btn-success btn-sm">
                       <i class="fa fa-glass"></i>
                       {{ 'MIXING' | translate }}
                     </button>
-                    <button (click)="stirGlue(values.row1)" style="width: 90px;" type="button" class="btn btn-warning btn-sm my-2">
+                    <button (click)="stirGlue(values.row1)" style="width: 90px;" type="button"
+                      class="btn btn-warning btn-sm my-2">
                       <i class="fa fa-fan"></i>
                       {{ 'STIR' | translate }}</button>
-                    <button type="button" style="width: 90px;" (click)="pushHistory(values.row1)" class="btn btn-sm btn-info">
+                    <button type="button" style="width: 90px;" (click)="pushHistory(values.row1)"
+                      class="btn btn-sm btn-info">
                       {{ 'HISTORY' | translate }}</button>
                   </td>
                 </tr>
@@ -87,7 +95,8 @@
                 <tr class="table-warning">
                   <td class="my-align" (dblclick)='showModal(deliveredModal, value)'
                     *ngFor="let value of values.row2.cellsCenter">
-                    <ejs-tooltip #tooltipRow2 class="fix-css" position="RightCenter" [content]="onBeforeRenderRow2(value)">
+                    <ejs-tooltip #tooltipRow2 class="fix-css" position="RightCenter"
+                      [content]="onBeforeRenderRow2(value)">
                       <span *ngIf='value.count > 0'>
                         {{value.deliveredTotal}}kg({{value.count}})
                       </span>
@@ -97,21 +106,22 @@
                     </ejs-tooltip>
                   </td>
                 </tr>
-                  <!-- End Row2 -->
+                <!-- End Row2 -->
               </ng-container>
             </tbody>
           </table>
-          </div>
+        </div>
       </div>
     </div>
   </div>
 
 </div>
+
 <div *ngIf="show" class="card my-height">
   <div class="card-body my-vertical">
     <div class="row">
       <div class="col-md-12">
-        <h2 class="text-center text-danger"> {{ 'GLUE_NAME' | translate }}: {{makeGlue.name}} </h2>
+        <h2 class="text-center text-danger">{{ 'GLUE_NAME' | translate }}: {{makeGlue.name}} </h2>
       </div>
     </div>
     <div class="row">
@@ -134,10 +144,10 @@
           <div class="col-md-6">
             <div class="row">
               <div class="col-md-8 text-center">
-                <label class="font-weight-bold" for="">{{ 'EXPECTED' | translate }} ({{unit}}) </label>
+                <label class="font-weight-bold" for="">{{ 'EXPECTED' | translate }}</label>
               </div>
               <div class="col-md-4 text-center">
-                <label class="font-weight-bold" for="">{{ 'ACTUAL' | translate }} ({{unit}})</label>
+                <label class="font-weight-bold" for="">{{ 'ACTUAL' | translate }}</label>
               </div>
             </div>
           </div>
@@ -228,23 +238,16 @@
   <div class="modal-body">
     <div class="row">
       <div class="col-md-12">
-         <ejs-grid  [dataSource]='deliveredData' #deliveredGrid
-            rowHeight='38'
-            height='300'
-            allowFiltering='true'
-            [allowSorting]='true'
-            [filterSettings]='filterSettings'
-            [editSettings]='editSettings'
-            [toolbar]='toolbarOptions'
-            (toolbarClick)='toolbarClick($event)'
-            (actionBegin)="actionBegin($event)"
-            showColumnMenu='true'
-            [toolbar]='toolbarOptions'>
-            <e-columns>
-                <e-column field='glueName' isPrimaryKey='true' textAlign='Center' headerText='Glue' width='100'></e-column>
-                <e-column field='qty' textAlign='Center' headerText='Qty' width='80'></e-column>
-                <e-column field='createdDate' isPrimaryKey='true' textAlign='Center' type='dateTime' format='d MMM, yyyy hh:mm:ss a' headerText='Delivered Date' width='150'></e-column>
-              </e-columns>
+        <ejs-grid [dataSource]='deliveredData' #deliveredGrid rowHeight='38' height='300' allowFiltering='true'
+          [allowSorting]='true' [filterSettings]='filterSettings' [editSettings]='editSettings'
+          [toolbar]='toolbarOptions' (toolbarClick)='toolbarClick($event)' (actionBegin)="actionBegin($event)"
+          showColumnMenu='true' [toolbar]='toolbarOptions'>
+          <e-columns>
+            <e-column field='glueName' isPrimaryKey='true' textAlign='Center' headerText='Glue' width='100'></e-column>
+            <e-column field='qty' textAlign='Center' headerText='Qty' width='80'></e-column>
+            <e-column field='createdDate' isPrimaryKey='true' textAlign='Center' type='dateTime'
+              format='d MMM, yyyy hh:mm:ss a' headerText='Delivered Date' width='150'></e-column>
+          </e-columns>
         </ejs-grid>
       </div>
     </div>

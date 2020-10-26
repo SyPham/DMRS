@@ -73,7 +73,7 @@ export class PlanService {
     return this.http.get(`${this.baseUrl}Plan/getGlueByBuildingModelName/${buildingID}/${modelname}`);
   }
   summary(buildingID) {
-    return this.http.get(this.baseUrl + 'Plan/summary/' + buildingID);
+    return this.http.get(this.baseUrl + 'Plan/OldSummary/' + buildingID);
   }
   dispatchGlue(obj) {
     return this.http.post(this.baseUrl + 'Plan/DispatchGlue', obj);
