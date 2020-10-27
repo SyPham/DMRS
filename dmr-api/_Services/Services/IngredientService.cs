@@ -127,6 +127,7 @@ namespace DMR_API._Services.Services
         {
             var ingredient = _mapper.Map<Ingredient>(model);
             ingredient.isShow = true;
+            ingredient.ModifiedDate = DateTime.Now;
             _repoIngredient.Update(ingredient);
             return await _repoIngredient.SaveAll();
         }

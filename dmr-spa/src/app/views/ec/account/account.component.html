@@ -37,7 +37,7 @@
               </ng-template>
             </e-column>
             <e-column field="Email" headerText="Email"> </e-column>
-            <e-column field="BuildingName" headerText="Building">
+            <e-column field="BuildingName" headerText="Role">
               <ng-template #editTemplate let-data>
                 <ejs-dropdownlist #positionDropdownlist [dataSource]='buildings' [value]="data.BuildingName"
                   [fields]='fieldsBuilding' [allowFiltering]='true'

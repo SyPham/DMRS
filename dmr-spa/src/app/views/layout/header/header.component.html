@@ -24,7 +24,7 @@
 
     <div class="collapse navbar-collapse order-3" id="navbarCollapse">
       <ul class="navbar-nav" >
-        <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR">
+          <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === SUPER_ADMIN">
           <a class="nav-link dropdown-toggle" style="cursor: pointer" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ 'SETTING' | translate }}
           </a>
@@ -38,10 +38,10 @@
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/part']">{{ 'PART' | translate }}</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/material']">{{ 'MATERIAL' | translate }}</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/building-setting']">{{ 'Building Setting' | translate }}</a>
-            <!-- <a class="dropdown-item" [routerLink]="[ '/ec/setting/glue']">{{ 'GLUE' | translate }}</a> -->
-            </div>
+            <a class="dropdown-item"[routerLink]="[ '/ec/setting/costing']">Costing</a>
+          </div>
           </li>
-          <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF">
+          <li class="nav-item dropdown" *ngIf="level === SUPER_ADMIN || level === SUPERVISOR || level === STAFF">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               {{ 'ESTABLISH' | translate }}
             </a>
@@ -50,7 +50,7 @@
               <a class="dropdown-item" [routerLink]="[ '/ec/establish/bpfc']">{{ 'BPFC' | translate }}</a>
           </div>
         </li>
-          <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER">
+          <li class="nav-item dropdown" *ngIf="level === SUPER_ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               {{ 'MANAGE' | translate }}
             </a>
@@ -61,7 +61,7 @@
           </div>
         </li>
 
-        <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER">
+        <li class="nav-item dropdown" *ngIf="level === SUPER_ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ 'EXECUTION' | translate }}
           </a>
@@ -74,7 +74,7 @@
           </div>
         </li>
 
-        <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF">
+        <li class="nav-item dropdown" *ngIf="level === SUPER_ADMIN || level === SUPERVISOR || level === STAFF">
           <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ 'REPORT' | translate }}
           </a>
@@ -86,7 +86,7 @@
             <a class="dropdown-item" [routerLink]="[ '/ec/report/delivered-history']">{{'DELIVERED_HISTORY_LABEL' | translate}}</a>
         </div>
       </li>
-        <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF">
+        <li class="nav-item dropdown" *ngIf="level === SUPER_ADMIN || level === SUPERVISOR || level === STAFF">
           <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{'TROUBLESHOOTING_LABEL' | translate}}
           </a>

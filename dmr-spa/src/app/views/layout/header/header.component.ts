@@ -27,6 +27,9 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public totalCount: number;
   public page: number;
   public ADMIN = 1;
+  public SUPER_ADMIN = 0;
+  public ADMIN_COSTING = 1;
+  public ADMIN_COSTING_NAME = 'Admin Costing';
   public SUPERVISOR = 2;
   public STAFF = 3;
   public WORKER = 4;
@@ -35,6 +38,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public currentTime: any;
   userid: number;
   level: number;
+  roleName: string;
   role: number;
   avatar: any;
   langsData: object[];
@@ -105,6 +109,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       res = res || {};
       if (res !== {}) {
         this.level = res.level;
+        this.roleName = res.name;
       }
     });
   }

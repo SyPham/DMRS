@@ -6,6 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { UserForLogin } from 'src/app/_core/_model/user';
 import { environment } from 'src/environments/environment';
 const ADMIN = 1;
+const SUPPER_ADMIN = 78;
 const SUPERVISOR = 2;
 const STAFF = 3;
 const WORKER = 4;
@@ -45,6 +46,10 @@ export class LoginComponent implements OnInit {
 
     //
     '/report/consumption',
+  ];
+  routerLinkSuperAdmin = [
+    '/setting/costing',
+    '/report/output-quantity',
   ];
   routerLinkSupervisor = [
     '/setting/account-1',
@@ -159,6 +164,15 @@ export class LoginComponent implements OnInit {
       }
     );
   }
+  checkRouteSuperAdmin(uri) {
+    let flag = false;
+    this.routerLinkSuperAdmin.forEach(element => {
+      if (uri.includes(element)) {
+        flag = true;
+      }
+    });
+    return flag;
+  }
   checkRouteAdmin(uri) {
     let flag = false;
     this.routerLinkAdmin.forEach(element => {
@@ -197,7 +211,17 @@ export class LoginComponent implements OnInit {
   }
   checkRole() {
     const uri = decodeURI(this.uri);
-    if (this.level === ADMIN) {
+    if (this.level === SUPPER_ADMIN) {
+      if (uri !== 'undefined') {
+        if (this.checkRouteSuperAdmin(uri)) {
+          this.router.navigate([uri]);
+        } else {
+          this.router.navigate(['/ec/setting/costing']);
+        }
+      } else {
+        this.router.navigate(['/ec/setting/costing']);
+      }
+    } else if (this.level === ADMIN) {
       if (uri !== 'undefined') {
         if (this.checkRouteAdmin(uri)) {
           this.router.navigate([uri]);

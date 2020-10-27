@@ -5,16 +5,16 @@ const SYSTEM_CODE = 2;
 export const environment = {
   production: false,
   systemCode: SYSTEM_CODE,
-  apiUrlEC: 'http://10.4.4.224:10022/api/',
+  apiUrlEC: 'http://10.4.4.224:1002/api/',
   apiUrl: 'http://10.4.0.76:106/api/',
-  hub: 'http://10.4.4.224:10022/ec-hub',
+  hub: 'http://10.4.4.224:1002/ec-hub',
   scalingHub: 'http://10.4.0.76:5000/scalingHub',
-  // apiUrlEC: 'http://10.4.0.76:1002/api/',
+
+  // apiUrlEC: 'http://10.4.4.224:10022/api/',
   // apiUrl: 'http://10.4.0.76:106/api/',
-  // hub: 'http://10.4.0.76:1002/ec-hub'
-  // apiUrlEC: 'http://10.4.4.92:1002/api/',
-  // apiUrl: 'http://10.4.0.76:106/api/',
-  // hub: 'http://10.4.4.92:1002/ec-hub'
+  // hub: 'http://10.4.4.224:10022/ec-hub',
+  // scalingHub: 'http://10.4.0.76:5000/scalingHub',
+  
 };
 
 /*

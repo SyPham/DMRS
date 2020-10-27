@@ -72,6 +72,7 @@ import { IncomingComponent } from './incoming/incoming.component';
 import { BuildingSettingComponent } from './building-setting/building-setting.component';
 import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-quantity.component';
 import { DatePipe } from '@angular/common';
+import { CostingComponent } from './costing/costing.component';
 setCulture('de-DE');
 
 const lang = localStorage.getItem('lang');
@@ -160,6 +161,7 @@ if (lang) {
     SelectQrCodeDirective,
     IncomingComponent,
     PlanOutputQuantityComponent,
+    CostingComponent,
     BuildingSettingComponent
   ]
 })

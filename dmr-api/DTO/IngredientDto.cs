@@ -32,6 +32,7 @@ namespace DMR_API.DTO
         public int DaysToExpiration { get; set; }
 
         public int ExpiredTime { get; set; }
+        public int CreateBy { get; set; }
         public DateTime ManufacturingDate { get; set; }
         public bool isShow { get; set; }
         public int ModifiedBy { get; set; }

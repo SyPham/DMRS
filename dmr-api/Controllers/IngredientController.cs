@@ -155,6 +155,7 @@ namespace DMR_API.Controllers
         {
 
             ingredientIngredientDto.CreatedDate = DateTime.Now.ToString("MMMM dd, yyyy HH:mm:ss tt");
+            
             if (await _ingredientService.Update(ingredientIngredientDto))
                 return NoContent();
 

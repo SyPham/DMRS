@@ -34,6 +34,7 @@ import { DeliveredHistoryComponent } from './delivered-history/delivered-history
 import { IncomingComponent } from './incoming/incoming.component';
 import { BuildingSettingComponent } from './building-setting/building-setting.component';
 import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-quantity.component';
+import { CostingComponent } from './costing/costing.component';
 
 const routes: Routes = [
   {
@@ -102,8 +103,15 @@ const routes: Routes = [
               title: 'Building Setting',
               breadcrumb: 'Building Setting'
             }
-          }
-          ,
+          },
+          {
+            path: 'costing',
+            component: CostingComponent,
+            data: {
+              title: 'costing',
+              breadcrumb: 'Costing'
+            }
+          },
           {
             path: 'building',
             component: BuildingComponent,
