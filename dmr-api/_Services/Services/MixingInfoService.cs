@@ -54,7 +54,7 @@ namespace DMR_API._Services.Services
                 item.ExpiredTime = DateTime.Now.AddMinutes(glue.ExpiredTime);
                 _repoMixingInfor.Add(item);
                 await _repoMixingInfor.SaveAll();
-                await _repoMixing.AddOrUpdate(item.ID);
+                // await _repoMixing.AddOrUpdate(item.ID);
                 return item;
             }
             catch
