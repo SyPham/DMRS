@@ -762,12 +762,19 @@ namespace DMR_API._Services.Services
         }
         public async Task<object> DispatchGlue(BuildingGlueForCreateDto obj)
         {
-            var buildingGlue = _mapper.Map<BuildingGlue>(obj);
-            var building = _repoBuilding.FindById(obj.BuildingID);
-            var lastMixingInfo = await _repoMixingInfo.FindAll().Where(x => x.GlueName.Contains(obj.GlueName) && x.BuildingID == building.ParentID).OrderByDescending(x => x.CreatedTime).FirstOrDefaultAsync();
-            buildingGlue.MixingInfoID = lastMixingInfo == null ? 0 : lastMixingInfo.ID;
-            _repoBuildingGlue.Add(buildingGlue);
-            return await _repoBuildingGlue.SaveAll();
+           try
+           {
+                var buildingGlue = _mapper.Map<BuildingGlue>(obj);
+                var building = _repoBuilding.FindById(obj.BuildingID);
+                var lastMixingInfo = await _repoMixingInfo.FindAll().Where(x => x.GlueName.Contains(obj.GlueName) && x.BuildingID == building.ParentID).OrderByDescending(x => x.CreatedTime).FirstOrDefaultAsync();
+                buildingGlue.MixingInfoID = lastMixingInfo == null ? 0 : lastMixingInfo.ID;
+                _repoBuildingGlue.Add(buildingGlue);
+                return await _repoBuildingGlue.SaveAll();
+           }
+           catch(Exception ex)
+           {
+               return false;
+           }
         }
         public async Task<object> ClonePlan(List<PlanForCloneDto> plansDto)
         {
@@ -1005,6 +1012,13 @@ namespace DMR_API._Services.Services
 
             return ExportExcel(headers, bodyList, ingredients.ToList());
         }
+        double SumProduct(double[] arrayA, double[] arrayB)
+        {
+            double result = 0;
+            for (int i = 0; i < arrayA.Count(); i++)
+                result += arrayA[i] * arrayB[i];
+            return result;
+        }
         private Byte[] ExportExcel(ReportHeaderDto header, List<ReportBodyDto> bodyList, List<IngredientReportDto> ingredients)
         {
             try
@@ -1128,16 +1142,18 @@ namespace DMR_API._Services.Services
                         ws.Cells[rowIndex, colIndex++].Value = body.Quantity == 0 ? string.Empty : body.Quantity.ToString();
                         ws.Cells[rowIndex, colIndex++].Value = body.Line;
 
-                        double cbdTotal = ingredients.Select(x => x.CBD).Sum();
-                        double realTotal = ingredients.Select(x => x.Real).Sum();
+                        var cbds = ingredients.Select(x => x.CBD).ToArray();
+                        var reals = ingredients.Select(x => x.Real).ToArray();
 
-                        double cbdRowTotal = body.Ingredients.Sum();
-                        double realRowTotal = body.Ingredients.Sum();
+                        var cbdRowTotal = body.Ingredients.ToArray();
+                        var realRowTotal = body.Ingredients.ToArray();
+                        var value = body.Ingredients.Sum();
                         double CBD = 0, real = 0;
-                        if (cbdRowTotal > 0 && body.Quantity > 0)
-                            CBD = Math.Round((cbdTotal + cbdRowTotal) / body.Quantity, 3, MidpointRounding.AwayFromZero);
-                        if (realRowTotal > 0 && body.Quantity > 0)
-                            real = Math.Round((realTotal + realRowTotal) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+
+                        if (value > 0 && body.Quantity > 0)
+                            CBD = Math.Round( SumProduct(cbdRowTotal,cbds ) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+                        if (value > 0 && body.Quantity > 0)
+                            real = Math.Round(SumProduct(realRowTotal , reals) / body.Quantity, 3, MidpointRounding.AwayFromZero);
 
                         ws.Cells[rowIndex, colIndex++].Value = CBD == 0 ? string.Empty : CBD.ToString();
                         ws.Cells[rowIndex, colIndex++].Value = real == 0 ? string.Empty : real.ToString();
@@ -1373,7 +1389,8 @@ namespace DMR_API._Services.Services
         public async Task<object> OldSummary(int building)
         {
 
-            var currentDate = DateTime.Now.Date;
+           var currentDate = DateTime.Now.Date;
+           // var currentDate = new DateTime(2020,10,26);
             var item = _repoBuilding.FindById(building);
             var lineList = await _repoBuilding.FindAll().Where(x => x.ParentID == item.ID).ToListAsync();
             var plans = await _repoPlan.FindAll()

@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from '../../_core/_service/auth.service';
 import { AlertifyService } from '../../_core/_service/alertify.service';
 import { Router, ActivatedRoute, RouterStateSnapshot } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
+import { UserForLogin } from 'src/app/_core/_model/user';
+import { environment } from 'src/environments/environment';
 const ADMIN = 1;
 const SUPERVISOR = 2;
 const STAFF = 3;
@@ -12,7 +15,11 @@ const WORKER = 4;
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  user: any = {};
+  user: UserForLogin = {
+    username: '',
+    password: '',
+    systemCode: environment.systemCode
+  };
   uri: any;
   level: number;
   routerLinkAdmin = [
@@ -79,12 +86,24 @@ export class LoginComponent implements OnInit {
     '/execution/todolist',
     '/execution/addition',
   ];
+  remember = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
+    private cookieService: CookieService,
     private alertifyService: AlertifyService
   ) {
+    if (this.cookieService.get('remember') !== undefined) {
+      if (this.cookieService.get('remember') === 'Yes') {
+        this.user = {
+          username: this.cookieService.get('username'),
+          password: this.cookieService.get('password'),
+          systemCode: environment.systemCode
+        };
+        this.remember = true;
+      }
+    }
     this.route.queryParams.subscribe(params => {
       this.uri = params.uri;
     });
@@ -92,11 +111,25 @@ export class LoginComponent implements OnInit {
   role: number;
   ngOnInit(): void {
   }
+  onChangeRemember(args) {
+    this.remember = args.target.checked;
+  }
   login(): void {
     this.authService.login(this.user).subscribe(
       next => {
         this.role = JSON.parse(localStorage.getItem('user')).User.Role;
         this.alertifyService.success('Login Success!!');
+        if (this.remember) {
+          this.cookieService.set('remember', 'Yes') ;
+          this.cookieService.set('username', this.user.username );
+          this.cookieService.set('password', this.user.password);
+          this.cookieService.set('systemCode', this.user.systemCode.toString());
+        } else {
+          this.cookieService.set('remember', 'No');
+          this.cookieService.set('username', '');
+          this.cookieService.set('password', '');
+          this.cookieService.set('systemCode', '');
+        }
         this.authService.getBuildingByUserID(JSON.parse(localStorage.getItem('user')).User.ID).subscribe((res: any) => {
           res = res || {};
           localStorage.setItem('level', JSON.stringify(res));
