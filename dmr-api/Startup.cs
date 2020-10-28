@@ -47,6 +47,7 @@ namespace DMR_API
                 options.AddPolicy("CorsPolicy",
                     builder => builder.WithOrigins(
                     "http://10.4.4.224:1000",
+                    "http://localhost:1000",
                     "http://10.4.4.224:1001",
                     "http://10.4.4.224:106",
                     "http://10.4.0.76:96",
