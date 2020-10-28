@@ -41,6 +41,8 @@ namespace DMR_API.Data
         public DbSet<IngredientInfoReport> IngredientInfoReports { get; set; }
         public DbSet<BPFCHistory> BPFCHistories { get; set; }
         public DbSet<Abnormal> Abnormals { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BPFCEstablish>().HasKey(x => x.ID);

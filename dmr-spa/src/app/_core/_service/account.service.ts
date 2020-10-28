@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Tutorial } from '../_model/tutorial';
 import { PaginatedResult } from '../_model/pagination';
+import { IUserRole } from '../_model/role';
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json',
@@ -17,7 +18,7 @@ const httpOptions = {
 })
 export class AccountService {
   baseUrl = environment.apiUrlEC;
-  authUrl = environment.apiUrl;
+  authUrl = environment.apiUrl2;
   messageSource = new BehaviorSubject<number>(0);
   currentMessage = this.messageSource.asObservable();
   // method này để change source message

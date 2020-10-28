@@ -15,6 +15,7 @@ import { CalendarsService } from 'src/app/_core/_service/calendars.service';
 import { AuthService } from 'src/app/_core/_service/auth.service';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { count } from 'console';
+import { UserService } from 'src/app/_core/_service/user.service';
 @Component({
   selector: 'app-bpfc-status',
   templateUrl: './bpfc-status.component.html',
@@ -62,7 +63,7 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
     private glueService: GlueService,
     private commentService: CommentService,
     private calendarsService: CalendarsService,
-    private buildingUserService: BuildingUserService,
+    private userService: UserService,
     private authService: AuthService,
   ) { }
 
@@ -379,8 +380,8 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
   }
 
   getAllUsers() {
-    this.buildingUserService.getAllUsers(1, 1000).subscribe((res: any) => {
-      this.users = res.result;
+    this.userService.getAllUserInfo().subscribe((res: any) => {
+      this.users = res;
       this.filterByFinishedStatus();
     });
   }
@@ -427,16 +428,16 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
   }
 
   username(id) {
-    return (this.users.filter((item: any) => item.ID === id)[0] as any).Username;
+    return (this.users.filter((item: any) => item.id === id)[0] as any).username;
   }
 
   createdBy(id) {
     if (id === 0) {
       return '#N/A';
     }
-    const result = (this.users.filter((item: any) => item.ID === id)[0] as any);
+    const result = (this.users.filter((item: any) => item.id === id)[0] as any);
     if (result !== undefined) {
-      return result.Username;
+      return result.username;
     } else {
       return '#N/A';
     }

@@ -15,7 +15,6 @@ import { GlueModalComponent } from './glue/glue-modal/glue-modal.component';
 import { IngredientModalComponent } from './ingredient/ingredient-modal/ingredient-modal.component';
 import { GlueResolver } from '../../_core/_resolvers/glue.resolver';
 import { IngredientResolver } from '../../_core/_resolvers/ingredient.resolver';
-import { MakeGlueComponent } from './make-glue/make-glue.component';
 import { LineComponent } from './line/line.component';
 import { BuildingComponent } from './building/building.component';
 import { BuildingUserComponent } from './building-user/building-user.component';
@@ -23,7 +22,6 @@ import { SummaryComponent } from './summary/summary.component';
 import { AccountComponent } from './account/account.component';
 import { BPFCScheduleComponent } from './BPFCSchedule/BPFCSchedule.component';
 import { PrintQRCodeComponent } from './ingredient/print-qrcode/print-qrcode.component';
-import { EstablishedRecordComponent } from './established-record/established-record.component';
 import { PartComponent } from './part/part.component';
 import { KindComponent } from './kind/kind.component';
 import { MaterialComponent } from './material/material.component';
@@ -35,6 +33,7 @@ import { IncomingComponent } from './incoming/incoming.component';
 import { BuildingSettingComponent } from './building-setting/building-setting.component';
 import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-quantity.component';
 import { CostingComponent } from './costing/costing.component';
+import { ConsumptionComponent } from './consumption/consumption.component';
 
 const routes: Routes = [
   {
@@ -215,26 +214,6 @@ const routes: Routes = [
               title: 'bpfc',
               breadcrumb: 'BPFC'
             }
-          }
-        ]
-      },
-      // end establish
-
-      // manage
-      {
-        path: 'manage',
-        data: {
-          title: 'Manage',
-          breadcrumb: 'Manage'
-        },
-        children: [
-          {
-            path: 'workplan',
-            component: PlanComponent,
-            data: {
-              title: 'Workplan',
-              breadcrumb: 'Work Plan'
-            }
           },
           {
             path: 'bpfc-status',
@@ -246,7 +225,7 @@ const routes: Routes = [
           }
         ]
       },
-      // end manage
+      // end establish
 
       // execution
       {
@@ -256,14 +235,6 @@ const routes: Routes = [
           breadcrumb: 'Execution'
         },
         children: [
-          {
-            path: 'addition',
-            component: MakeGlueComponent,
-            data: {
-              title: 'Addtion',
-              breadcrumb: 'Addtion'
-            }
-          },
           {
             path: 'todolist',
             // component: SummaryComponent,
@@ -300,17 +271,32 @@ const routes: Routes = [
                   breadcrumb: 'History'
                 }
               },
+              {
+                path: 'workplan',
+                component: PlanComponent,
+                data: {
+                  title: 'Workplan',
+                  breadcrumb: 'Work Plan'
+                }
+              },
+              {
+                path: 'output-quantity',
+                component: PlanOutputQuantityComponent,
+                data: {
+                  title: 'Output Quantity',
+                  breadcrumb: 'Output Quantity'
+                }
+              },
+              {
+                path: 'incoming',
+                component: IncomingComponent,
+                data: {
+                  title: 'Incoming',
+                  breadcrumb: 'Incoming'
+                }
+              }
             ]
-          },
-          {
-            path: 'incoming',
-            // resolve: { ingredients: IngredientResolver },
-            component: IncomingComponent,
-            data: {
-              title: 'Incoming',
-              breadcrumb: 'Incoming'
-            }
-          },
+          }
         ]
       },
       // end execution
@@ -324,19 +310,11 @@ const routes: Routes = [
         },
         children: [
           {
-            path: 'established-record',
-            component: EstablishedRecordComponent,
+            path: 'consumption',
+            component: ConsumptionComponent,
             data: {
-              title: 'Established Record',
-              breadcrumb: 'Established Record'
-            }
-          },
-          {
-            path: 'comsumption',
-            component: SummaryComponent,
-            data: {
-              title: 'Comsumption',
-              breadcrumb: 'Comsumption'
+              title: 'Consumption',
+              breadcrumb: 'Consumption'
             }
           },
           {
@@ -354,14 +332,6 @@ const routes: Routes = [
               title: 'Inventory',
               breadcrumb: 'Inventory'
             },
-          },
-          {
-            path: 'output-quantity',
-            component: PlanOutputQuantityComponent,
-            data: {
-              title: 'Output Quantity',
-              breadcrumb: 'Output Quantity'
-            }
           }
         ]
       },

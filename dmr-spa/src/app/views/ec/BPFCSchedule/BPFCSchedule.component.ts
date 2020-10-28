@@ -7,6 +7,7 @@ import { BuildingUserService } from 'src/app/_core/_service/building.user.servic
 import { environment } from '../../../../environments/environment';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { DatePipe } from '@angular/common';
+import { UserService } from 'src/app/_core/_service/user.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -34,6 +35,7 @@ export class BPFCScheduleComponent implements OnInit {
     private modelNameService: ModalNameService,
     private alertify: AlertifyService,
     private buildingUserService: BuildingUserService,
+    private userService: UserService,
     private bPFCEstablishService: BPFCEstablishService,
     public modalService: NgbModal,
     private datePipe: DatePipe
@@ -103,8 +105,8 @@ export class BPFCScheduleComponent implements OnInit {
 
 
   getAllUsers() {
-    this.buildingUserService.getAllUsers(1, 1000).subscribe((res: any) => {
-      this.users = res.result;
+    this.userService.getAllUserInfo().subscribe((res: any) => {
+      this.users = res;
       this.getAll();
     });
   }
@@ -120,7 +122,7 @@ export class BPFCScheduleComponent implements OnInit {
           articleNo: item.articleNo,
           approvalStatus: item.approvalStatus,
           finishedStatus: item.finishedStatus,
-          approvedBy: this.users.filter(a => a.ID === item.approvalBy)[0]?.Username,
+          approvedBy: this.users.filter(a => a.id === item.approvalBy)[0]?.username,
           createdBy: item.createdBy,
           artProcess: item.artProcess,
           season: item.season

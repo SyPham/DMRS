@@ -22,7 +22,7 @@ export class RoleResolver implements Resolve<IRole[]> {
     this.pageSize = 10;
   }
   resolve(route: ActivatedRouteSnapshot): Observable<IRole[]> {
-    return this.roleService.getRoles(this.page, this.pageSize).pipe(
+    return this.roleService.getAll().pipe(
       catchError(error => {
         console.log(error);
         this.alertify.error('Problem retrieving data');

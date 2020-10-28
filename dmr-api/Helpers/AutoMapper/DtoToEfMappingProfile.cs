@@ -48,6 +48,7 @@ namespace DMR_API.Helpers.AutoMapper
             CreateMap<ProcessDto, Process>();
             CreateMap<KindDto, Kind>();
             CreateMap<PartDto, Part>();
+            CreateMap<RoleDto, Role>();
             CreateMap<MaterialDto, Material>();
             CreateMap<MixingInfo, MixingInfoDto>()
              .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble()));

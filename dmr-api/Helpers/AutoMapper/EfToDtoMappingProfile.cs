@@ -21,6 +21,7 @@ namespace DMR_API.Helpers.AutoMapper
                 .ForMember(d => d.VOC, o => o.MapFrom(x => x.VOC.ToDouble()))
                 .ForMember(d => d.Unit, o => o.MapFrom(x => x.Unit.ToDouble()))
                 .ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
+            CreateMap<Role, RoleDto>();
 
             CreateMap<Ingredient, IngredientDto1>()
                 .ForMember(d => d.Supplier, o => o.MapFrom(x => x.Supplier.Name))

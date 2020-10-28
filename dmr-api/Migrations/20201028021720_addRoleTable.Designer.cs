@@ -4,14 +4,16 @@ using DMR_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DMR_API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20201028021720_addRoleTable")]
+    partial class addRoleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,8 +263,6 @@ namespace DMR_API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("BuildingID");
 
                     b.ToTable("BuildingUser");
                 });
@@ -1039,9 +1039,6 @@ namespace DMR_API.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsLock")
-                        .HasColumnType("bit");
-
                     b.Property<int>("RoleID")
                         .HasColumnType("int");
 
@@ -1049,8 +1046,6 @@ namespace DMR_API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("RoleID");
 
                     b.ToTable("UserRoles");
                 });
@@ -1117,15 +1112,6 @@ namespace DMR_API.Migrations
                     b.HasOne("DMR_API.Models.MixingInfo", "MixingInfo")
                         .WithMany("BuildingGlues")
                         .HasForeignKey("MixingInfoID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DMR_API.Models.BuildingUser", b =>
-                {
-                    b.HasOne("DMR_API.Models.Building", "Building")
-                        .WithMany()
-                        .HasForeignKey("BuildingID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1235,15 +1221,6 @@ namespace DMR_API.Migrations
                     b.HasOne("DMR_API.Models.Setting", "Setting")
                         .WithMany()
                         .HasForeignKey("SettingID");
-                });
-
-            modelBuilder.Entity("DMR_API.Models.UserRole", b =>
-                {
-                    b.HasOne("DMR_API.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

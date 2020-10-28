@@ -12,6 +12,7 @@ using DMR_API.Data;
 using DMR_API.Helpers;
 using DMR_API.Helpers.AutoMapper;
 using DMR_API.SignalrHub;
+using EC_API._Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -161,6 +162,8 @@ namespace DMR_API
             services.AddScoped<IStirRepository, StirRepository>();
             services.AddScoped<IAbnormalRepository, AbnormalRepository>();
             services.AddScoped<IRawDataRepository, RawDataRepository>();
+            services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
 
             //Services
@@ -192,6 +195,8 @@ namespace DMR_API
             services.AddScoped<IMixingInfoService, MixingInfoService>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IAbnormalService, AbnormalService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IUserRoleService, UserRoleService>();
             //extension
             services.AddScoped<IMailExtension, MailExtension>();
 

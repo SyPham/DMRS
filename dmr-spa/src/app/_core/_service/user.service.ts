@@ -17,6 +17,7 @@ const httpOptions = {
 })
 export class UserService {
   baseUrl = environment.apiUrl;
+  baseUrlEC = environment.apiUrlEC;
   messageSource = new BehaviorSubject<number>(0);
   currentMessage = this.messageSource.asObservable();
   // method này để change source message
@@ -29,7 +30,7 @@ export class UserService {
   rename(edit) { return this.http.post(`${this.baseUrl}Users/rename`, edit, {headers: httpOptions.headers}); }
   update(update) { return this.http.post(`${this.baseUrl}Users/Update`, update); }
   getUsers(page = 1, pageSize = 10, search = '%20') {
-    return this.http.get(`${this.baseUrl}Users/GetAllPaging/${page}/${pageSize}/${search}`);
+    return this.http.get(`${this.baseUrl}Users/GetAllPaging/${environment.systemCode}/${page}/${pageSize}/${search}`);
   }
   create(create) { return this.http.post(`${this.baseUrl}Users/Create`, create); }
   getAllUsers(page?, pageSize? ): Observable<PaginatedResult<UserGetAll[]>> {
@@ -37,7 +38,7 @@ export class UserService {
     UserGetAll[]
     >();
     return this.http
-      .get<UserGetAll[]>(`${this.baseUrl}Users/GetAllUsers/${page}/${pageSize}`, {
+      .get<UserGetAll[]>(`${this.baseUrl}Users/GetAllUsers/${environment.systemCode}/${page}/${pageSize}`, {
         observe: 'response'
       })
       .pipe(
@@ -57,7 +58,7 @@ export class UserService {
     UserGetAll[]
     >();
     return this.http
-      .get<UserGetAll[]>(`${this.baseUrl}Users/GetAllUsers/${page}/${pageSize}/${text}`, {
+      .get<UserGetAll[]>(`${this.baseUrl}Users/GetAllUsers/${environment.systemCode}/${page}/${pageSize}/${text}`, {
         observe: 'response'
       })
       .pipe(
@@ -77,5 +78,8 @@ export class UserService {
   }
   getRole() {
     return this.http.get(`${this.baseUrl}Roles/GetAll`);
+  }
+  getAllUserInfo() {
+    return this.http.get(`${this.baseUrlEC}UserDetail/getAllUserInfo`);
   }
 }

@@ -9,7 +9,6 @@ import {
   HostListener,
   ViewChildren,
   QueryList,
-  ɵConsole,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -17,7 +16,6 @@ import { ColumnModel, GridComponent } from '@syncfusion/ej2-angular-grids';
 import { PlanService } from 'src/app/_core/_service/plan.service';
 import * as signalr from '../../../../assets/js/ec-client.js';
 import { AuthService } from 'src/app/_core/_service/auth.service';
-import { IIngredient } from 'src/app/_core/_model/Ingredient';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { MakeGlueService } from 'src/app/_core/_service/make-glue.service';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
@@ -30,7 +28,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 
 import { AbnormalService } from 'src/app/_core/_service/abnormal.service.js';
 import { TooltipComponent, Position } from '@syncfusion/ej2-angular-popups';
-import { fork } from 'child_process';
+import { RoleService } from 'src/app/_core/_service/role.service';
 
 declare var $: any;
 declare var Swal: any;
@@ -135,6 +133,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     private planService: PlanService,
     private authService: AuthService,
     private dataService: DataService,
+    private roleService: RoleService,
     public modalService: NgbModal,
     public ingredientService: IngredientService,
     private makeGlueService: MakeGlueService,
@@ -283,7 +282,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   summary() {
     const E_BUILDING = 8;
     const ROLES = [1, 2, 3];
-    const level = JSON.parse(localStorage.getItem('level')).level;
+    const level = JSON.parse(localStorage.getItem('level')).id;
     if (ROLES.includes(level)) {
       this.buildingID = E_BUILDING;
     }
@@ -292,11 +291,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       this.lineColumns = res.header;
       this.data = res.data;
       this.rowParents = res.rowParents;
-
       this.modelNameList = res.modelNameList;
-      // if (this.linevalue.length === 0) {
-      //   this.hasWarning = true;
-      // }
       this.spinner.hide();
     });
   }

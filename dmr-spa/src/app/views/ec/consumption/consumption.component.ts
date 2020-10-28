@@ -20,11 +20,11 @@ import { Tooltip } from '@syncfusion/ej2-popups';
 import { NgxSpinnerService } from 'ngx-spinner';
 const WORKER = 4;
 @Component({
-  selector: 'app-plan-output-quantity',
-  templateUrl: './plan-output-quantity.component.html',
-  styleUrls: ['./plan-output-quantity.component.scss']
+  selector: 'app-consumption',
+  templateUrl: './consumption.component.html',
+  styleUrls: ['./consumption.component.css']
 })
-export class PlanOutputQuantityComponent implements OnInit {
+export class ConsumptionComponent implements OnInit {
   @ViewChild('cloneModal') public cloneModal: TemplateRef<any>;
   @ViewChild('planForm')
   public orderForm: FormGroup;
@@ -88,13 +88,13 @@ export class PlanOutputQuantityComponent implements OnInit {
     if (this.level === WORKER) {
       this.hasWorker = true;
       this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
-      this.toolbarOptions = ['Search'];
+      this.toolbarOptions = ['ExcelExport', 'Search'];
     } else {
       this.hasWorker = false;
-      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
-      this.toolbarOptions = ['Cancel', 'Search'];
+      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
+      this.toolbarOptions = ['ExcelExport', 'Search'];
     }
-    this.toolbar = ['Delete', 'Search', 'Copy'];
+    this.toolbar = ['ExcelExport', 'Search'];
     this.getAll(this.startDate, this.endDate);
     this.getAllBPFC();
     const buildingID = JSON.parse(localStorage.getItem('level')).id;
@@ -113,19 +113,19 @@ export class PlanOutputQuantityComponent implements OnInit {
   getReport(obj: { startDate: Date, endDate: Date }) {
     this.spinner.show();
     this.planService.getReport(obj).subscribe((data: any) => {
-        const blob = new Blob([data],
+      const blob = new Blob([data],
         { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-        const downloadURL = window.URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = downloadURL;
-        link.download = 'report.xlsx';
-        link.click();
-        this.spinner.hide();
+      const downloadURL = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = 'report.xlsx';
+      link.click();
+      this.spinner.hide();
     }, err => {
-        this.alertify.error(`Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>
+      this.alertify.error(`Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>
         The report data can only be exported for 30 days !!!`, true);
-        this.spinner.hide();
+      this.spinner.hide();
     });
   }
   // Method is use to download file.
@@ -288,7 +288,7 @@ export class PlanOutputQuantityComponent implements OnInit {
         }
         break;
       case 'Excel Export':
-        this.getReport({startDate: this.startDate, endDate: this.endDate});
+        this.getReport({ startDate: this.startDate, endDate: this.endDate });
         break;
       default:
         break;

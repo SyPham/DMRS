@@ -11,5 +11,6 @@ namespace DMR_API._Services.Interface
         Task<List<ModelNoForMapModelDto>> GetModelNos(int modelNameID);
         Task<bool> MapUserDetailDto(UserDetailDto mapModel);
         Task<bool> Delete(int userId, int lineID);
+        Task<object> GetAllUserInfo();
     }
 }

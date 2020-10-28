@@ -8,6 +8,19 @@ export interface User {
   Role: number;
   ListOcs: [];
 }
+export interface UserDRM {
+  iD: number;
+  username: string;
+  password: string;
+  employeeID: string;
+  email: string;
+  status: boolean;
+  systemID: number;
+  userRoleID: number;
+  buildingUserID: number;
+  role: string;
+  building: string;
+}
 export interface UserForLogin {
   username: string;
   password: string;
@@ -25,4 +38,24 @@ export interface UserGetAll {
   ImageBase64: string   ;
   isLeader: boolean ;
    Role: any ;
+}
+
+export interface IUserCreate {
+  id: number;
+  username: string;
+  password: string;
+  email: string;
+  roleid: number;
+  employeeID: string;
+  isLeader: boolean;
+}
+export interface IUserUpdate {
+  id: number;
+  username: string;
+  password: string;
+  email: string;
+  roleid: number;
+  employeeID: string;
+  isLeader: boolean;
+
 }

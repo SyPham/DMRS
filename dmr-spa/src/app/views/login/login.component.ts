@@ -5,8 +5,10 @@ import { Router, ActivatedRoute, RouterStateSnapshot } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { UserForLogin } from 'src/app/_core/_model/user';
 import { environment } from 'src/environments/environment';
+import { RoleService } from 'src/app/_core/_service/role.service';
+import { IUserRole } from 'src/app/_core/_model/role';
 const ADMIN = 1;
-const SUPPER_ADMIN = 78;
+const ADMIN_COSTING = 5;
 const SUPERVISOR = 2;
 const STAFF = 3;
 const WORKER = 4;
@@ -24,78 +26,100 @@ export class LoginComponent implements OnInit {
   uri: any;
   level: number;
   routerLinkAdmin = [
+    // setting
     '/setting/account-1',
-    '/setting/account-2',
     '/setting/building',
     '/setting/supplier',
     '/setting/ingredient',
     '/setting/kind',
     '/setting/part',
-    '/setting/building-setting',
     '/setting/material',
-    //
-    '/establish/bpfc',
-    //
-    '/manage/bpfc-status',
-    '/manage/bpfc-schedule',
-    '/manage/workplan',
-    '/manage/establish-record',
-
-    '/execution/todolist',
-    '/execution/addition',
-
-    //
-    '/report/consumption',
-  ];
-  routerLinkSuperAdmin = [
+    '/setting/building-setting',
     '/setting/costing',
-    '/report/output-quantity',
+    // Establish
+    '/establish/bpfc',
+    '/establish/bpfc-schedule',
+    '/establish/bpfc-status',
+
+    // Excution
+    '/execution/todolist',
+    '/execution/output-quantity',
+    '/execution/workplan',
+    '/execution/incoming',
+
+    // Troubleshooting
+    '/troubleshooting/search',
+    '/troubleshooting/Abnormal-List',
+    // Report
+    '/report/consumption',
+    '/report/inventory',
+    '/report/delivered-history'
+  ];
+  routerLinkAdminCosting = [
+    '/setting/costing'
   ];
   routerLinkSupervisor = [
+    // setting
     '/setting/account-1',
-    '/setting/account-2',
     '/setting/building',
     '/setting/supplier',
     '/setting/ingredient',
-    '/setting/building-setting',
     '/setting/kind',
     '/setting/part',
     '/setting/material',
-    //
+    '/setting/building-setting',
+    // '/setting/costing',
+    // Establish
     '/establish/bpfc',
-    //
-    '/manage/bpfc-status',
-    '/manage/bpfc-schedule',
-    '/manage/workplan',
-    '/manage/establish-record',
-    //
-    '/report/consumption',
+    '/establish/bpfc-schedule',
+    '/establish/bpfc-status',
 
+    // Excution
     '/execution/todolist',
-    '/execution/addition',
+    '/execution/output-quantity',
+    '/execution/workplan',
+    '/execution/incoming',
+
+    // Troubleshooting
+    '/troubleshooting/search',
+    '/troubleshooting/Abnormal-List',
+    // Report
+    '/report/consumption',
+    '/report/inventory',
+    '/report/delivered-history'
   ];
   routerLinkStaff = [
+    // setting
+    '/setting/supplier',
+    '/setting/ingredient',
+    '/setting/kind',
+    '/setting/part',
+    '/setting/material',
+    '/setting/building-setting',
+    // Establish
     '/establish/bpfc',
-    //
-    '/manage/bpfc-status',
-    '/manage/bpfc-schedule',
-    '/manage/workplan',
-    '/manage/establish-record',
-    //
-    '/report/consumption',
+    '/establish/bpfc-schedule',
+    // Excution
+    '/execution/workplan',
+    '/execution/incoming',
 
-    '/execution/todolist',
-    '/execution/addition',
+    // Troubleshooting
+    '/troubleshooting/search',
+    '/troubleshooting/Abnormal-List',
+    // Report
   ];
   routerLinkWorker = [
+    // Excution
     '/execution/todolist',
-    '/execution/addition',
+    '/execution/incoming',
+    '/execution/workplan',
   ];
   remember = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
+    private roleService: RoleService,
     private cookieService: CookieService,
     private alertifyService: AlertifyService
   ) {
@@ -123,38 +147,51 @@ export class LoginComponent implements OnInit {
     this.authService.login(this.user).subscribe(
       next => {
         this.role = JSON.parse(localStorage.getItem('user')).User.Role;
-        this.alertifyService.success('Login Success!!');
-        if (this.remember) {
-          this.cookieService.set('remember', 'Yes') ;
-          this.cookieService.set('username', this.user.username );
-          this.cookieService.set('password', this.user.password);
-          this.cookieService.set('systemCode', this.user.systemCode.toString());
-        } else {
-          this.cookieService.set('remember', 'No');
-          this.cookieService.set('username', '');
-          this.cookieService.set('password', '');
-          this.cookieService.set('systemCode', '');
-        }
-        this.authService.getBuildingByUserID(JSON.parse(localStorage.getItem('user')).User.ID).subscribe((res: any) => {
+        const userId = JSON.parse(localStorage.getItem('user')).User.ID;
+        this.roleService.getRoleByUserID(userId).subscribe((res: any) => {
           res = res || {};
-          localStorage.setItem('level', JSON.stringify(res));
-          this.level = res.level;
-          if (this.level === WORKER) {
-            const currentLang = localStorage.getItem('lang');
-            if (currentLang) {
-              localStorage.setItem('lang', currentLang);
+          const userRole: IUserRole = {
+            isLock : true,
+            userID: userId,
+            roleID: res.id
+          };
+          this.roleService.isLock(userRole).subscribe((isLock: boolean) => {
+            if (isLock) {
+              this.alertifyService.error('Your account has been locked!!!');
+              return;
             } else {
-              localStorage.setItem('lang', 'vi');
+              this.alertifyService.success('Login Success!!');
+              if (this.remember) {
+                this.cookieService.set('remember', 'Yes');
+                this.cookieService.set('username', this.user.username);
+                this.cookieService.set('password', this.user.password);
+                this.cookieService.set('systemCode', this.user.systemCode.toString());
+              } else {
+                this.cookieService.set('remember', 'No');
+                this.cookieService.set('username', '');
+                this.cookieService.set('password', '');
+                this.cookieService.set('systemCode', '');
+              }
+              localStorage.setItem('level', JSON.stringify(res));
+              this.level = res.id;
+              if (this.level === WORKER) {
+                const currentLang = localStorage.getItem('lang');
+                if (currentLang) {
+                  localStorage.setItem('lang', currentLang);
+                } else {
+                  localStorage.setItem('lang', 'vi');
+                }
+              } else {
+                const currentLang = localStorage.getItem('lang');
+                if (currentLang) {
+                  localStorage.setItem('lang', currentLang);
+                } else {
+                  localStorage.setItem('lang', 'en');
+                }
+              }
+              this.checkRole();
             }
-          } else {
-            const currentLang = localStorage.getItem('lang');
-            if (currentLang) {
-              localStorage.setItem('lang', currentLang);
-            } else {
-              localStorage.setItem('lang', 'en');
-            }
-          }
-          this.checkRole();
+          });
         });
       },
       error => {
@@ -164,9 +201,9 @@ export class LoginComponent implements OnInit {
       }
     );
   }
-  checkRouteSuperAdmin(uri) {
+  checkRouteAdminCosting(uri) {
     let flag = false;
-    this.routerLinkSuperAdmin.forEach(element => {
+    this.routerLinkAdminCosting.forEach(element => {
       if (uri.includes(element)) {
         flag = true;
       }
@@ -211,9 +248,9 @@ export class LoginComponent implements OnInit {
   }
   checkRole() {
     const uri = decodeURI(this.uri);
-    if (this.level === SUPPER_ADMIN) {
+    if (this.level === ADMIN_COSTING) {
       if (uri !== 'undefined') {
-        if (this.checkRouteSuperAdmin(uri)) {
+        if (this.checkRouteAdminCosting(uri)) {
           this.router.navigate([uri]);
         } else {
           this.router.navigate(['/ec/setting/costing']);

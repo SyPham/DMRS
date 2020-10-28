@@ -10,7 +10,6 @@ namespace DMR_API.Models
         {
             this.CreatedDate = DateTime.Now.ToString("MMMM dd, yyyy HH:mm:ss");
         }
-
         [Key]
         public int ID { get; set; }
         public string Username { get; set; }

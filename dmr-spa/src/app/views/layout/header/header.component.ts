@@ -12,6 +12,7 @@ import { Nav } from 'src/app/_core/_model/nav';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AvatarModalComponent } from './avatar-modal/avatar-modal.component';
 import { TranslateService } from '@ngx-translate/core';
+import { RoleService } from 'src/app/_core/_service/role.service';
 
 @Component({
   selector: 'app-header',
@@ -27,9 +28,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public totalCount: number;
   public page: number;
   public ADMIN = 1;
-  public SUPER_ADMIN = 0;
-  public ADMIN_COSTING = 1;
-  public ADMIN_COSTING_NAME = 'Admin Costing';
+  public ADMIN_COSTING = 5;
   public SUPERVISOR = 2;
   public STAFF = 3;
   public WORKER = 4;
@@ -46,6 +45,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public value: string;
   constructor(
     private authService: AuthService,
+    private roleService: RoleService,
     private alertify: AlertifyService,
     private signalrService: SignalrService,
     private headerService: HeaderService,
@@ -105,11 +105,10 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   getBuilding() {
     const userID = JSON.parse(localStorage.getItem('user')).User.ID;
-    this.authService.getBuildingByUserID(userID).subscribe((res: any) => {
+    this.roleService.getRoleByUserID(userID).subscribe((res: any) => {
       res = res || {};
       if (res !== {}) {
-        this.level = res.level;
-        this.roleName = res.name;
+        this.level = res.id;
       }
     });
   }

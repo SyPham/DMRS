@@ -18,7 +18,6 @@ import { NgbModalModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BarcodeGeneratorAllModule, DataMatrixGeneratorAllModule } from '@syncfusion/ej2-angular-barcode-generator';
 import { ChartAllModule, AccumulationChartAllModule, RangeNavigatorAllModule } from '@syncfusion/ej2-angular-charts';
 import { ChartsModule } from 'ng2-charts';
-import { MakeGlueComponent } from './make-glue/make-glue.component';
 import { SwitchModule, RadioButtonModule } from '@syncfusion/ej2-angular-buttons';
 import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 import { TreeGridAllModule } from '@syncfusion/ej2-angular-treegrid';
@@ -37,7 +36,6 @@ import { AccountComponent } from './account/account.component';
 import { BPFCScheduleComponent } from './BPFCSchedule/BPFCSchedule.component';
 import { BuildingModalComponent } from './building/building-modal/building-modal.component';
 import { QRCodeGeneratorAllModule } from '@syncfusion/ej2-angular-barcode-generator';
-import { EstablishedRecordComponent } from './established-record/established-record.component';
 import { PrintQRCodeComponent } from './ingredient/print-qrcode/print-qrcode.component';
 import { MaskedTextBoxModule } from '@syncfusion/ej2-angular-inputs';
 import { HttpClient } from '@angular/common/http';
@@ -73,6 +71,7 @@ import { BuildingSettingComponent } from './building-setting/building-setting.co
 import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-quantity.component';
 import { DatePipe } from '@angular/common';
 import { CostingComponent } from './costing/costing.component';
+import { ConsumptionComponent } from './consumption/consumption.component';
 setCulture('de-DE');
 
 const lang = localStorage.getItem('lang');
@@ -128,7 +127,6 @@ if (lang) {
     IngredientComponent,
     GlueModalComponent,
     IngredientModalComponent,
-    MakeGlueComponent,
     ModalNameComponent,
     ModalNoComponent,
     PlanComponent,
@@ -141,7 +139,6 @@ if (lang) {
     AccountComponent,
     BPFCScheduleComponent,
     SummaryComponent,
-    EstablishedRecordComponent,
     PrintQRCodeComponent,
     PartComponent,
     KindComponent,
@@ -162,7 +159,8 @@ if (lang) {
     IncomingComponent,
     PlanOutputQuantityComponent,
     CostingComponent,
-    BuildingSettingComponent
+    BuildingSettingComponent,
+    ConsumptionComponent
   ]
 })
 export class ECModule { }

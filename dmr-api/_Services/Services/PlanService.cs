@@ -762,19 +762,19 @@ namespace DMR_API._Services.Services
         }
         public async Task<object> DispatchGlue(BuildingGlueForCreateDto obj)
         {
-           try
-           {
+            try
+            {
                 var buildingGlue = _mapper.Map<BuildingGlue>(obj);
                 var building = _repoBuilding.FindById(obj.BuildingID);
                 var lastMixingInfo = await _repoMixingInfo.FindAll().Where(x => x.GlueName.Contains(obj.GlueName) && x.BuildingID == building.ParentID).OrderByDescending(x => x.CreatedTime).FirstOrDefaultAsync();
                 buildingGlue.MixingInfoID = lastMixingInfo == null ? 0 : lastMixingInfo.ID;
                 _repoBuildingGlue.Add(buildingGlue);
                 return await _repoBuildingGlue.SaveAll();
-           }
-           catch(Exception ex)
-           {
-               return false;
-           }
+            }
+            catch
+            {
+                return false;
+            }
         }
         public async Task<object> ClonePlan(List<PlanForCloneDto> plansDto)
         {
@@ -1151,9 +1151,9 @@ namespace DMR_API._Services.Services
                         double CBD = 0, real = 0;
 
                         if (value > 0 && body.Quantity > 0)
-                            CBD = Math.Round( SumProduct(cbdRowTotal,cbds ) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+                            CBD = Math.Round(SumProduct(cbdRowTotal, cbds) / body.Quantity, 3, MidpointRounding.AwayFromZero);
                         if (value > 0 && body.Quantity > 0)
-                            real = Math.Round(SumProduct(realRowTotal , reals) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+                            real = Math.Round(SumProduct(realRowTotal, reals) / body.Quantity, 3, MidpointRounding.AwayFromZero);
 
                         ws.Cells[rowIndex, colIndex++].Value = CBD == 0 ? string.Empty : CBD.ToString();
                         ws.Cells[rowIndex, colIndex++].Value = real == 0 ? string.Empty : real.ToString();
@@ -1389,16 +1389,17 @@ namespace DMR_API._Services.Services
         public async Task<object> OldSummary(int building)
         {
 
-           var currentDate = DateTime.Now.Date;
-           // var currentDate = new DateTime(2020,10,26);
+            var currentDate = DateTime.Now.Date;
+            // var currentDate = new DateTime(2020,10,26);
             var item = _repoBuilding.FindById(building);
             var lineList = await _repoBuilding.FindAll().Where(x => x.ParentID == item.ID).ToListAsync();
             var plans = await _repoPlan.FindAll()
             .Include(x => x.BPFCEstablish)
             .ThenInclude(x => x.ModelName)
             .Where(x => x.DueDate.Date == currentDate && lineList.Select(x => x.ID).Contains(x.BuildingID))
-            .Select(x=> new {
-                x.BPFCEstablish, 
+            .Select(x => new
+            {
+                x.BPFCEstablish,
                 x.BuildingID,
                 x.CreatedDate,
                 x.DueDate,
@@ -1478,7 +1479,7 @@ namespace DMR_API._Services.Services
                     MixingInfos = x.MixingInfos.Select(a => new { a.GlueName, a.CreatedTime, a.ChemicalA, a.ChemicalB, a.ChemicalC, a.ChemicalD, a.ChemicalE, })
                 }).ToListAsync();
             var glueDistinct = glueList.DistinctBy(x => x.Name);
-            var buildingGlues  = await _repoBuildingGlue.FindAll()
+            var buildingGlues = await _repoBuildingGlue.FindAll()
                                         .Where(x => lineList.Select(a => a.ID).Contains(x.BuildingID) && x.CreatedDate.Date == currentDate).ToListAsync();
             var rowParents = new List<RowParentDto>();
             foreach (var glue in glueDistinct)

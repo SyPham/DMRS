@@ -1,4 +1,9 @@
 export interface IRole {
-    ID: number;
-    Name: string;
+    id: number;
+    name: string;
+}
+export interface IUserRole {
+    roleID: number;
+    userID: string;
+    isLock: boolean;
 }

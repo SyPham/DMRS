@@ -39,7 +39,7 @@ export class BuildingUserService {
     object[]
     >();
     return this.http
-      .get<object[]>(`${this.authUrl}Users/GetAllUsers/${page}/${pageSize}`, {
+      .get<object[]>(`${this.authUrl}Users/GetAllUsers/${environment.systemCode}/${page}/${pageSize}`, {
         observe: 'response'
       })
       .pipe(
