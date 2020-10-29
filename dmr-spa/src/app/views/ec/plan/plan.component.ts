@@ -87,20 +87,20 @@ export class PlanComponent implements OnInit {
     const now = new Date();
     this.endDate = new Date(now.setDate(now.getDate() + 15));
     this.level = JSON.parse(localStorage.getItem('level')).level;
-    this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10};
+    this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.editparams = { params: { popupHeight: '300px' } };
-    if (this.level === WORKER) {
-      this.hasWorker = true;
-      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
-      this.toolbarOptions = ['ExcelExport', 'Search'];
-    } else {
-      this.hasWorker = false;
-      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
-      this.toolbarOptions = ['ExcelExport', 'Add', 'Save', 'Cancel',
-        { text: 'Delete Range', tooltipText: 'Delete Range', prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
-        { text: 'Clone', tooltipText: 'Copy', prefixIcon: 'fa fa-copy', id: 'Clone' }
-      ];
-    }
+    // if (this.level === WORKER) {
+    //   this.hasWorker = true;
+    //   this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
+    //   this.toolbarOptions = ['ExcelExport', 'Search'];
+    // } else {
+    this.hasWorker = false;
+    this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
+    this.toolbarOptions = ['ExcelExport', 'Add', 'Save', 'Cancel',
+      { text: 'Delete Range', tooltipText: 'Delete Range', prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
+      { text: 'Clone', tooltipText: 'Copy', prefixIcon: 'fa fa-copy', id: 'Clone' }
+    ];
+    // }
     this.toolbar = ['ExcelExport', 'Add', 'Delete', 'Search', 'Copy'];
     this.getAll(this.startDate, this.endDate);
     this.getAllBPFC();
