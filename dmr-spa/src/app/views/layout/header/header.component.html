@@ -53,17 +53,17 @@
           </div>
         </li>
         <li class="nav-item dropdown"
-          *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER">
+          *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER || level === WORKER2">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">
             {{ 'EXECUTION' | translate }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER" [routerLink]="[ '/ec/execution/todolist']">{{ 'TODOLIST' | translate }}</a>
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF" [routerLink]="[ '/ec/execution/output-quantity']">{{ 'OUTPUT_QUANTITY' | translate }}</a>
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER"
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/todolist']">{{ 'TODOLIST' | translate }}</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF|| level === WORKER2" [routerLink]="[ '/ec/execution/output-quantity']">{{ 'OUTPUT_QUANTITY' | translate }}</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER || level === WORKER2"
               [routerLink]="[ '/ec/execution/workplan']">{{ 'WORK_PLAN' | translate }}</a>
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER" [routerLink]="[ '/ec/execution/incoming']">{{'INCOMING_LABEL' | translate}}</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/incoming']">{{'INCOMING_LABEL' | translate}}</a>
           </div>
         </li>
         <li class="nav-item dropdown"

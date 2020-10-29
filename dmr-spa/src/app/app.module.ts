@@ -38,7 +38,6 @@ import { SafePipeModule } from 'safe-pipe';
 import { TodolistResolver } from './_core/_resolvers/todolist.resolvers';
 import { HistoryResolver } from './_core/_resolvers/history.resolvers';
 import { FollowResolver } from './_core/_resolvers/follow.resolvers';
-import { OcResolver } from 'src/app/_core/_resolvers/oc.resolvers';
 
 // module
 import { MomentModule } from 'ngx-moment';
@@ -52,7 +51,6 @@ import { ImageCropperModule } from 'ngx-image-cropper';
 import { AvatarModalComponent } from './views/layout/header/avatar-modal/avatar-modal.component';
 import { PreviewModalComponent } from './views/layout/header/preview-modal/preview-modal.component';
 import { GlueResolver } from './_core/_resolvers/glue.resolver';
-import { DropDownListModule } from '@syncfusion/ej2-angular-dropdowns';
 
 import {HttpClient} from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';

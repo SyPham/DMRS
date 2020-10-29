@@ -48,13 +48,13 @@ namespace DMR_API._Services.Services
 
         public async Task<object> GetBuildingByUserID(int userid)
         {
-            var model =await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == userid);
+            var model = await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == userid);
             return _buildingRepository.FindById(model.BuildingID);
         }
 
         public async Task<List<BuildingUserDto>> GetBuildingUserByBuildingID(int buildingID)
         {
-            return await _buildingUserRepository.FindAll().Where(x=>x.BuildingID == buildingID).ProjectTo<BuildingUserDto>(_configMapper).ToListAsync();
+            return await _buildingUserRepository.FindAll().Where(x => x.BuildingID == buildingID).ProjectTo<BuildingUserDto>(_configMapper).ToListAsync();
         }
 
         public BuildingUserDto GetById(object id)
@@ -69,14 +69,73 @@ namespace DMR_API._Services.Services
 
         public async Task<object> MapBuildingUser(int userid, int buildingid)
         {
-            var item = await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == userid && x.BuildingID == buildingid);
+            var item = await _buildingUserRepository.FindAll().Where(x => x.UserID == userid).ToListAsync();
+            if (item.Count == 0)
+            {
+                try
+                {
+                    _buildingUserRepository.Add(new BuildingUser
+                    {
+                        UserID = userid,
+                        BuildingID = buildingid,
+                        CreatedDate = DateTime.Now
+                    });
+
+                    await _buildingUserRepository.SaveAll();
+                    return new
+                    {
+                        status = true,
+                        message = "Mapping Successfully!"
+                    };
+                }
+                catch (Exception)
+                {
+                    return new
+                    {
+                        status = false,
+                        message = "Failed on save!"
+                    };
+                }
+            }
+            else
+            {
+
+                try
+                {
+                    _buildingUserRepository.RemoveMultiple(item);
+                    await _buildingUserRepository.SaveAll();
+                    _buildingUserRepository.Add(new BuildingUser
+                    {
+                        UserID = userid,
+                        BuildingID = buildingid,
+                        CreatedDate = DateTime.Now
+                    });
+                    return new
+                    {
+                        status = await _buildingUserRepository.SaveAll(),
+                        message = "Mapping Successfully!"
+                    };
+                }
+                catch (Exception)
+                {
+                    return new
+                    {
+                        status = false,
+                        message = "Failed on save!"
+                    };
+                }
+            }
+        }
+
+        public async Task<object> MappingUserWithBuilding(BuildingUserDto buildingUserDto)
+        {
+            var item = await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == buildingUserDto.UserID && x.BuildingID == buildingUserDto.BuildingID);
             if (item == null)
             {
                 _buildingUserRepository.Add(new BuildingUser
                 {
-                    UserID = userid,
-                    BuildingID = buildingid,
-                    CreatedDate = DateTime.Now
+                    UserID = buildingUserDto.UserID,
+                    BuildingID = buildingUserDto.BuildingID
                 });
                 try
                 {
@@ -97,58 +156,6 @@ namespace DMR_API._Services.Services
                 }
             }
             else
-            {
-                item.UserID = userid;
-                item.BuildingID = buildingid;
-                item.CreatedDate = DateTime.Now;
-
-                try
-                {
-                    await _buildingUserRepository.SaveAll();
-                    return new
-                    {
-                        status = true,
-                        message = "Mapping Successfully!"
-                    };
-                }
-                catch (Exception)
-                {
-                    return new
-                    {
-                        status = false,
-                        message = "Failed on save!"
-                    };
-                }
-            }
-        }
-
-        public async Task<object> MappingUserWithBuilding(BuildingUserDto buildingUserDto)
-        {
-            var item =await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == buildingUserDto.UserID && x.BuildingID == buildingUserDto.BuildingID);
-            if (item == null)
-            {
-                _buildingUserRepository.Add(new BuildingUser { 
-                    UserID = buildingUserDto.UserID,
-                    BuildingID = buildingUserDto.BuildingID
-                });
-                try
-                {
-                   await _buildingUserRepository.SaveAll();
-                    return new
-                    {
-                        status = true,
-                        message = "Mapping Successfully!"
-                    };
-                }
-                catch (Exception)
-                {
-                    return new
-                    {
-                        status = false,
-                        message = "Failed on save!"
-                    };
-                }
-            } else
             {
 
                 return new

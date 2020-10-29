@@ -10,7 +10,7 @@ import { IIngredient } from 'src/app/_core/_model/Ingredient';
 import { ModalNameService } from 'src/app/_core/_service/modal-name.service';
 import { environment } from '../../../../environments/environment';
 import { QRCodeGenerator, DisplayTextModel } from '@syncfusion/ej2-angular-barcode-generator';
-import { GridComponent, RowDDService } from '@syncfusion/ej2-angular-grids';
+import { ExcelExportProperties, Column, ColumnModel, GridComponent, RowDataBoundEventArgs, RowDDService } from '@syncfusion/ej2-angular-grids';
 import { DatePipe } from '@angular/common';
 
 declare let $: any;
@@ -64,12 +64,13 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   itemsPerPage = 15;
   totalItems: any;
   file: any;
-  toolbar = ['Search'];
+  toolbar = ['Search', 'Excel Export'];
   text: any;
   dataPrint: Array<{
     id: number,
     code: string,
     name: string,
+    unit: number,
     supplier: string,
     supplierID: number,
     batch: string,
@@ -97,6 +98,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   @ViewChild('ingredientGrid') ingredientGrid: GridComponent;
   show: boolean;
   pd: Date;
+  dataIsDone: any;
   constructor(
     private modalNameService: ModalNameService,
     public modalService: NgbModal,
@@ -106,7 +108,6 @@ export class IngredientComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute
   ) { }
   ngOnInit() {
-    console.log(this.currentDate);
     this.filterSettings = { type: 'Excel' };
     this.toolbarOptions = ['ExcelExport', 'Search'];
     this.excelDownloadUrl = `${environment.apiUrlEC}Ingredient/ExcelExport`;
@@ -139,16 +140,75 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     $('[data-toggle="tooltip"]').tooltip();
   }
-  dataBound() {
+  rowDB(args: RowDataBoundEventArgs) {
+    const data = args.data as any;
+    if (data.expiredTime === 0 || data.unit === 0 || data.daysToExpiration === 0 || data.materialNO === '') {
+      args.row.classList.add('bgcolor');
+    }
+  }
+  toolbarClickPrint(args): void {
+    switch (args.item.text) {
+      case 'Excel Export':
+        const data = this.dataPrint.map(item => {
+          return {
+            supplier: item.supplier,
+            name: item.name,
+            unit: item.unit,
+            qrCode: item.qrCode
+          };
+        });
+        const supplierModel: ColumnModel =
+        {
+          field: 'supplier',
+          headerText: 'Supplier',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 120,
+        };
+        const nameModel: ColumnModel =
+        {
+          field: 'name',
+          headerText: 'Ingredient',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 120,
+        };
+        const unitModel: ColumnModel =
+        {
+          field: 'unit',
+          headerText: 'Unit',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 80,
+        };
+        const qrCoderModel: ColumnModel = {
+          field: 'qrCode',
+          headerText: 'QR Code',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 200,
+        };
+        const excelExportProperties: ExcelExportProperties = {
+          dataSource: data,
+          columns: [
+            new Column(supplierModel),
+            new Column(nameModel),
+            new Column(unitModel),
+            new Column(qrCoderModel)
+          ],
+        };
+        this.printGrid.excelExport(excelExportProperties);
+        break;
+      default:
+        break;
+    }
   }
   toolbarClick(args): void {
     switch (args.item.text) {
-      /* tslint:disable */
       case 'Excel Export':
         this.ingredientGrid.excelExport();
         break;
-      /* tslint:enable */
-      case 'PDF Export':
+      default:
         break;
     }
   }
@@ -169,7 +229,6 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   }
   configurePrint(html) {
     const WindowPrt = window.open('', '_blank', 'left=0,top=0,width=1000,height=900,toolbar=0,scrollbars=0,status=0');
-    // WindowPrt.document.write(printContent.innerHTML);
     WindowPrt.document.write(`
     <html>
       <head>
@@ -270,10 +329,10 @@ export class IngredientComponent implements OnInit, AfterViewInit {
          </div>
           <div class='info'>
           <ul>
-            <li class='subInfo'>Name: ${ item.name}</li>
+            <li class='subInfo'>Name: ${item.name}</li>
               <li class='subInfo'>QR Code: ${item.productionDate}-${item.batch}-${item.code}</li>
-              <li class='subInfo'>MFG: ${ this.datePipe.transform(item.productionDate, 'yyyyMMdd')}</li>
-              <li class='subInfo'>EXP: ${ item.exp}</li>
+              <li class='subInfo'>MFG: ${this.datePipe.transform(item.productionDate, 'yyyyMMdd')}</li>
+              <li class='subInfo'>EXP: ${item.exp}</li>
           </ul>
          </div>
       </div>
@@ -377,7 +436,12 @@ export class IngredientComponent implements OnInit, AfterViewInit {
             cbd: item.cbd,
             createdDate: new Date(item.createdDate),
           };
-        });
+        }) || [];
+        const total = this.data.length;
+        const undone = this.data.filter(item =>
+          item.expiredTime === 0 || item.unit === 0 || item.daysToExpiration === 0 || item.materialNO === ''
+        ).length;
+        this.dataIsDone = `${undone}/${total}`;
       }, error => {
         this.alertify.error(error);
       });
@@ -393,6 +457,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
             supplier: item.supplier,
             supplierID: item.supplierID,
             batch: 'DEFAULT',
+            unit: item.unit,
             expiredTime: item.expiredTime,
             daysToExpiration: item.daysToExpiration,
             productionDate: new Date(),

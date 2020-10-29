@@ -65,13 +65,13 @@ export class AccountComponent implements OnInit {
         employeeID: args.data.employeeID,
         isLeader: false
       };
-      if (args.data.username === undefined) {
-        this.alertify.error('Please add username!');
+      if (args.data.employeeID === undefined) {
+        this.alertify.error('Please key in a account!');
         args.cancel = true;
         return;
       }
       if (args.data.password === undefined) {
-        this.alertify.error('Please add password!');
+        this.alertify.error('Please key in a password!');
         args.cancel = true;
         return;
       }
@@ -79,7 +79,7 @@ export class AccountComponent implements OnInit {
         this.create();
       } else {
         args.cancel = true;
-        this.alertify.error('Please add a role!');
+        this.alertify.error('Please select a role!');
         return;
       }
     }
@@ -110,10 +110,14 @@ export class AccountComponent implements OnInit {
   }
   actionComplete(args) {
     if (args.requestType === 'beginEdit' ) {
-      args.form.elements.namedItem(this.setFocus.field).focus(); // Set focus to the Target element
+      if (this.setFocus?.field) {
+        args.form.elements.namedItem(this.setFocus.field).focus(); // Set focus to the Target element
+      }
     }
     if (args.requestType === 'add') {
+      if (this.setFocus?.field) {
       args.form.elements.namedItem('username').focus(); // Set focus to the Target element
+      }
     }
   }
   dataBound() {

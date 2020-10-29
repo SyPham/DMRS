@@ -12,6 +12,7 @@ const ADMIN_COSTING = 5;
 const SUPERVISOR = 2;
 const STAFF = 3;
 const WORKER = 4;
+const WORKER2 = 6;
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -111,6 +112,13 @@ export class LoginComponent implements OnInit {
   routerLinkWorker = [
     // Excution
     '/execution/todolist',
+    '/execution/incoming',
+    '/execution/workplan',
+  ];
+  routerLinkWorker2 = [
+    // Excution
+    '/execution/todolist',
+    '/execution/output-quantity',
     '/execution/incoming',
     '/execution/workplan',
   ];
@@ -246,6 +254,15 @@ export class LoginComponent implements OnInit {
     });
     return flag;
   }
+  checkRouteWorker2(uri) {
+    let flag = false;
+    this.routerLinkWorker2.forEach(element => {
+      if (uri.includes(element)) {
+        flag = true;
+      }
+    });
+    return flag;
+  }
   checkRole() {
     const uri = decodeURI(this.uri);
     if (this.level === ADMIN_COSTING) {
@@ -289,6 +306,16 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/ec/establish/bpfc']);
       }
     } else if (this.level === WORKER) {
+      if (uri !== 'undefined') {
+        if (this.checkRouteWorker(uri)) {
+          this.router.navigate([uri]);
+        } else {
+          this.router.navigate(['/ec/execution/todolist']);
+        }
+      } else {
+        this.router.navigate(['/ec/execution/todolist']);
+      }
+    } else if (this.level === WORKER2) {
       if (uri !== 'undefined') {
         if (this.checkRouteWorker(uri)) {
           this.router.navigate([uri]);

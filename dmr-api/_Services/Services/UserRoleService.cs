@@ -61,20 +61,20 @@ namespace DMR_API._Services.Services
 
         public async Task<object> MapUserRole(int userid, int roleID)
         {
-            var item = await _userRoleRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == userid && x.RoleID == roleID);
-            if (item == null)
+            var item = await _userRoleRepository.FindAll().Where(x => x.UserID == userid).ToListAsync();
+            if (item.Count == 0)
             {
-                _userRoleRepository.Add(new UserRole
-                {
-                    UserID = userid,
-                    RoleID = roleID,
-                });
                 try
                 {
-                    await _userRoleRepository.SaveAll();
+                    _userRoleRepository.Add(new UserRole
+                    {
+                        UserID = userid,
+                        RoleID = roleID,
+                    });
+
                     return new
                     {
-                        status = true,
+                        status = await _userRoleRepository.SaveAll(),
                         message = "Mapping Successfully!"
                     };
                 }
@@ -89,15 +89,22 @@ namespace DMR_API._Services.Services
             }
             else
             {
-                item.UserID = userid;
-                item.UserID = userid;
 
                 try
                 {
+                    _userRoleRepository.RemoveMultiple(item);
                     await _userRoleRepository.SaveAll();
+
+                    _userRoleRepository.Add(new UserRole
+                    {
+                        UserID = userid,
+                        RoleID = roleID,
+                    });
+
+                    
                     return new
                     {
-                        status = true,
+                        status = await _userRoleRepository.SaveAll(),
                         message = "Mapping Successfully!"
                     };
                 }
@@ -198,7 +205,7 @@ namespace DMR_API._Services.Services
 
         public async Task<object> GetRoleByUserID(int userid)
         {
-            var model = await _userRoleRepository.FindAll().Include(x=>x.Role).FirstOrDefaultAsync(x => x.UserID == userid);
+            var model = await _userRoleRepository.FindAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.UserID == userid);
 
             return model.Role;
         }

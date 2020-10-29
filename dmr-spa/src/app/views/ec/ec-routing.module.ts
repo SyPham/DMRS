@@ -4,18 +4,11 @@ import { SearchComponent } from './search/search.component';
 import { InventoryComponent } from './inventory/inventory.component';
 import { SuppilerComponent } from './suppiler/suppiler.component';
 import { PlanComponent } from './plan/plan.component';
-import { ModalNoComponent } from './modal-no/modal-no.component';
-import { ModalNameComponent } from './modal-name/modal-name.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { GlueIngredientComponent } from './glue-ingredient/glue-ingredient.component';
 import { GlueComponent } from './glue/glue.component';
 import { IngredientComponent } from './ingredient/ingredient.component';
-import { GlueModalComponent } from './glue/glue-modal/glue-modal.component';
-import { IngredientModalComponent } from './ingredient/ingredient-modal/ingredient-modal.component';
 import { GlueResolver } from '../../_core/_resolvers/glue.resolver';
-import { IngredientResolver } from '../../_core/_resolvers/ingredient.resolver';
-import { LineComponent } from './line/line.component';
 import { BuildingComponent } from './building/building.component';
 import { BuildingUserComponent } from './building-user/building-user.component';
 import { SummaryComponent } from './summary/summary.component';
@@ -271,31 +264,31 @@ const routes: Routes = [
                   breadcrumb: 'History'
                 }
               },
-              {
-                path: 'workplan',
-                component: PlanComponent,
-                data: {
-                  title: 'Workplan',
-                  breadcrumb: 'Work Plan'
-                }
-              },
-              {
-                path: 'output-quantity',
-                component: PlanOutputQuantityComponent,
-                data: {
-                  title: 'Output Quantity',
-                  breadcrumb: 'Output Quantity'
-                }
-              },
-              {
-                path: 'incoming',
-                component: IncomingComponent,
-                data: {
-                  title: 'Incoming',
-                  breadcrumb: 'Incoming'
-                }
-              }
             ]
+          },
+          {
+            path: 'workplan',
+            component: PlanComponent,
+            data: {
+              title: 'Workplan',
+              breadcrumb: 'Work Plan'
+            }
+          },
+          {
+            path: 'output-quantity',
+            component: PlanOutputQuantityComponent,
+            data: {
+              title: 'Output Quantity',
+              breadcrumb: 'Output Quantity'
+            }
+          },
+          {
+            path: 'incoming',
+            component: IncomingComponent,
+            data: {
+              title: 'Incoming',
+              breadcrumb: 'Incoming'
+            }
           }
         ]
       },

@@ -32,6 +32,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public SUPERVISOR = 2;
   public STAFF = 3;
   public WORKER = 4;
+  public WORKER2 = 6;
   public pageSize: number;
   public currentUser: string;
   public currentTime: any;
