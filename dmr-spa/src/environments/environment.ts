@@ -1,13 +1,13 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-const SYSTEM_CODE = 2;
+const SYSTEM_CODE = 3;
 export const environment = {
   production: false,
   systemCode: SYSTEM_CODE,
   apiUrlEC: 'http://10.4.4.224:1002/api/',
-  apiUrl: 'http://10.4.0.76:1066/api/',
-  apiUrl2: 'http://10.4.0.76:1066/api/',
+  apiUrl: 'http://10.4.4.224:1066/api/',
+  apiUrl2: 'http://10.4.4.224:1066/api/',
   hub: 'http://10.4.4.224:1002/ec-hub',
   scalingHub: 'http://10.4.0.76:5000/scalingHub',
 

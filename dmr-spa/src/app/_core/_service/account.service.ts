@@ -46,7 +46,7 @@ export class AccountService {
         })
       );
   }
-  deleteUser(id) { return this.http.delete(`${this.authUrl}Users/Delete/${id}`); }
+  deleteUser(id) { return this.http.delete(`${this.authUrl}Users/Delete/${id}/${environment.systemCode}`); }
   mapBuildingUser(userid, buildingid) { return this.http.get(`${this.baseUrl}BuildingUser/MapBuildingUser/${userid}/${buildingid}`); }
   getBuildings() { return this.http.get(`${this.baseUrl}Building/GetBuildings`); }
   updateUser(update) { return this.http.post(`${this.authUrl}Users/Update`, update); }

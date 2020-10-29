@@ -6,6 +6,7 @@ import { RoleService } from 'src/app/_core/_service/role.service';
 import { IRole, IUserRole } from 'src/app/_core/_model/role';
 import { IUserCreate, IUserUpdate } from 'src/app/_core/_model/user';
 import { UserService } from 'src/app/_core/_service/user.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-account',
@@ -62,7 +63,8 @@ export class AccountComponent implements OnInit {
         email: args.data.email,
         roleid: 2,
         employeeID: args.data.employeeID,
-        isLeader: false
+        isLeader: false,
+        systemCode: environment.systemCode
       };
       if (args.data.employeeID === undefined) {
         this.alertify.error('Please key in a account!');
@@ -213,10 +215,10 @@ export class AccountComponent implements OnInit {
     this.accountService.createUser(this.userCreate).subscribe((res: number) => {
       this.alertify.success('The user has been created!');
       if (res > 0) {
-        if (res > 0 && this.buildingID) {
+        if (res > 0) {
           this.mapBuildingUser(res, this.buildingID);
         }
-        if (res > 0 && this.buildingID) {
+        if (res > 0) {
           this.mapUserRole(res, this.roleID);
         }
         this.getAllUserInfo();

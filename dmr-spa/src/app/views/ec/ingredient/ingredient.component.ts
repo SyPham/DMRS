@@ -206,7 +206,55 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   toolbarClick(args): void {
     switch (args.item.text) {
       case 'Excel Export':
-        this.ingredientGrid.excelExport();
+        const data = this.data.map(item => {
+          return {
+            supplier: item.supplier,
+            name: item.name,
+            unit: item.unit,
+            code: item.code
+          };
+        });
+        const supplierModel: ColumnModel =
+        {
+          field: 'supplier',
+          headerText: 'Supplier',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 120,
+        };
+        const nameModel: ColumnModel =
+        {
+          field: 'name',
+          headerText: 'Ingredient',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 120,
+        };
+        const unitModel: ColumnModel =
+        {
+          field: 'unit',
+          headerText: 'Unit',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 80,
+        };
+        const qrCoderModel: ColumnModel = {
+          field: 'code',
+          headerText: 'Code',
+          textAlign: 'Center',
+          autoFit: true,
+          width: 200,
+        };
+        const excelExportProperties: ExcelExportProperties = {
+          dataSource: data,
+          columns: [
+            new Column(supplierModel),
+            new Column(nameModel),
+            new Column(unitModel),
+            new Column(qrCoderModel)
+          ],
+        };
+        this.ingredientGrid.excelExport(excelExportProperties);
         break;
       default:
         break;

@@ -47,6 +47,7 @@ export interface IUserCreate {
   email: string;
   roleid: number;
   employeeID: string;
+  systemCode: number;
   isLeader: boolean;
 }
 export interface IUserUpdate {
