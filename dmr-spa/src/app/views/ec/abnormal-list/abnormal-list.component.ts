@@ -4,25 +4,14 @@ import { IngredientService } from './../../../_core/_service/ingredient.service'
 import { BuildingUserService } from './../../../_core/_service/building.user.service';
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-// import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-// import { IngredientService } from 'src/app/_core/_service/ingredient.service';
 import { DatePipe } from '@angular/common';
 import { FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
 import { EmitType } from '@syncfusion/ej2-base';
 import { Query } from '@syncfusion/ej2-data';
 import {
-  PageSettingsModel,
   GridComponent,
-  IEditCell,
-  ToolbarItems,
 } from '@syncfusion/ej2-angular-grids';
-import {
-  EditService,
-  ToolbarService,
-  PageService,
-} from '@syncfusion/ej2-angular-grids';
-// import { AbnormalService } from 'src/app/_core/_service/abnormal.service';
-// import { BuildingUserService } from 'src/app/_core/_service/building.user.service';
+
 declare const $: any;
 
 @Component({
@@ -120,7 +109,6 @@ export class AbnormalListComponent implements OnInit, AfterViewInit {
       this.ingredient = args.itemData?.name;
       this.abnormal.ingredient = args.itemData?.name;
       this.abnormalService.getBatchByIngredientID(args.value).subscribe((res: any) => {
-        console.log(res);
         this.batches = res;
       });
     }
@@ -198,7 +186,6 @@ export class AbnormalListComponent implements OnInit, AfterViewInit {
         batch: this.abnormal.batch
       };
     });
-    console.log(obj);
     this.abnormalService.createRange(obj).subscribe(() => {
       this.alertify.success('Successfully!!!');
       this.getAll();
@@ -215,7 +202,6 @@ export class AbnormalListComponent implements OnInit, AfterViewInit {
     this.createRange();
   }
   unlock(data) {
-    console.log(data);
     this.delete(data.id);
   }
 }

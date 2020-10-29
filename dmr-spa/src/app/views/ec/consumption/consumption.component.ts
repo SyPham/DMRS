@@ -156,7 +156,6 @@ export class ConsumptionComponent implements OnInit {
   }
 
   actionComplete(e) {
-    console.log(e);
     if (e.requestType === 'beginEdit') {
       e.form.elements.namedItem(this.setFocus.field).focus(); // Set focus to the Target element
     }
@@ -283,7 +282,6 @@ export class ConsumptionComponent implements OnInit {
           const selectedRecords = this.grid.getSelectedRecords().map((item: any) => {
             return item.id;
           });
-          console.log('Delete Range', selectedRecords);
           this.deleteRange(selectedRecords);
         }
         break;

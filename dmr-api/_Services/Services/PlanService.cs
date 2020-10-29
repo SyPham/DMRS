@@ -320,7 +320,8 @@ namespace DMR_API._Services.Services
         public async Task<object> GetLines(int buildingID)
         {
             var item = _repoBuilding.FindById(buildingID);
-            if (item.Level == 4)
+            if (item == null) return new List<BuildingDto>();
+            if (item.Level == 2)
             {
                 var lineList = _repoBuilding.FindAll().Where(x => x.ParentID == item.ID);
                 return await lineList.ProjectTo<BuildingDto>(_configMapper).ToListAsync();
@@ -1153,7 +1154,7 @@ namespace DMR_API._Services.Services
                         if (value > 0 && body.Quantity > 0)
                             CBD = Math.Round(SumProduct(cbdRowTotal, cbds) / body.Quantity, 3, MidpointRounding.AwayFromZero);
                         if (value > 0 && body.Quantity > 0)
-                            real = Math.Round(SumProduct(realRowTotal, reals) / body.Quantity, 3, MidpointRounding.AwayFromZero);
+                            real = Math.Round(SumProduct(realRowTotal, reals) / body.Quantity, 4, MidpointRounding.AwayFromZero);
 
                         ws.Cells[rowIndex, colIndex++].Value = CBD == 0 ? string.Empty : CBD.ToString();
                         ws.Cells[rowIndex, colIndex++].Value = real == 0 ? string.Empty : real.ToString();

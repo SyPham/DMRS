@@ -59,7 +59,6 @@ export class CostingComponent implements OnInit {
         cbd: data.cbd
       };
       this.update(ingredient);
-      console.log('tag', ingredient);
     }
   }
 

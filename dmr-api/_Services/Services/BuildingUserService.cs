@@ -49,6 +49,7 @@ namespace DMR_API._Services.Services
         public async Task<object> GetBuildingByUserID(int userid)
         {
             var model = await _buildingUserRepository.FindAll().FirstOrDefaultAsync(x => x.UserID == userid);
+            if (model == null) return new Building();
             return _buildingRepository.FindById(model.BuildingID);
         }
 

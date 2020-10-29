@@ -14,7 +14,6 @@ export class FooterComponent implements OnInit {
     if (signalr.CONNECTION_HUB.state === 'Connected') {
       signalr.CONNECTION_HUB.invoke('CheckOnline').catch(err => console.error(err));
       signalr.CONNECTION_HUB.on('Online', (users) => {
-        console.log('Online', users);
         this.online = users;
       });
     }

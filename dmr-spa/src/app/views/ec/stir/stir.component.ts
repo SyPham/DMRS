@@ -3,9 +3,6 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { IngredientService } from 'src/app/_core/_service/ingredient.service';
 import { DatePipe } from '@angular/common';
-import { FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
-import { EmitType } from '@syncfusion/ej2-base';
-import { Query } from '@syncfusion/ej2-data';
 import { SettingService } from 'src/app/_core/_service/setting.service';
 import { StirService } from 'src/app/_core/_service/stir.service';
 import { GridComponent } from '@syncfusion/ej2-angular-grids';
@@ -80,7 +77,6 @@ export class StirComponent implements OnInit {
     }
   }
   onChange(args, data) {
-    console.log(args);
     this.settingID = args.value ;
     const minTime = '0001-01-01T00:00:00';
     const startTime = new Date();
@@ -108,7 +104,6 @@ export class StirComponent implements OnInit {
       }
     }
     this.grid.refresh();
-    console.log(this.glues);
   }
   getStirInfo(glueName): Promise<any> {
     return this.stirService.getStirInfo(glueName).toPromise();
@@ -178,7 +173,6 @@ export class StirComponent implements OnInit {
   }
 
   saveStir(data) {
-    console.log(data);
     if (data.settingID === null && data.x === false) {
       this.alertify.warning(`Please select glue type radio button first!!!<br> Hãy chọn loại keo trước!!!`, true);
       return;
@@ -232,7 +226,6 @@ export class StirComponent implements OnInit {
     return (this.grid.pageSettings.currentPage - 1) * this.grid.pageSettings.pageSize + Number(index) + 1;
   }
   async showModal(name, data) {
-    console.log('show modal', data);
     this.stir = data;
     this.modalReference = this.modalService.open(name, { size: 'lg' });
     const startTime = this.datePipe.transform(data.startTime, 'yyyy-MM-dd HH:mm:ss');

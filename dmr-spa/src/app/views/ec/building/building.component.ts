@@ -1,18 +1,22 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BuildingService } from 'src/app/_core/_service/building.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BuildingModalComponent } from './building-modal/building-modal.component';
-import { TreeGridComponent } from '@syncfusion/ej2-angular-treegrid';
+import { TreeGridComponent } from '@syncfusion/ej2-angular-treegrid/';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
+import { SortService, FilterService, ReorderService, ITreeData } from '@syncfusion/ej2-angular-treegrid/';
+import { HierarchyNode, IBuilding } from 'src/app/_core/_model/building';
 
 @Component({
   selector: 'app-building',
   templateUrl: './building.component.html',
-  styleUrls: ['./building.component.css']
+  styleUrls: ['./building.component.css'],
+  providers: [FilterService, SortService, ReorderService],
+  encapsulation: ViewEncapsulation.None
 })
 export class BuildingComponent implements OnInit {
   toolbar: object;
-  data: any;
+  data: Array<HierarchyNode<IBuilding>>;
   editing: any;
 
   contextMenuItems: any;
@@ -35,6 +39,7 @@ export class BuildingComponent implements OnInit {
     this.toolbar = ['Add', 'Delete', 'Search', 'Update', 'Cancel'];
     this.optionTreeGrid();
     this.onService();
+    this.getBuildingsAsTreeView();
   }
   optionTreeGrid() {
     this.contextMenuItems = [

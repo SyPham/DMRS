@@ -25,10 +25,10 @@ export class ModalNoComponent implements OnInit {
   modalReference: NgbModalRef ;
   public data: object [];
   searchSettings: any = { hierarchyMode: 'Parent' } ;
-  public fields: Object = { text: 'name', value: 'id' };
-  public textNo: string = 'Select Model No';
+  public fields = { text: 'name', value: 'id' };
+  public textNo = 'Select Model No';
   public dataModalName: object [];
-  public value: number = 0;
+  public value = 0;
   modalno: ModalNo = {
     id: 0,
     name: '',
@@ -58,7 +58,7 @@ export class ModalNoComponent implements OnInit {
     this.getAllModalNo();
     this.getAllModelName();
   }
-  EditModalNo(id,editModalNo) {
+  EditModalNo(id, editModalNo) {
     this.openeditModalNo(editModalNo) ;
     this.modalNoService.getbyid(id).subscribe((res: any) => {
       this.modalno.id = id ;

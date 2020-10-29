@@ -691,7 +691,6 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
   onFocusScanQRCode(args, item) {
     // this.signal();
-    // console.log("Dang focus vao chat :" + item.position);
   }
 
   // khi scan qr-code

@@ -116,13 +116,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   onService() {
     this.headerService.currentImage
       .subscribe(arg => {
-        // console.log('onService header: ', arg);
         if (arg) {
           this.changeAvatar(arg);
         }
       });
     // this.headerService.imgSource.subscribe(res => {
-    //   console.log('on Service Avatar', res);
     //   if (res) {
     //      ;
     //   }
@@ -142,7 +140,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   }
   onScrollDown() {
-    // console.log('scrolled down!!');
     if (this.pageSize >= 200) {
       this.pageSize -= 10;
       this.getNotifications();
@@ -154,7 +151,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   onScrollUp() {
-    // console.log('scrolled up!!');
     if (this.pageSize >= 200) {
       this.pageSize -= 10;
       this.getNotifications();
@@ -186,7 +182,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     modalRef.componentInstance.title = 'Add Routine Main Task';
     // modalRef.componentInstance.user = 1;
     modalRef.result.then((result) => {
-      // console.log('openAvatarModal', result);
     }, (reason) => {
     });
   }
@@ -202,7 +197,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   checkServer() {
     const user = JSON.parse(localStorage.getItem('user')).User.Username;
     setInterval(() => {
-      // console.log(user + 'yeu cau server check alert');
       this.checkAlert();
     }, 30000);
   }
@@ -211,8 +205,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.signalrService.checkAlert(userId);
   }
   getNotifications() {
-    // console.log('getNotifications: ', this.userid);
-
     this.headerService.getAllNotificationCurrentUser(this.page, this.pageSize, this.userid).subscribe((res: any) => {
       this.data = res.model;
       this.total = res.total;
@@ -249,10 +241,9 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   checkTask() {
     this.headerService.checkTask(this.userid)
-      .subscribe(() => console.log('Vua moi kiem tra nhiem vu - ', this.userid));
+      .subscribe(() => {});
   }
   seen(item) {
-    // console.log('seen: ', item);
     this.headerService.seen(item).subscribe(res => {
       this.page = 1;
       this.data = [];
@@ -265,7 +256,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     if (obj.router === 'project-detail') {
       this.router.navigate([item.URL.replace('project-detail', 'project/detail')]);
     } else {
-      // this.headerService.changeMessage(obj);
       const url = `/${obj.router}`;
       this.router.navigate([item.URL]);
     }

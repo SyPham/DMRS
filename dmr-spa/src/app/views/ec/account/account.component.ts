@@ -54,7 +54,6 @@ export class AccountComponent implements OnInit {
     this.setFocus = args.column; // Get the column from Double click event
   }
   actionBegin(args) {
-    console.log('action Begin', args);
     if (args.requestType === 'save' && args.action === 'add') {
       this.userCreate = {
         id: 0,
@@ -96,7 +95,7 @@ export class AccountComponent implements OnInit {
       this.update();
     }
     if (args.requestType === 'delete') {
-      this.delete(args.data[0].ID);
+      this.delete(args.data[0].id);
     }
   }
   toolbarClick(args) {

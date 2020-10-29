@@ -20,7 +20,7 @@ import { ChartAllModule, AccumulationChartAllModule, RangeNavigatorAllModule } f
 import { ChartsModule } from 'ng2-charts';
 import { SwitchModule, RadioButtonModule } from '@syncfusion/ej2-angular-buttons';
 import { GridAllModule } from '@syncfusion/ej2-angular-grids';
-import { TreeGridAllModule } from '@syncfusion/ej2-angular-treegrid';
+
 import { ModalNameComponent } from './modal-name/modal-name.component';
 import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
 import { ModalNoComponent } from './modal-no/modal-no.component';
@@ -72,7 +72,8 @@ import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-
 import { DatePipe } from '@angular/common';
 import { CostingComponent } from './costing/costing.component';
 import { ConsumptionComponent } from './consumption/consumption.component';
-setCulture('de-DE');
+import { TreeGridModule } from '@syncfusion/ej2-angular-treegrid';
+setCulture('en-US');
 
 const lang = localStorage.getItem('lang');
 let defaultLang: any;
@@ -105,7 +106,7 @@ if (lang) {
     SwitchModule,
     MaskedTextBoxModule,
     DatePickerModule,
-    TreeGridAllModule,
+    TreeGridModule,
     GridAllModule,
     RadioButtonModule,
     TooltipModule,

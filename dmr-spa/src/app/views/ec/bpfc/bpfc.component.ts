@@ -1,6 +1,4 @@
-import { ModalName } from './../../../_core/_model/modal-name';
 import { ModalNameService } from './../../../_core/_service/modal-name.service';
-import { ISupplier } from './../../../_core/_model/Supplier';
 import { IngredientService } from './../../../_core/_service/ingredient.service';
 import {
   Component,
@@ -10,20 +8,11 @@ import {
   QueryList,
   ViewChildren,
 } from '@angular/core';
-import { EmitType } from '@syncfusion/ej2-base';
+import { EmitType } from '@syncfusion/ej2-base/';
 import { FilteringEventArgs } from '@syncfusion/ej2-dropdowns';
-import { Query } from '@syncfusion/ej2-data';
-import {
-  AccumulationChartComponent,
-  IAccLoadedEventArgs,
-  AccumulationTheme,
-  AccumulationChart,
-} from '@syncfusion/ej2-angular-charts';
-import * as pluginDataLabels from 'chartjs-plugin-datalabels';
-import { ChartOptions } from 'chart.js';
+import { Query } from '@syncfusion/ej2-data/';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { GlueModalComponent } from '../glue/glue-modal/glue-modal.component';
 import {
   PageSettingsModel,
   GridComponent,
@@ -41,23 +30,18 @@ import { IIngredient } from 'src/app/_core/_model/Ingredient';
 import { GlueIngredientService } from 'src/app/_core/_service/glue-ingredient.service';
 import { GlueService } from 'src/app/_core/_service/glue.service';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { ChartDataService } from 'src/app/_core/_service/chart-data.service';
 import { IngredientModalComponent } from '../ingredient/ingredient-modal/ingredient-modal.component';
 import { Tooltip, TooltipEventArgs } from '@syncfusion/ej2-popups';
 import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 import {
-  IGlueIngredientDetail,
   IGlueIngredient,
 } from 'src/app/_core/_model/glue-ingredient-detail';
-import { truncateSync } from 'fs';
 import { ArticleNoService } from 'src/app/_core/_service/articleNoService.service';
 import { IArticleNo } from 'src/app/_core/_model/Iarticle-no';
 import { AuthService } from 'src/app/_core/_service/auth.service';
-import { TranslateService } from '@ngx-translate/core';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { ModelNoService } from 'src/app/_core/_service/model-no.service';
 import { ArtProcessService } from 'src/app/_core/_service/art-process.service';
-import { AnyAaaaRecord } from 'dns';
 import { KindService } from 'src/app/_core/_service/kind.service';
 import { PartService } from 'src/app/_core/_service/part.service';
 import { MaterialService } from 'src/app/_core/_service/material.service';
@@ -1113,8 +1097,6 @@ export class BpfcComponent implements OnInit, AfterViewInit {
         this.updateChemicals();
         // update glueIngredient
         if (this.gridglue.getSelectedRecords().length > 0) {
-          console.log('glue update percentage', (this.gridglue.getSelectedRecords()[0] as any).glueIngredients);
-          console.log('ingredient update percentage', args.data);
           const glueIngredients = (this.gridglue.getSelectedRecords()[0] as any).glueIngredients;
           if (glueIngredients.length > 0) {
             const index = glueIngredients.findIndex((obj) => obj.ingredientID === args.data.id);
@@ -1139,8 +1121,6 @@ export class BpfcComponent implements OnInit, AfterViewInit {
 
         // update glueIngredient
         if (this.gridglue.getSelectedRecords().length > 0) {
-          console.log('glue update alow', (this.gridglue.getSelectedRecords()[0] as any).glueIngredients);
-          console.log('ingredient update alow', args.data);
           const glueIngredients = (this.gridglue.getSelectedRecords()[0] as any).glueIngredients;
           if (glueIngredients.length > 0) {
              const index = glueIngredients.findIndex((obj) => obj.ingredientID === args.data.id);
@@ -1198,7 +1178,6 @@ export class BpfcComponent implements OnInit, AfterViewInit {
   getIngredients() {
     this.glueIngredientService.getIngredients(this.glueid).subscribe(
       (res: any) => {
-        console.log(res);
         this.ingredients1 = res.result.list1;
         this.ingredients2 = res.result.list2;
       },
@@ -1477,7 +1456,6 @@ export class BpfcComponent implements OnInit, AfterViewInit {
     this.glueService.getAllGluesByBPFCID(BPFCID).subscribe((res: any) => {
       if (this.ingredientID === undefined) {
         this.glues = res;
-        console.log('glue: ', this.glues);
         if (res.length > 0) {
           this.detailGlue = true;
         }
@@ -2024,7 +2002,6 @@ export class BpfcComponent implements OnInit, AfterViewInit {
       this.artProcessService
         .getArtProcessByArticleNoID(articleNoID)
         .subscribe((res: any) => {
-          console.log('getArtProcessByArticleNoIDClone', res);
           this.artProcessDataClone = res.map((item) => {
             return {
               id: item.id,

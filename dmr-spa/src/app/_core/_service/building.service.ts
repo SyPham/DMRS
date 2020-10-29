@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Tutorial } from '../_model/tutorial';
+import { HierarchyNode, IBuilding } from '../_model/building';
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ export class BuildingService {
   rename(edit) { return this.http.put(`${this.baseUrl}Building/Update`, edit); }
 
   getBuildingsAsTreeView() {
-    return this.http.get(`${this.baseUrl}Building/GetAllAsTreeView`);
+    return this.http.get<Array<HierarchyNode<IBuilding>>>(`${this.baseUrl}Building/GetAllAsTreeView`);
   }
   getBuildingsForSetting() {
     return this.http.get(`${this.baseUrl}Building/GetBuildingsForSetting`);

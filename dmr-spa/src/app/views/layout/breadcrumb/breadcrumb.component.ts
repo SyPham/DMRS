@@ -19,7 +19,6 @@ export class BreadcrumbComponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
-    // console.log('BreadcrumbComponent: ', this.activatedRoute);
     this.breadcrumbs = this.buildBreadCrumb(this.activatedRoute.root);
   }
 
@@ -28,24 +27,17 @@ export class BreadcrumbComponent implements OnInit {
       filter(event => event instanceof NavigationEnd),
       distinctUntilChanged(),
     ).pipe(map(() => this.activatedRoute)).subscribe((e) => {
-      // console.log('ngOnInit breadcrumb: ', e);
       this.breadcrumbs = this.buildBreadCrumb(this.activatedRoute.root);
     });
     this.level = JSON.parse(localStorage.getItem('level')).level as number ;
   }
-  /**
-   * Recursively build breadcrumb according to activated route.
-   * @param route
-   * @param url
-   * @param breadcrumbs
-   */
+
   buildBreadCrumb(route: ActivatedRoute, url: string = '', breadcrumbs: IBreadcrumb[] = []): IBreadcrumb[] {
     // debugger
     // If no routeConfig is avalailable we are on the root path
     let label = route.routeConfig && route.routeConfig.data ? route.routeConfig.data.breadcrumb : '';
-    let isClickable = route.routeConfig && route.routeConfig.data && route.routeConfig.data.isClickable;
+    const isClickable = route.routeConfig && route.routeConfig.data && route.routeConfig.data.isClickable;
     let path = route.routeConfig && route.routeConfig.data ? 'ec/' + route.routeConfig.path : '';
-    // console.log(route.routeConfig);
     // If the route is dynamic route such as ':id', remove it
     const lastRoutePart = path.split('/').pop();
     const isDynamicRoute = lastRoutePart.startsWith('/');
@@ -71,8 +63,6 @@ export class BreadcrumbComponent implements OnInit {
     return newBreadcrumbs;
   }
   gotoRouter(data) {
-    // console.log(data)
-
     if (data.label === 'Ingredient' ) {
       this.router.navigate(['/ec/setting/ingredient']);
     }

@@ -11,7 +11,7 @@ import { rejects } from 'assert';
 })
 export class DeliveredHistoryComponent implements OnInit {
   data: any;
-  users: { ID: any; Username: any; Email: any; }[];
+  users: { ID: any; EmployeeID: any; Email: any; }[];
   public filterSettings: object;
   pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10};
   @ViewChild('grid') public grid: GridComponent;
@@ -43,7 +43,7 @@ export class DeliveredHistoryComponent implements OnInit {
         const data = res.result.map((i: any) => {
           return {
             ID: i.ID,
-            Username: i.Username,
+            EmployeeID: i.EmployeeID,
             Email: i.Email
           };
         });
@@ -55,7 +55,7 @@ export class DeliveredHistoryComponent implements OnInit {
     });
   }
   username(id) {
-    return (this.users.find(item => item.ID === id) as any).Username;
+    return (this.users.find(item => item.ID === id) as any)?.EmployeeID || '#N/A';
   }
   async loadData() {
     try {
@@ -64,7 +64,6 @@ export class DeliveredHistoryComponent implements OnInit {
         this.deliveredHistory();
       }
     } catch (error) {
-      console.log(error + '');
     }
   }
   deliveredHistory() {

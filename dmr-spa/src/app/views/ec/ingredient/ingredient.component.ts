@@ -214,14 +214,12 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   }
   actionBegin(args) {
     if (args.requestType === 'save' && args.action === 'edit') {
-      console.log('requestType', args);
       for (const key in this.dataPrint) {
         if (this.dataPrint[key].id === args.data.id) {
           this.dataPrint[key].batch = args.data.batch;
           this.dataPrint[key].productionDate = args.data.productionDate;
           // tslint:disable-next-line:max-line-length
           this.dataPrint[key].qrCode = `${this.datePipe.transform(args.data.productionDate, 'yyyyMMdd')}-${args.data.batch}-${args.data.code}`;
-          console.log(this.dataPrint[key]);
           break;
         }
       }
@@ -401,7 +399,6 @@ export class IngredientComponent implements OnInit, AfterViewInit {
     return (d < 10) ? '0' + d.toString() : d.toString();
   }
   onChangeDate(args, data) {
-    console.log(args);
     if (args.isInteracted) {
       // if (args.value === null) { return; }
       // this.pd = (args.value as Date);

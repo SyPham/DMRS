@@ -119,7 +119,6 @@ export class BuildingSettingComponent implements OnInit {
     }
   }
  async rowSelectedBuilding(args: any) {
-    console.log(args);
     if (args.isInteracted) {
      this.toolbarOptions = ['Add', 'Edit', 'Delete', 'Cancel', 'Excel Export', 'Search'];
      this.buildingID = args.data.id;
