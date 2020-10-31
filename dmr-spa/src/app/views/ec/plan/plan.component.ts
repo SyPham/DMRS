@@ -6,7 +6,7 @@ import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { PageSettingsModel, GridComponent, CellEditArgs } from '@syncfusion/ej2-angular-grids';
+import { PageSettingsModel, GridComponent, CellEditArgs, actionBegin, actionComplete } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { EditService, ToolbarService, PageService } from '@syncfusion/ej2-angular-grids';
 import { ActivatedRoute } from '@angular/router';
@@ -17,6 +17,9 @@ import { ArtProcessService } from 'src/app/_core/_service/art-process.service';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { Tooltip } from '@syncfusion/ej2-popups';
+import { count } from 'console';
+import { async } from 'rxjs/internal/scheduler/async';
+import { BuildingService } from 'src/app/_core/_service/building.service';
 const WORKER = 4;
 @Component({
   selector: 'app-plan',
@@ -71,15 +74,11 @@ export class PlanComponent implements OnInit {
   bpfcEdit: number;
   glueDetails: any;
   constructor(
-    private route: ActivatedRoute,
     private alertify: AlertifyService,
     public modalService: NgbModal,
     private planService: PlanService,
-    private modelNoService: ModelNoService,
-    private modelNameService: ModalNameService,
-    private articleNoService: ArticleNoService,
+    private buildingService: BuildingService,
     private bPFCEstablishService: BPFCEstablishService,
-    private artProcessService: ArtProcessService,
     public datePipe: DatePipe
   ) { }
 
@@ -89,29 +88,50 @@ export class PlanComponent implements OnInit {
     this.level = JSON.parse(localStorage.getItem('level')).level;
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.editparams = { params: { popupHeight: '300px' } };
-    // if (this.level === WORKER) {
-    //   this.hasWorker = true;
-    //   this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
-    //   this.toolbarOptions = ['ExcelExport', 'Search'];
-    // } else {
     this.hasWorker = false;
     this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
-    this.toolbarOptions = ['ExcelExport', 'Add', 'Save', 'Cancel',
+    this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
       { text: 'Delete Range', tooltipText: 'Delete Range', prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
       { text: 'Clone', tooltipText: 'Copy', prefixIcon: 'fa fa-copy', id: 'Clone' }
     ];
-    // }
     this.toolbar = ['ExcelExport', 'Add', 'Delete', 'Search', 'Copy'];
     this.getAll(this.startDate, this.endDate);
     this.getAllBPFC();
-    const buildingID = JSON.parse(localStorage.getItem('level')).id;
-    this.getAllLine(buildingID);
+    // tslint:disable-next-line:one-variable-per-declaration
+    const ADMIN = 1, SUPERVISER = 2;
+    const ROLES = [ADMIN, SUPERVISER];
+    const building = JSON.parse(localStorage.getItem('building'));
+    const role = JSON.parse(localStorage.getItem('level')).id;
+    if (ROLES.includes(role)) {
+      this.buildingService.getBuildings().subscribe(async (buildingData) => {
+        const lines = buildingData.filter(item => item.level === 3);
+        this.buildingName = lines;
+      });
+    } else {
+      this.getAllLine(building.id);
+    }
     this.ClearForm();
   }
   count(index) {
     return Number(index) + 1;
   }
-
+  async sweetalertSelect(inputOptions): Promise<any> {
+    const { value: buildingID } = await this.alertify.$swal.fire({
+      title: 'Select a building',
+      input: 'select',
+      inputOptions,
+      inputPlaceholder: 'Select a building',
+      showCancelButton: true,
+    });
+    const buildID = Number(buildingID);
+    return new Promise((resolve, rejects) => {
+      if (buildID > 0) {
+        resolve(buildID);
+      } else {
+        rejects('Error');
+      }
+    });
+  }
   getAllLine(buildingID) {
     this.planService.getLines(buildingID).subscribe((res: any) => {
       this.buildingName = res;

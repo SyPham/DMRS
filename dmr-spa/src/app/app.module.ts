@@ -102,8 +102,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     JwtModule.forRoot({
       config: {
         tokenGetter,
-        whitelistedDomains: ['10.4.0.76:96'],
-        blacklistedRoutes: ['10.4.0.76:96/api/auth']
+        whitelistedDomains: ['10.4.0.76:1002'],
+        blacklistedRoutes: ['10.4.0.76:1002/api/auth']
       }
     })
   ],

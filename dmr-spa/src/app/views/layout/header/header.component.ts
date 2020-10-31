@@ -13,7 +13,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AvatarModalComponent } from './avatar-modal/avatar-modal.component';
 import { TranslateService } from '@ngx-translate/core';
 import { RoleService } from 'src/app/_core/_service/role.service';
+import { DataService } from 'src/app/_core/_service/data.service';
+import { setCulture, loadCldr, L10n } from '@syncfusion/ej2-base';
 
+declare var require: any;
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -28,8 +31,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   public totalCount: number;
   public page: number;
   public ADMIN = 1;
-  public ADMIN_COSTING = 5;
   public SUPERVISOR = 2;
+  public ADMIN_COSTING = 5;
   public STAFF = 3;
   public WORKER = 4;
   public WORKER2 = 6;
@@ -62,6 +65,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.value = lang;
       translate.setDefaultLang(lang);
       translate.use(lang);
+
     } else {
       this.value = 'vi';
       translate.setDefaultLang('vi');
@@ -101,6 +105,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     if (args.itemData) {
       localStorage.removeItem('lang');
       localStorage.setItem('lang', args.itemData.id);
+      this.value = args.itemData.id;
       this.translate.use(args.itemData.id);
     }
   }
@@ -120,17 +125,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           this.changeAvatar(arg);
         }
       });
-    // this.headerService.imgSource.subscribe(res => {
-    //   if (res) {
-    //      ;
-    //   }
-    // });
   }
   changeAvatar(avt) {
     let avatar;
     if (avt) {
       avatar = avt.replace('data:image/png;base64,', '').trim();
-      // this.avatar = this.sanitizer.bypassSecurityTrustResourceUrl(avt);
       localStorage.removeItem('avatar');
       localStorage.setItem('avatar', avatar);
       this.getAvatar();

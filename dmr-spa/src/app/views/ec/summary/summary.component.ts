@@ -29,6 +29,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { AbnormalService } from 'src/app/_core/_service/abnormal.service.js';
 import { TooltipComponent, Position } from '@syncfusion/ej2-angular-popups';
 import { RoleService } from 'src/app/_core/_service/role.service';
+import { BuildingService } from 'src/app/_core/_service/building.service';
 
 declare var $: any;
 declare var Swal: any;
@@ -133,7 +134,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     private planService: PlanService,
     private authService: AuthService,
     private dataService: DataService,
-    private roleService: RoleService,
+    private buildingService: BuildingService,
     public modalService: NgbModal,
     public ingredientService: IngredientService,
     private makeGlueService: MakeGlueService,
@@ -205,7 +206,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
             this.modalReference.close();
             this.summary();
           }
-        });
+      });
       }
     }
   }
@@ -278,14 +279,24 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     const url = '/ec/execution/todolist/stir/' + values.glueName.glueName;
     return this.router.navigate([url]);
   }
-
+  async sweetalertSelect(inputOptions): Promise<any> {
+    const { value: buildingID } = await this.alertify.$swal.fire({
+      title: 'Select a building',
+      input: 'select',
+      inputOptions,
+      inputPlaceholder: 'Select a building',
+      showCancelButton: true,
+    });
+    const buildID = Number(buildingID);
+    return new Promise((resolve, rejects) => {
+      if (buildID > 0) {
+        resolve(buildID);
+      } else {
+        rejects('Error');
+      }
+    });
+  }
   summary() {
-    const E_BUILDING = 8;
-    const ROLES = [1, 2, 3];
-    const level = JSON.parse(localStorage.getItem('level')).id;
-    if (ROLES.includes(level)) {
-      this.buildingID = E_BUILDING;
-    }
     this.spinner.show();
     this.planService.summary(this.buildingID).subscribe((res: any) => {
       this.lineColumns = res.header;
@@ -294,6 +305,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       this.modelNameList = res.modelNameList;
       this.spinner.hide();
     });
+
   }
 
   hasLineValue(value) {
@@ -404,14 +416,35 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   getBuilding() {
-    const userID = JSON.parse(localStorage.getItem('user')).User.ID;
-    this.authService.getBuildingByUserID(userID).subscribe((res: any) => {
-      res = res || {};
-      if (res !== {}) {
-        this.buildingID = res.id;
-        this.summary();
-      }
-    });
+    // tslint:disable-next-line:one-variable-per-declaration
+    const ADMIN = 1, SUPERVISER = 2;
+    const ROLES = [ADMIN, SUPERVISER];
+    const building = JSON.parse(localStorage.getItem('building'));
+    const role = JSON.parse(localStorage.getItem('level')).id;
+    if (ROLES.includes(role)) {
+      this.buildingService.getBuildings().subscribe(async (buildingData) => {
+        const buildings = buildingData.filter(item => item.level === 2);
+        const inputOptions = {};
+        buildings.map(item => {
+          const id = item.id;
+          inputOptions[id] = item.name;
+          return { id: item.id, name: item.name };
+        });
+        this.sweetalertSelect(inputOptions).then(buildingID => {
+          this.buildingID = buildingID;
+          this.summary();
+        }).catch(err => this.alertify.error(err));
+      });
+    } else {
+      const userID = JSON.parse(localStorage.getItem('user')).User.ID;
+      this.authService.getBuildingByUserID(userID).subscribe((res: any) => {
+        res = res || {};
+        if (res !== {}) {
+          this.buildingID = res.id;
+          this.summary();
+        }
+      });
+    }
   }
 
   // make glue

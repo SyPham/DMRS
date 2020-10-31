@@ -30,6 +30,9 @@ export class BuildingService {
   getBuildingsAsTreeView() {
     return this.http.get<Array<HierarchyNode<IBuilding>>>(`${this.baseUrl}Building/GetAllAsTreeView`);
   }
+  getBuildings() {
+    return this.http.get<Array<IBuilding>>(`${this.baseUrl}Building/GetBuildings`);
+  }
   getBuildingsForSetting() {
     return this.http.get(`${this.baseUrl}Building/GetBuildingsForSetting`);
   }

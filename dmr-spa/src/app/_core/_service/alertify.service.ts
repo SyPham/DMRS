@@ -39,7 +39,7 @@ export class AlertifyService {
     });
   }
   valid(title: string, message: string): Promise<boolean> {
-    return new Promise((resolve, rejects) => {
+    return new Promise((res, rejects) => {
       Swal.fire({
         title,
         text: message,
@@ -49,7 +49,7 @@ export class AlertifyService {
         cancelButtonText: 'No'
       }).then((result) => {
         if (result.value) {
-          resolve(true);
+          res(true);
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           rejects(false);
         }

@@ -43,7 +43,7 @@ export class BPFCScheduleComponent implements OnInit {
 
   ngOnInit() {
     this.excelDownloadUrl = `${environment.apiUrlEC}ModelName/ExcelExport`;
-    this.toolbar = ['Import Excel', 'Export Excel', 'Search'];
+    this.toolbar = ['Excel Import', 'ExcelExport', 'Search'];
     this.filterSettings = { type: 'Excel' };
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, newRowPosition: 'Normal' };
     this.getAllUsers();
@@ -64,20 +64,21 @@ export class BPFCScheduleComponent implements OnInit {
 
   toolbarClick(args) {
     switch (args.item.text) {
-      case 'Import Excel':
+      case 'Excel Import':
         this.showModal(this.importModal);
         break;
-      case 'Export Excel':
+      case 'Excel Export':
         const data = this.data.map(item => {
           return {
             approvedBy: item.approvedBy,
             approvalStatus: item.approvalStatus,
             createdBy: item.createdBy,
             articleNo: item.articleNo,
-            createdDate: this.datePipe.transform(item.createdDate, 'MM-dd-yyyy'),
+            createdDate: this.datePipe.transform(item.createdDate, 'd MMM, yyyy HH:mm'),
             artProcess: item.artProcess,
             finishedStatus: item.finishedStatus === true ? 'Yes' : 'No',
-            BPFCName: item.modelName + ' - ' + item.modelNo,
+            modelName: item.modelName,
+            modelNo: item.modelNo,
             season: item.season
           };
         });

@@ -9,6 +9,7 @@ export class DataService {
   currentMessage = this.messageSource.asObservable();
   currentSourceLang = this.SourceLang.asObservable();
   public info = new BehaviorSubject<boolean>(false);
+  locale = new BehaviorSubject<string>('');
   // method này để change source message
 
   constructor() { }
@@ -24,5 +25,11 @@ export class DataService {
   }
   public getValue(): Observable<boolean> {
     return this.info.asObservable();
+  }
+  public setValueLocale(message): void {
+    this.locale.next(message);
+  }
+  public getValueLocale(): Observable<string> {
+    return this.locale.asObservable();
   }
 }

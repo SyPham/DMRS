@@ -1,23 +1,17 @@
-import { ModalNameService } from './../../../_core/_service/modal-name.service';
-import { GlueService } from './../../../_core/_service/glue.service';
-import { GlueIngredientService } from './../../../_core/_service/glue-ingredient.service';
-import { LineService } from './../../../_core/_service/line.service';
 import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { PageSettingsModel, GridComponent, CellEditArgs } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EditService, ToolbarService, PageService } from '@syncfusion/ej2-angular-grids';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { ModelNoService } from 'src/app/_core/_service/model-no.service';
-import { ArticleNoService } from 'src/app/_core/_service/article-no.service';
-import { ArtProcessService } from 'src/app/_core/_service/art-process.service';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
-import { Tooltip } from '@syncfusion/ej2-popups';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { setCulture, loadCldr, L10n } from '@syncfusion/ej2-base';
+import { DataService } from 'src/app/_core/_service/data.service';
+
 const WORKER = 4;
 @Component({
   selector: 'app-plan-output-quantity',
@@ -69,8 +63,10 @@ export class PlanOutputQuantityComponent implements OnInit {
   bpfcEdit: number;
   glueDetails: any;
   setFocus: any;
+  locale: string;
+
   constructor(
-    private route: ActivatedRoute,
+    private langService: DataService,
     private alertify: AlertifyService,
     public modalService: NgbModal,
     private planService: PlanService,
@@ -80,6 +76,7 @@ export class PlanOutputQuantityComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.locale = localStorage.getItem('lang');
     const now = new Date();
     this.endDate = new Date(now.setDate(now.getDate() + 15));
     this.level = JSON.parse(localStorage.getItem('level')).level;
@@ -158,7 +155,9 @@ export class PlanOutputQuantityComponent implements OnInit {
   actionComplete(e) {
     console.log(e);
     if (e.requestType === 'beginEdit') {
-      e.form.elements.namedItem(this.setFocus.field).focus(); // Set focus to the Target element
+      if (this.setFocus?.field) {
+        e.form.elements.namedItem('quantity').focus(); // Set focus to the Target element
+      }
     }
   }
   onDoubleClick(args: any): void {
@@ -222,23 +221,25 @@ export class PlanOutputQuantityComponent implements OnInit {
   }
 
   getAll(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
-      this.data = res.map(item => {
-        return {
-          id: item.id,
-          bpfcName: `${item.modelName} - ${item.modelNoName} - ${item.articleName} - ${item.processName}`,
-          dueDate: item.dueDate,
-          createdDate: item.createdDate,
-          workingHour: item.workingHour,
-          hourlyOutput: item.hourlyOutput,
-          buildingName: item.buildingName,
-          buildingID: item.buildingID,
-          quantity: item.quantity,
-          bpfcEstablishID: item.bpfcEstablishID,
-          glues: item.glues || []
-        };
+    if (startDate instanceof Date && endDate instanceof Date) {
+      this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+        this.data = res.map(item => {
+          return {
+            id: item.id,
+            bpfcName: `${item.modelName} - ${item.modelNoName} - ${item.articleName} - ${item.processName}`,
+            dueDate: item.dueDate,
+            createdDate: item.createdDate,
+            workingHour: item.workingHour,
+            hourlyOutput: item.hourlyOutput,
+            buildingName: item.buildingName,
+            buildingID: item.buildingID,
+            quantity: item.quantity,
+            bpfcEstablishID: item.bpfcEstablishID,
+            glues: item.glues || []
+          };
+        });
       });
-    });
+    }
   }
   deleteRange(plans) {
     this.alertify.confirm('Delete Plan', 'Are you sure you want to delete this Plans ?', () => {

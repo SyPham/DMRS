@@ -197,6 +197,7 @@ export class LoginComponent implements OnInit {
                   localStorage.setItem('lang', 'en');
                 }
               }
+              this.authService.getBuildingByUserID(userId).subscribe((line: any) => localStorage.setItem('building', JSON.stringify(line)));
               this.checkRole();
             }
           });

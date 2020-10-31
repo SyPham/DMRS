@@ -45,7 +45,6 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
-import { setCulture, loadCldr, L10n } from '@syncfusion/ej2-schedule/node_modules/@syncfusion/ej2-base';
 import { PartComponent } from './part/part.component';
 import { KindComponent } from './kind/kind.component';
 import { MaterialComponent } from './material/material.component';
@@ -73,10 +72,10 @@ import { DatePipe } from '@angular/common';
 import { CostingComponent } from './costing/costing.component';
 import { ConsumptionComponent } from './consumption/consumption.component';
 import { TreeGridModule } from '@syncfusion/ej2-angular-treegrid';
-setCulture('en-US');
 
+
+let defaultLang: string;
 const lang = localStorage.getItem('lang');
-let defaultLang: any;
 if (lang) {
   defaultLang = lang;
 } else {
@@ -110,7 +109,7 @@ if (lang) {
     GridAllModule,
     RadioButtonModule,
     TooltipModule,
-    TimePickerModule ,
+    TimePickerModule,
     Ng2SearchPipeModule,
     DateTimePickerModule,
     TranslateModule.forChild({

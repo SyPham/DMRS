@@ -34,6 +34,7 @@ export class AccountComponent implements OnInit {
   userCreate: IUserCreate;
   userUpdate: IUserUpdate;
   setFocus: any;
+  locale = localStorage.getItem('lang');
   constructor(
     private accountService: AccountService,
     private roleService: RoleService,
