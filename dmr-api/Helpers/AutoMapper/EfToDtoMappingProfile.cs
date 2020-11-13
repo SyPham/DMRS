@@ -1,20 +1,26 @@
+using System;
 using DMR_API.DTO;
 using DMR_API.Models;
 using AutoMapper;
 using System.Linq;
-
 namespace DMR_API.Helpers.AutoMapper
 {
     public class EfToDtoMappingProfile : Profile
     {
         char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+       
         public EfToDtoMappingProfile()
         {
+            
             CreateMap<User, UserForDetailDto>();
             CreateMap<Glue, GlueDto>().ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
             CreateMap<Glue, GlueCreateDto>().ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
             CreateMap<Glue, GlueCreateDto1>()
                 .ForMember(d => d.GlueID, o => o.MapFrom(s => s.ID))
+                .ForMember(d => d.KindName, o => o.MapFrom(s => s.Kind == null ? string.Empty : s.Kind.Name))
+                .ForMember(d => d.PartName, o => o.MapFrom(s => s.Part == null ? string.Empty : s.Part.Name))
+                .ForMember(d => d.MaterialName, o => o.MapFrom(s => s.Material == null ? string.Empty : s.Material.Name))
+                .ForMember(d => d.Chemical, o => o.MapFrom(s => new GlueDto1 { ID = s.ID, Name = s.Name }))
                 .ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
             CreateMap<Ingredient, IngredientDto>()
                 .ForMember(d => d.Supplier, o => o.MapFrom(x => x.Supplier.Name))
@@ -74,7 +80,9 @@ namespace DMR_API.Helpers.AutoMapper
            .ForMember(d => d.ArticleNo, o => o.MapFrom(x => x.ArticleNo.Name))
            .ForMember(d => d.ArtProcess, o => o.MapFrom(x => x.ArtProcess.Process.Name));
 
-            CreateMap<MixingInfoDto, MixingInfo>();
+            CreateMap<MixingInfo, MixingInfoDto>()
+            .ForMember(d => d.ExpiredTime, o => o.MapFrom(x => x.Glue.GlueIngredients.ExpriedTime()))
+             .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble())); 
             CreateMap<MixingInfoForCreateDto, MixingInfo>();
 
             CreateMap<BPFCEstablish, BPFCEstablish>()
@@ -88,7 +96,7 @@ namespace DMR_API.Helpers.AutoMapper
             CreateMap<StirDTO, Stir>();
             CreateMap<SettingDTO, Setting>();
             CreateMap<PlanForCloneDto, Plan>();
-
+            CreateMap<ScaleMachineDto, ScaleMachine>();
         }
 
     }

@@ -50,8 +50,7 @@ namespace DMR_API.Helpers.AutoMapper
             CreateMap<PartDto, Part>();
             CreateMap<RoleDto, Role>();
             CreateMap<MaterialDto, Material>();
-            CreateMap<MixingInfo, MixingInfoDto>()
-             .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble()));
+            CreateMap<MixingInfoDto, MixingInfo>();
             CreateMap<MixingInfo, MixingInfoForCreateDto>();
             CreateMap<BuildingGlue, BuildingGlueForCreateDto>().ForMember(d => d.Qty, o => o.MapFrom(a => a.Qty.ToDouble().ToSafetyString()));
             CreateMap<IngredientInfo, IngredientInfoDto>();
@@ -59,6 +58,7 @@ namespace DMR_API.Helpers.AutoMapper
             CreateMap<Setting, SettingDTO>();
             CreateMap<Stir, StirDTO>();
             CreateMap<Plan, PlanForCloneDto>();
+            CreateMap<ScaleMachine, ScaleMachineDto>();
             //CreateMap<AuditTypeDto, MES_Audit_Type_M>();
         }
     }

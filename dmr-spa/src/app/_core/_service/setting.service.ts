@@ -16,11 +16,18 @@ export class SettingService {
   getAllSetting() {
     return this.http.get(this.baseUrl + 'Setting/GetAllSetting', {});
   }
+
   getSettingByBuilding(buildingID) {
     return this.http.get(this.baseUrl + 'Setting/GetSettingByBuilding/' + buildingID, {});
   }
+  getMachineByBuilding(buildingID) {
+    return this.http.get(this.baseUrl + 'Setting/GetMachineByBuilding/' + buildingID, {});
+  }
   deleteSetting(buildingID) {
     return this.http.delete(this.baseUrl + 'Setting/DeleteSetting/' + buildingID, {});
+  }
+  deleteMachine(id) {
+    return this.http.delete(this.baseUrl + 'Setting/DeleteMachine/' + id, {});
   }
   AddStir(entity) {
     return this.http.post(this.baseUrl + 'Setting/Create', entity);
@@ -28,10 +35,18 @@ export class SettingService {
   addSetting(entity) {
     return this.http.post(this.baseUrl + 'Setting/CreateSetting', entity);
   }
+
+  addMachine(entity) {
+    return this.http.post(this.baseUrl + 'Setting/CreateMachine', entity);
+  }
   updateStir(entity) {
     return this.http.put(this.baseUrl + 'Setting/Update', entity);
   }
   updateSetting(entity) {
     return this.http.put(this.baseUrl + 'Setting/UpdateSetting', entity);
+  }
+
+  updateMachine(entity) {
+    return this.http.put(this.baseUrl + 'Setting/UpdateMachine', entity);
   }
 }

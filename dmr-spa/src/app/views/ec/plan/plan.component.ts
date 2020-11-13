@@ -31,6 +31,8 @@ export class PlanComponent implements OnInit {
   bpfcID: number;
   level: number;
   hasWorker: boolean;
+  public role = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
   public bpfcData: object;
   public plansSelected: any;
   public date = new Date();
@@ -236,7 +238,7 @@ export class PlanComponent implements OnInit {
   }
 
   getAll(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,
@@ -328,7 +330,7 @@ export class PlanComponent implements OnInit {
   }
 
   search(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,

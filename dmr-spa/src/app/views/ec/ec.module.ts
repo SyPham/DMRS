@@ -17,9 +17,7 @@ import { NgbModalModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 // Import ngx-barcode module
 import { BarcodeGeneratorAllModule, DataMatrixGeneratorAllModule } from '@syncfusion/ej2-angular-barcode-generator';
 import { ChartAllModule, AccumulationChartAllModule, RangeNavigatorAllModule } from '@syncfusion/ej2-angular-charts';
-import { ChartsModule } from 'ng2-charts';
 import { SwitchModule, RadioButtonModule } from '@syncfusion/ej2-angular-buttons';
-import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 
 import { ModalNameComponent } from './modal-name/modal-name.component';
 import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
@@ -72,6 +70,8 @@ import { DatePipe } from '@angular/common';
 import { CostingComponent } from './costing/costing.component';
 import { ConsumptionComponent } from './consumption/consumption.component';
 import { TreeGridModule } from '@syncfusion/ej2-angular-treegrid';
+import { GridAllModule, GridModule } from '@syncfusion/ej2-angular-grids';
+import { ScalingSettingComponent } from './scaling-setting/scaling-setting.component';
 
 
 let defaultLang: string;
@@ -95,7 +95,6 @@ if (lang) {
     NgSelectModule,
     DropDownListModule,
     NgbModule,
-    ChartsModule,
     ChartAllModule,
     AccumulationChartAllModule,
     RangeNavigatorAllModule,
@@ -144,6 +143,7 @@ if (lang) {
     KindComponent,
     MaterialComponent,
     BpfcComponent,
+    ScalingSettingComponent,
     BpfcStatusComponent,
     AutofocusDirective,
     SelectTextDirective,

@@ -20,6 +20,7 @@ using OfficeOpenXml;
 using System.IO;
 using OfficeOpenXml.Style;
 using System.Drawing;
+using Microsoft.AspNetCore.Http;
 
 namespace DMR_API._Services.Services
 {
@@ -53,6 +54,7 @@ namespace DMR_API._Services.Services
             IModelNameRepository repoModelName,
             IBuildingGlueRepository repoBuildingGlue,
             IHubContext<ECHub> hubContext,
+            IHttpContextAccessor _httpContextAccessor,
             IMapper mapper,
             MapperConfiguration configMapper)
         {
@@ -91,7 +93,6 @@ namespace DMR_API._Services.Services
             }
 
         }
-
 
         public async Task<object> TroubleShootingSearch(string value, string batchValue)
         {
@@ -279,7 +280,7 @@ namespace DMR_API._Services.Services
                 ModelNo = x.ModelNo,
                 CreatedDate = x.CreatedDate,
                 BPFCEstablishID = x.BPFCEstablishID,
-                PathName = x.PathName,
+                PartName = x.PartName,
                 PartNameID = x.PartNameID,
                 MaterialNameID = x.MaterialNameID,
                 MaterialName = x.MaterialName,
@@ -302,7 +303,7 @@ namespace DMR_API._Services.Services
                 ModelNo = x.ModelNo,
                 CreatedDate = x.CreatedDate,
                 BPFCEstablishID = x.BPFCEstablishID,
-                PathName = x.PathName,
+                PartName = x.PartName,
                 PartNameID = x.PartNameID,
                 MaterialNameID = x.MaterialNameID,
                 MaterialName = x.MaterialName,
@@ -325,7 +326,6 @@ namespace DMR_API._Services.Services
             {
                 var lineList = _repoBuilding.FindAll().Where(x => x.ParentID == item.ID);
                 return await lineList.ProjectTo<BuildingDto>(_configMapper).ToListAsync();
-
             }
             else
             {
@@ -643,8 +643,11 @@ namespace DMR_API._Services.Services
                                         });
                     double realTotal = 0;
                     double deliver = 0;
+                    var deliverTotal = delivered.Select(x => x.Qty).ToList().ConvertAll<double>(Convert.ToDouble).Sum();
+
                     foreach (var plan in planHeaders)
                     {
+                        var status = plan.Glues.Count > 0 ? plan.Glues.Select(x => x.Name).Any(x => x == glue.Name) : false;
                         realTotal = 0;
                         deliver = 0;
                         foreach (var mixingInfo in mixingInfos)
@@ -674,10 +677,12 @@ namespace DMR_API._Services.Services
                         double deliverdTotal = 0;
                         if (listBuildingGlueCount > 0)
                         {
-                            deliverdTotal = listBuildingGlue.Select(x => x.Qty).ToList().ConvertAll<double>(Convert.ToDouble).Sum();
+                            deliverdTotal = delivered.Select(x => x.Qty).ToList().ConvertAll<double>(Convert.ToDouble).Sum();
                         }
                         var dynamicCellInfo = new CellInfoDto
                         {
+                            status = status,
+                            modelName = plan.ModelName,
                             GlueName = glue.Name,
                             line = plan.LineName,
                             lineID = plan.LineID,
@@ -685,8 +690,8 @@ namespace DMR_API._Services.Services
                             value = real >= 1 && real < 10 ? Math.Round(real, 2) : real >= 10 ? Math.Round(real, 1) : Math.Round(real, 3),
                             count = listBuildingGlueCount,
                             maxReal = realTotal,
-                            delivered = Math.Round(deliver, 3),
-                            deliveredTotal = deliverdTotal >= 1 && deliverdTotal < 10 ? Math.Round(deliverdTotal, 2) : deliverdTotal >= 10 ? Math.Round(deliverdTotal, 1) : Math.Round(deliverdTotal, 3),
+                            delivered = deliver >= 1 && deliver < 10 ? Math.Round(deliver, 2) : deliver >= 10 ? Math.Round(deliver, 1) : Math.Round(deliver, 3),
+                            deliveredTotal = Math.Round(deliverTotal, 3),
                             deliveredInfos = listBuildingGlue.Select(x => new DeliveredInfo
                             {
                                 ID = x.ID,
@@ -703,7 +708,6 @@ namespace DMR_API._Services.Services
 
                     }
                     // Static Right
-                    var deliverTotal = delivered.Select(x => x.Qty).ToList().ConvertAll<double>(Convert.ToDouble).Sum();
                     var actual = $"{Math.Round(deliverTotal, 3)}kg / {Math.Round(realTotal, 3)}kg";
                     var count = mixingInfos.Where(x => x.CreatedTime.Date == currentDate).Count();
                     rowChild1.Actual = new CellInfoDto() { real = actual };
@@ -830,11 +834,19 @@ namespace DMR_API._Services.Services
                 .ToListAsync();
         }
 
-        public async Task<object> GetAllPlanByRange(DateTime min, DateTime max)
+        public async Task<object> GetAllPlanByRange(int building, DateTime min, DateTime max)
         {
-
+            var lines = new List<int>();
+            if (building == 0)
+            {
+                lines = await _repoBuilding.FindAll(x => x.Level == 3).Select(x => x.ID).ToListAsync();
+            }
+            else
+            {
+                lines = await _repoBuilding.FindAll(x => x.ParentID == building).Select(x => x.ID).ToListAsync();
+            }
             return await _repoPlan.FindAll()
-                .Where(x => x.DueDate.Date >= min.Date && x.DueDate.Date <= max.Date)
+                .Where(x => x.DueDate.Date >= min.Date && x.DueDate.Date <= max.Date && lines.Contains(x.BuildingID))
                 .Include(x => x.Building)
                 .Include(x => x.BPFCEstablish)
                 .ThenInclude(x => x.ModelName)

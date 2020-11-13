@@ -887,6 +887,30 @@ namespace DMR_API.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("DMR_API.Models.ScaleMachine", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BuildingID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MachineID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MachineType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Unit")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ScaleMachines");
+                });
+
             modelBuilder.Entity("DMR_API.Models.Setting", b =>
                 {
                     b.Property<int>("ID")

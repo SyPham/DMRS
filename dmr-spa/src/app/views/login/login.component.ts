@@ -139,6 +139,7 @@ export class LoginComponent implements OnInit {
           systemCode: environment.systemCode
         };
         this.remember = true;
+        this.login();
       }
     }
     this.route.queryParams.subscribe(params => {
@@ -147,6 +148,14 @@ export class LoginComponent implements OnInit {
   }
   role: number;
   ngOnInit(): void {
+    if (localStorage.getItem('token')) {
+      const uri = decodeURI(this.uri);
+      if (uri !== 'undefined') {
+        this.router.navigate([uri]);
+      } else {
+        this.router.navigate(['/ec/execution/todolist']);
+      }
+    }
   }
   onChangeRemember(args) {
     this.remember = args.target.checked;
@@ -159,7 +168,7 @@ export class LoginComponent implements OnInit {
         this.roleService.getRoleByUserID(userId).subscribe((res: any) => {
           res = res || {};
           const userRole: IUserRole = {
-            isLock : true,
+            isLock: true,
             userID: userId,
             roleID: res.id
           };

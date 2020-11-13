@@ -4,12 +4,10 @@ import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { PageSettingsModel, GridComponent, CellEditArgs } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { setCulture, loadCldr, L10n } from '@syncfusion/ej2-base';
 import { DataService } from 'src/app/_core/_service/data.service';
 
 const WORKER = 4;
@@ -27,6 +25,8 @@ export class PlanOutputQuantityComponent implements OnInit {
   public editSettings: object;
   startDate = new Date();
   endDate = new Date();
+  public role = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
   bpfcID: number;
   level: number;
   hasWorker: boolean;
@@ -101,12 +101,12 @@ export class PlanOutputQuantityComponent implements OnInit {
   count(index) {
     return Number(index) + 1;
   }
-
   getAllLine(buildingID) {
     this.planService.getLines(buildingID).subscribe((res: any) => {
       this.buildingName = res;
     });
   }
+  created() {}
   getReport(obj: { startDate: Date, endDate: Date }) {
     this.spinner.show();
     this.planService.getReport(obj).subscribe((data: any) => {
@@ -222,7 +222,7 @@ export class PlanOutputQuantityComponent implements OnInit {
 
   getAll(startDate, endDate) {
     if (startDate instanceof Date && endDate instanceof Date) {
-      this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+      this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
         this.data = res.map(item => {
           return {
             id: item.id,
@@ -316,7 +316,7 @@ export class PlanOutputQuantityComponent implements OnInit {
   }
 
   search(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,

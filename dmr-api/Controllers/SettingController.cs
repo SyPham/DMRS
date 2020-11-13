@@ -15,7 +15,7 @@ namespace DMR_API.Controllers
     {
         private readonly IKindService _kindService;
         private readonly ISettingService _settingService;
-        public SettingController(IKindService kindService , ISettingService settingService)
+        public SettingController(IKindService kindService, ISettingService settingService)
         {
             _kindService = kindService;
             _settingService = settingService;
@@ -33,6 +33,13 @@ namespace DMR_API.Controllers
         public async Task<IActionResult> GetSettingByBuilding(int buildingID)
         {
             var settings = await _settingService.GetSettingByBuilding(buildingID);
+            return Ok(settings);
+        }
+
+        [HttpGet("{buildingID}")]
+        public async Task<IActionResult> GetMachineByBuilding(int buildingID)
+        {
+            var settings = await _settingService.GetMachineByBuilding(buildingID);
             return Ok(settings);
         }
 
@@ -56,6 +63,7 @@ namespace DMR_API.Controllers
                 return NoContent();
             return BadRequest($"Updating stir {update.ID} failed on save");
         }
+
         [HttpPut]
         public async Task<IActionResult> UpdateSetting(SettingDTO update)
         {
@@ -63,6 +71,7 @@ namespace DMR_API.Controllers
                 return NoContent();
             return BadRequest($"Updating setting {update.ID} failed on save");
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateSetting(SettingDTO create)
         {
@@ -74,6 +83,39 @@ namespace DMR_API.Controllers
             }
 
             throw new Exception("Creating the setting failed on save");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateMachine(ScaleMachineDto create)
+        {
+
+            //create.CreatedDate = DateTime.Now;
+            if (await _settingService.AddMachine(create))
+            {
+                return NoContent();
+            }
+
+            throw new Exception("Creating the setting failed on save");
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateMachine(ScaleMachineDto update)
+        {
+            if (await _settingService.UpdateMachine(update))
+                return NoContent();
+            return BadRequest($"Updating setting {update.ID} failed on save");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMachine(int id)
+        {
+            var settings = await _settingService.DeleteMachine(id);
+            if (settings)
+            {
+                return NoContent();
+            }
+
+            throw new Exception("Deleting the setting failed on save");
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSetting(int id)

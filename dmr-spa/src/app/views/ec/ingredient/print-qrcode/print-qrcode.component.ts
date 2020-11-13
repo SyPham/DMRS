@@ -44,7 +44,7 @@ export class PrintQRCodeComponent implements OnInit {
         this.mfg = this.datePipe.transform(this.mfgTemp, 'yyyyMMdd');
         // tslint:disable-next-line:max-line-length
         this.exp = this.datePipe.transform(this.mfgTemp.setDate(this.mfgTemp.getDate() + this.ingredient.daysToExpiration), 'yyyyMMdd');
-        this.qrcode = `${this.mfg}-${this.batch}-${this.ingredient.code}`;
+        this.qrcode = `${this.mfg}-${this.batch}-${this.ingredient.materialNO}`;
       }, error => {
       });
   }
@@ -53,7 +53,7 @@ export class PrintQRCodeComponent implements OnInit {
       const pd = args.value as Date;
       this.mfg = this.datePipe.transform(pd, 'yyyyMMdd');
       this.exp = this.datePipe.transform(pd.setDate(pd.getDate() + this.ingredient.daysToExpiration), 'yyyyMMdd');
-      this.qrcode = `${this.mfg}-${this.batch}-${this.ingredient.code}`;
+      this.qrcode = `${this.mfg}-${this.batch}-${this.ingredient.materialNO}`;
     }
   }
   printData() {

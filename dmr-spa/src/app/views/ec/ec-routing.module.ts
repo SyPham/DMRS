@@ -27,6 +27,7 @@ import { BuildingSettingComponent } from './building-setting/building-setting.co
 import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-quantity.component';
 import { CostingComponent } from './costing/costing.component';
 import { ConsumptionComponent } from './consumption/consumption.component';
+import { ScalingSettingComponent } from './scaling-setting/scaling-setting.component';
 
 const routes: Routes = [
   {
@@ -94,6 +95,14 @@ const routes: Routes = [
             data: {
               title: 'Building Setting',
               breadcrumb: 'Building Setting'
+            }
+          },
+          {
+            path: 'scaling-setting',
+            component: ScalingSettingComponent,
+            data: {
+              title: 'Scaling Setting',
+              breadcrumb: 'Scaling Setting'
             }
           },
           {

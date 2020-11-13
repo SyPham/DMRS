@@ -40,6 +40,8 @@ namespace DMR_API.DTO
         }
 
         public string GlueName { get; set; }
+        public string modelName { get; set; }
+        public bool status { get; set; }
         public string Supplier { get; set; }
         public object lineID { get; set; }
         public int GlueID { get; set; }

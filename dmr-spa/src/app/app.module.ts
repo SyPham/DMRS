@@ -55,6 +55,7 @@ import { GlueResolver } from './_core/_resolvers/glue.resolver';
 import {HttpClient} from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -86,6 +87,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     MultiSelectModule,
     HttpClientModule,
     SafePipeModule,
+    GridAllModule,
     MomentModule,
     InfiniteScrollModule,
     MentionModule,
@@ -102,8 +104,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     JwtModule.forRoot({
       config: {
         tokenGetter,
-        whitelistedDomains: ['10.4.0.76:1002'],
-        blacklistedRoutes: ['10.4.0.76:1002/api/auth']
+        allowedDomains: ['10.4.0.76:1002'],
+        disallowedRoutes: ['10.4.0.76:1002/api/auth']
       }
     })
   ],

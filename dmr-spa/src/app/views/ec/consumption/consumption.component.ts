@@ -41,6 +41,8 @@ export class ConsumptionComponent implements OnInit {
   public date = new Date();
   public toolbar: string[];
   public editparams: object;
+  public role = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
   @ViewChild('grid')
   public grid: GridComponent;
   dueDate: any;
@@ -221,7 +223,7 @@ export class ConsumptionComponent implements OnInit {
   }
 
   getAll(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,
@@ -313,7 +315,7 @@ export class ConsumptionComponent implements OnInit {
   }
 
   search(startDate, endDate) {
-    this.planService.search(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,

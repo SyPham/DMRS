@@ -10,10 +10,14 @@ namespace DMR_API._Services.Interface
     {
         Task<object> GetAllAsync();
         Task<bool> AddSetting(SettingDTO model);
+        Task<bool> AddMachine(ScaleMachineDto model);
         Task<bool> Add(StirDTO model);
         Task<bool> Update(StirDTO model);
         Task<bool> DeleteSetting(int id);
+        Task<bool> DeleteMachine(int id);
         Task<bool> UpdateSetting(SettingDTO model);
+        Task<bool> UpdateMachine(ScaleMachineDto model);
         Task<object> GetSettingByBuilding(int buildingID);
+        Task<object> GetMachineByBuilding(int buildingID);
     }
 }

@@ -13,25 +13,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AvatarModalComponent } from './avatar-modal/avatar-modal.component';
 import { TranslateService } from '@ngx-translate/core';
 import { RoleService } from 'src/app/_core/_service/role.service';
-import { DataService } from 'src/app/_core/_service/data.service';
-import { setCulture, loadCldr, L10n, Ajax } from '@syncfusion/ej2-base';
-// setCulture('vi');
-// loadCldr(
-//   require('cldr-data/main/vi/ca-gregorian.json'),
-//   require('cldr-data/main/vi/numbers.json'),
-//   require('cldr-data/main/vi/timeZoneNames.json'),
-//   require('cldr-data/supplemental/numberingSystems.json')
-// );
-// L10n.load({
-//   vi: {
-//     grid: {
-//       Cancel: 'Huy',
-//     }
-//   },
-// });
+import { setCulture, L10n } from '@syncfusion/ej2-base';
+import { CookieService } from 'ngx-cookie-service';
 
-
-declare var require: any;
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -71,6 +55,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     private calendarsService: CalendarsService,
     private sanitizer: DomSanitizer,
     private router: Router,
+    private cookieService: CookieService,
     private modalService: NgbModal,
     public translate: TranslateService
 
@@ -87,7 +72,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       translate.use('vi');
     }
   }
-
   ngOnInit(): void {
     this.langsData = [{ id: 'vi', name: 'VI' }, { id: 'en', name: 'EN' }];
     this.navAdmin = new Nav().getNavAdmin();
@@ -105,7 +89,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.onService();
     this.currentTime = moment().format('LTS');
     setInterval(() => this.updateCurrentTime(), 1 * 1000);
-
   }
   ngAfterViewInit() {
     this.getBuilding();
@@ -120,7 +103,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     if (args.itemData) {
       localStorage.removeItem('lang');
       localStorage.setItem('lang', args.itemData.id);
-      this.value = args.itemData.id;
       this.translate.use(args.itemData.id);
     }
   }
@@ -179,11 +161,13 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.currentTime = moment().format('LTS');
   }
   logout() {
+    this.cookieService.deleteAll();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('avatar');
     localStorage.removeItem('level');
     localStorage.removeItem('details');
+    localStorage.removeItem('buildingID');
     this.authService.decodedToken = null;
     this.authService.currentUser = null;
     this.alertify.message('Logged out');

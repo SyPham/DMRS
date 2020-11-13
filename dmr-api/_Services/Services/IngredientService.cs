@@ -84,12 +84,44 @@ namespace DMR_API._Services.Services
             return await _repoIngredient.SaveAll();
         }
 
-        public async Task<bool> AddRangeAsync(List<IngredientForImportExcelDto> model)
+        public async Task<string> AddRangeAsync(List<IngredientForImportExcelDto> model)
         {
+            var suppliers = await _repoSupplier.FindAll().ToListAsync();
+            var ingredientList =  _repoIngredient.FindAll();
+            string error = string.Empty;
+            foreach(var item in model) {
+                var checkMaterial = ingredientList.FirstOrDefault(x => x.MaterialNO.Equals(item.MaterialNO));
+                var checkName = ingredientList.FirstOrDefault(x => x.Name.Equals(item.Name));
+                if (checkMaterial != null)
+                {
+                    error = $"Material# {item.MaterialNO} already exists in the database";
+                    break;
+                }
+                if (checkName != null)
+                {
+                    error = $"Ingredient Name {item.Name} already exists in the database";
+                    break;
+                }
+            }
+            if (error != string.Empty) return error;
+            model.ForEach(item =>
+            {
+                
+                item.isShow = true; 
+                var supply = suppliers.FirstOrDefault(x => x.Name.ToLower().Equals(item.SupplierName.ToSafetyString().ToLower()));
+                item.SupplierID = supply != null ? supply.ID : 0;
+            });
             var ingredients = _mapper.Map<List<Ingredient>>(model);
-            ingredients.ForEach(ingredient => { ingredient.isShow = true; });
             _repoIngredient.AddRange(ingredients);
-            return await _repoIngredient.SaveAll();
+            try
+            {
+             await _repoIngredient.SaveAll();
+                return "ok";
+            }
+            catch
+            {
+                return "Error";
+            }
         }
 
 
@@ -223,34 +255,22 @@ namespace DMR_API._Services.Services
 
         public async Task<IngredientDto> ScanQRCode(string qrCode)
         {
-            var ingredient = await _repoIngredient.FindAll().Where(x => x.isShow == true).FirstOrDefaultAsync(x => x.Code.Equals(qrCode));
+            var ingredient = await _repoIngredient.FindAll().Where(x => x.isShow == true).FirstOrDefaultAsync(x => x.MaterialNO.Equals(qrCode));
             var result = _mapper.Map<IngredientDto>(ingredient);
             return result;
         }
 
         public async Task<object> ScanQRCodeFromChemialWareHouse(string qrCode,string building, int userid)
         {
-
-            // load tat ca supplier
+            var obj = qrCode.Split('-');
+            var Barcode = obj[2];
+            var ProductionDate = obj[0];
+            var Batch = obj[1];
+            var model = _repoIngredient.FindAll().FirstOrDefault(x => x.MaterialNO.Equals(Barcode));
             var supModel = _repoSupplier.GetAll();
-            // lay gia tri "barcode" trong chuỗi qrcode được chuyền lên
-            var Barcode = qrCode.Split('-', '-')[2];
-            // tim ID của ingredient
-            var ingredientID = _repoIngredient.FindAll().FirstOrDefault(x => x.Code.Equals(Barcode)).ID;
-            // Find ingredient theo ingredientID vừa tìm được ở trên
-            var model = _repoIngredient.FindById(ingredientID);
-            // lấy giá trị "ProductionDate" trong chuỗi qrcode được chuyền lên
-            var ProductionDate = qrCode.Split('-')[0];
-            // lấy giá trị "Batch" trong chuỗi qrcode được chuyền lên
-            var Batch = qrCode.Split('-', '-')[1];
-            // sau đó convert sang kiểu date time
             var ProductionDates = Convert.ToDateTime(ProductionDate.Substring(0, 4) + "/" + ProductionDate.Substring(4, 2) + "/" + ProductionDate.Substring(6, 2));
             var exp = ProductionDates.AddMonths(3);
-            // khai báo biến start = ngày hiện tại
-            var resultStart = DateTime.Now;
-            // khai báo biến end = ngày hiện tại
-            var resultEnd = DateTime.Now;
-            // tạo ingredientInfo mới
+            var currentDate = DateTime.Now;
             var data = await CreateIngredientInfo(new IngredientInfo
             {
                 Name = model.Name,
@@ -260,7 +280,7 @@ namespace DMR_API._Services.Services
                 Qty = model.Unit.ToInt(),
                 Batch = Batch,
                 Consumption = "0",
-                Code = model.Code,
+                Code = model.MaterialNO,
                 IngredientID = model.ID,
                 UserID = userid,
                 BuildingName = building
@@ -271,7 +291,7 @@ namespace DMR_API._Services.Services
             if (await _repoIngredientInfoReport.CheckBarCodeExists(Barcode))
             {
                 // check tiep trong bang ingredientReport xem co du lieu chua 
-                var result = _repoIngredientInfoReport.FindAll().FirstOrDefault(x => x.Code == Barcode && x.Batch == Batch && x.CreatedDate <= resultEnd.Date && x.CreatedDate >= resultStart.Date);
+                var result = _repoIngredientInfoReport.FindAll().FirstOrDefault(x => x.Code == Barcode && x.Batch == Batch && x.CreatedDate.Date == currentDate.Date);
 
                 // nếu khác Null thi update lai
                 if (result != null)
@@ -291,7 +311,7 @@ namespace DMR_API._Services.Services
                         SupplierName = supModel.FirstOrDefault(s => s.ID == model.SupplierID).Name,
                         Qty = model.Unit.ToInt(),
                         Consumption = "0",
-                        Code = model.Code,
+                        Code = model.MaterialNO,
                         Batch = Batch,
                         IngredientInfoID = data.ID,
                         UserID = userid,
@@ -311,7 +331,7 @@ namespace DMR_API._Services.Services
                     Qty = model.Unit.ToInt(),
                     Batch = Batch,
                     Consumption = "0",
-                    Code = model.Code,
+                    Code = model.MaterialNO,
                     IngredientInfoID = data.ID,
                     UserID = userid,
                     BuildingName = building
@@ -327,7 +347,7 @@ namespace DMR_API._Services.Services
             // lay gia tri "barcode" trong chuỗi qrcode được chuyền lên
             var Barcode = qrCode.Split('-', '-')[2];
             // tim ID của ingredient
-            var ingredientID = _repoIngredient.FindAll().FirstOrDefault(x => x.Code.Equals(Barcode)).ID;
+            var ingredientID = _repoIngredient.FindAll().FirstOrDefault(x => x.MaterialNO.Equals(Barcode)).ID;
             // Find ingredient theo ingredientID vừa tìm được ở trên
             var model = _repoIngredient.FindById(ingredientID);
             // lấy giá trị "Batch" trong chuỗi qrcode được chuyền lên

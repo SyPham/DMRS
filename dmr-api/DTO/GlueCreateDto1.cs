@@ -21,13 +21,14 @@ namespace DMR_API.DTO
         public string GlueName { get; set; }
         public string ModelNo { get; set; }
         public int BPFCEstablishID { get; set; }
-        public string PathName { get; set; }
+        public string PartName { get; set; }
         public int PartNameID { get; set; }
         public string MaterialName { get; set; }
         public string Consumption { get; set; }
         public int ExpiredTime { get; set; }
         public int CreatedBy { get; set; }
         public int MaterialNameID { get; set; }
+        public string KindName { get; set; }
         public int KindID { get; set; }
         public int PartID { get; set; }
         public int MaterialID { get; set; }

@@ -91,7 +91,19 @@ namespace DMR_API.Controllers
             }
             //throw new Exception("Creating the brand failed on save");
         }
-
+        [HttpPost("MapGlueIngredients")]
+        public async Task<IActionResult> MapGlueIngredients(List<GlueIngredient> glueIngredients)
+        {
+            
+            if (await _glueIngredientService.MapGlueIngredient(glueIngredients))
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
         [HttpGet("{glueid}/{ingredient}/delete")]
         public async Task<IActionResult> Delete(int glueid, int ingredient)
         {

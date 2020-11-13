@@ -6,7 +6,15 @@
   <div class="card-header d-flex p-1" *ngIf="existGlue">
     <h4>{{ 'TODOLIST' | translate }}</h4>
     <div class="d-inline-flex ml-auto">
-      <button class="btn btn-xs p-2 mr-1 my-bg-warning">{{ 'DELIVERED_TOTAL_COUNT_LABEL' | translate }}</button>
+      <ejs-dropdownlist #modelNameDropdownlist *ngIf="IsAdmin"
+        [dataSource]='buildings' 
+        [fields]='fieldsBuildings' 
+        [allowFiltering]='true' 
+        [(ngModel)]="buildingID"
+        (filtering)='onFilteringBuilding($event)' 
+        (change)='onChangeBuilding($event)' placeholder="Select a building">
+      </ejs-dropdownlist>
+      <button class="btn btn-xs p-2 mx-1 my-bg-warning">{{ 'DELIVERED_TOTAL_COUNT_LABEL' | translate }}</button>
       <button class="btn btn-xs p-2 mr-1 my-bg-primary">{{ 'ACTUAL_NOTE_LABEL' | translate }}</button>
       <button (click)="openFullscreen()" class="btn btn-xs p-2 mr-1 bg-secondary" *ngIf="!hasFullScreen"><i
           class="fa fa-expand-arrows-alt"></i> Fullscreen</button>
@@ -99,7 +107,7 @@
                     <ejs-tooltip #tooltipRow2 class="fix-css" position="RightCenter"
                       [content]="onBeforeRenderRow2(value)">
                       <span *ngIf='value.count > 0'>
-                        {{value.deliveredTotal}}kg({{value.count}})
+                        {{value.delivered}}kg({{value.count}})
                       </span>
                       <span *ngIf='value.count === 0'>
                         0
@@ -177,13 +185,13 @@
 
             </div>
             <div class="form-group col-md-2 col-xl-2">
-              <input [class]="item.info" class="form-control form-control-lg rounded-pill lock"
+              <input [class]="item.info" [class.lock]="true" class="form-control form-control-lg rounded-pill lock"
                 [value]="item.name + ' ( ' + item.percentage + '% )'" type="text">
             </div>
             <div class="col-md-6">
               <div class="row">
                 <div class="col-md-8">
-                  <input *ngIf="item.focusExpected; else expectedBlock"
+                  <input *ngIf="item.focusExpected; else expectedBlock" [class.lock]="item.position !== 'A'"
                     class="form-control form-control-lg rounded-pill" [value]='item.expected'
                     [autofocus]='item.focusExpected' [class]="item.info" (keyup)='onKeyupExpected(item, $event)'
                     type="text">
@@ -193,13 +201,13 @@
                   </ng-template>
                 </div>
                 <div class="col-md-4">
-                  <input class="form-control form-control-lg rounded-pill mixing" data-toggle="tooltip"
+                  <input class="form-control form-control-lg rounded-pill mixing" [class.lock]="item.position === 'A'" data-toggle="tooltip"
                     title="tooltip on second input!" *ngIf="item.focusReal; else realElse" [value]='item.real'
-                    [id]='item.position' [class]="realClass(item)" [autofocus]='item.focusReal'
+                    [id]='item.position' [class]="realClass(item)" [autofocus]='item.focusReal' (click)='onDblClicked(item, $event)'
                     (keyup)='onKeyupReal(item, $event)' type="text">
                   <ng-template #realElse>
-                    <input class="form-control form-control-lg rounded-pill lock mixing" data-toggle="tooltip"
-                      title="tooltip on second input!" [value]='item.real' [id]='item.position'
+                    <input class="form-control form-control-lg rounded-pill mixing" [class.lock]="item.position === 'A'" data-toggle="tooltip"
+                      title="tooltip on second input!" [value]='item.real' [id]='item.position'  (click)='onDblClicked(item, $event)'
                       [class]="realClass(item)" (keyup)='onKeyupReal(item, $event)' type="text">
                   </ng-template>
                 </div>
@@ -216,9 +224,9 @@
           <button type="button" [disabled]="disabled" (click)="Finish()" class="btn btn-success rounded-pill ml-2"><i
               class="fas fa-save"></i>
             {{ 'FINISHED' | translate }}</button>
-          <button type="button" (click)="gotoStir()" [disabled]="!showQRCode"
+          <!-- <button type="button" (click)="gotoStir()" [disabled]="!showQRCode"
             class="btn btn-warning rounded-pill ml-2"><i class="fa fa-arrow-circle-right"></i>
-            {{ 'STIR' | translate }}</button>
+            {{ 'STIR' | translate }}</button> -->
 
         </div>
         <p class="text-center my-2 text-danger" *ngIf="!disabled">{{ 'NOTE' | translate }}</p>

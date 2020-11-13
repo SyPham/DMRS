@@ -43,6 +43,7 @@ namespace DMR_API.Data
         public DbSet<Abnormal> Abnormals { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<ScaleMachine> ScaleMachines { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BPFCEstablish>().HasKey(x => x.ID);

@@ -25,6 +25,7 @@
                     <i class="fa fa-times"></i>
                   </button>
                 </div>
+              
               </div>
             </div>
 
@@ -32,7 +33,7 @@
         </div>
         <ejs-grid #grid [dataSource]='data' [searchSettings]="searchSettings" showColumnMenu='true'
           [allowExcelExport]='true' allowPaging='true' allowSorting='true' allowResizing='true' gridLines='Both'
-          (actionBegin)="actionBegin($event)" locale='vi' (actionComplete)="actionComplete($event)" (recordDoubleClick)='onDoubleClick($event)'
+          (actionBegin)="actionBegin($event)" (created)="created()" (actionComplete)="actionComplete($event)" (recordDoubleClick)='onDoubleClick($event)'
           (rowSelected)="rowSelected($event)" [toolbar]='toolbarOptions' (toolbarClick)='toolbarClick($event)'
           [pageSettings]='pageSettings' [editSettings]='editSettings'>
           <e-columns>

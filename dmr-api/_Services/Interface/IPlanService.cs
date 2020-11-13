@@ -9,7 +9,7 @@ namespace DMR_API._Services.Interface
     public interface IPlanService : IECService<PlanDto>
     {
         Task<object> GetAllPlanByDefaultRange();
-        Task<object> GetAllPlanByRange(DateTime min, DateTime max);
+        Task<object> GetAllPlanByRange(int building, DateTime min, DateTime max);
         Task<object> GetAllPlansByDate(string from, string to);
         Task<object> Summary(int building);
         Task<object> GetLines(int buildingID);

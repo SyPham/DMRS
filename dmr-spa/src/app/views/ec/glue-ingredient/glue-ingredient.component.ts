@@ -7,7 +7,6 @@ import { EmitType } from '@syncfusion/ej2-base';
 import { FilteringEventArgs } from '@syncfusion/ej2-dropdowns';
 import { Query } from '@syncfusion/ej2-data';
 import { AccumulationChartComponent, IAccLoadedEventArgs, AccumulationTheme, AccumulationChart } from '@syncfusion/ej2-angular-charts';
-import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { ChartOptions } from 'chart.js';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';

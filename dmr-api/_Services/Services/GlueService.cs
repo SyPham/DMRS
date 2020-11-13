@@ -191,29 +191,14 @@ namespace DMR_API._Services.Services
         public async Task<List<GlueCreateDto1>> GetAllGluesByBPFCID(int BPFCID)
         {
             var lists = await _repoGlue.FindAll()
+                .Include(x=>x.Kind)
+                .Include(x=>x.Part)
+                .Include(x => x.Material)
                 .Include(x => x.GlueIngredients)
                 .ThenInclude(x => x.Ingredient)
                 .Where(x => x.BPFCEstablishID == BPFCID && x.isShow == true)
                 .ProjectTo<GlueCreateDto1>(_configMapper)
-                .OrderByDescending(x => x.ID).Select(x => new GlueCreateDto1
-                {
-                    ID = x.ID,
-                    Name = x.Name,
-                    GlueID = x.GlueID,
-                    Code = x.Code,
-                    ModelNo = x.ModelNo,
-                    CreatedDate = x.CreatedDate,
-                    BPFCEstablishID = x.BPFCEstablishID,
-                    PathName = x.PathName,
-                    PartNameID = x.PartNameID,
-                    MaterialNameID = x.MaterialNameID,
-                    MaterialName = x.MaterialName,
-                    Consumption = x.Consumption,
-                    ExpiredTime = x.ExpiredTime,
-                    CreatedBy = x.CreatedBy,
-                    GlueIngredients = x.GlueIngredients,
-                    Chemical = new GlueDto1 { ID = x.GlueID, Name = x.Name }
-                }).ToListAsync();
+                .OrderByDescending(x => x.ID).ToListAsync();
             return lists;
         }
     }

@@ -2,9 +2,9 @@
     background-color: rgb(252, 248, 54);
   } */
 
-  #todolist th:nth-child(1), #delegateTable tr td:nth-child(1){
-  /* display: none; */
-}
+  /* #todolist th:nth-child(1), #delegateTable tr td:nth-child(1){
+   display: none; 
+} */
    .my-align{
     vertical-align: middle!important;
     text-align: center!important;
@@ -36,10 +36,13 @@
     color: white;
     font-weight: bold
   }
-  input.noHover{
-    pointer-events: none;
-}
+  /* input.noHover{
+  pointer-events: none; 
+  }
 input.lock {
+  pointer-events: none;
+} */
+.lock {
   pointer-events: none;
 }
 input.warning-focus {
@@ -49,7 +52,7 @@ input.warning-focus {
 
 }
 input {
-  pointer-events: none;
+  /* pointer-events: none; */
   text-align: center;
 }
 @keyframes warning-frames {
@@ -177,9 +180,6 @@ input.summary:focus {
 .my-bg-primary {
   background-color: #b8daff;
 }
-#todolist {
-}
-
 #todolist thead {
   width: calc(100% - 17px); /* - 17px because of the scrollbar width */
 }

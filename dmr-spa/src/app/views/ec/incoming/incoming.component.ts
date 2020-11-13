@@ -33,7 +33,7 @@ export class IncomingComponent implements OnInit {
   public ingredients: any = [];
   test: any = 'form-control w3-light-grey';
   checkCode: boolean;
-  autofocus: boolean = false ;
+  autofocus = false ;
   toolbarOptions = ['Search'];
   filterSettings = { type: 'Excel' };
   constructor(
@@ -87,8 +87,8 @@ export class IncomingComponent implements OnInit {
     if (input[2].length !== 8) {
       return;
     }
-    const levels = [1, 2, 3, 4];
-    const building = JSON.parse(localStorage.getItem('level'));
+    const levels = [1, 0];
+    const building = JSON.parse(localStorage.getItem('building'));
     let buildingName = building.name;
     if (levels.includes(building.level)) {
       buildingName = 'E';
@@ -139,7 +139,7 @@ export class IncomingComponent implements OnInit {
   // tim Qrcode dang scan co ton tai khong
   findIngredientCode(code) {
     for (const item of this.ingredients) {
-      if (item.code === code) {
+      if (item.materialNO === code) {
         // return true;
         this.checkCode = true;
         break;

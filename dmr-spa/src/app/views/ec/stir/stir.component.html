@@ -15,6 +15,7 @@
             [toolbar]='toolbarOptions'
             allowResizing= 'true'
             [rowHeight]='60'
+            (dataBound)='dataBound()'
             showColumnMenu='true'
             (toolbarClick)='toolbarClick($event)'>
             <e-columns>

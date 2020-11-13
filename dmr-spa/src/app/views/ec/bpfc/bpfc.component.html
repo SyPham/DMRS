@@ -110,25 +110,25 @@
                   {{'EXPIRED_TIME' | translate}}
                 </ng-template>
               </e-column>
-              <e-column field='modelNo' headerText='Kind' textAlign='Center' width='150'>
+              <e-column field='kindName' headerText='Kind' textAlign='Center' width='150'>
                 <ng-template #headerTemplate let-data>
                   {{'KIND' | translate}}
                 </ng-template>
                 <ng-template #editTemplate let-data>
-                  <ejs-dropdownlist id='glueDropdownlist' #glueDropdownlist [dataSource]='parts'
-                    [(ngModel)]="data.partID" [fields]='fieldsGlueEdit' [allowFiltering]='true'
-                    (change)='onChangePartEdit($event)'>
+                  <ejs-dropdownlist #glueDropdownlist [dataSource]='kinds'
+                    [(ngModel)]="data.kindName" [fields]='fieldsKindEdit' [allowFiltering]='true'
+                    (change)='onChangeKindEdit($event)'>
                   </ejs-dropdownlist>
                 </ng-template>
               </e-column>
-              <e-column field='pathName' headerText='Part' textAlign='Center' width='150'>
+              <e-column field='partName' headerText='Part' textAlign='Center' width='150'>
                 <ng-template #headerTemplate let-data>
                   {{'PART' | translate}}
                 </ng-template>
                 <ng-template #editTemplate let-data>
-                  <ejs-dropdownlist id='glueDropdownlist' #glueDropdownlist [dataSource]='kinds'
-                    [(ngModel)]="data.kindID" popupHeight='200px' popupWidth='250px' [fields]='fieldsGlueEdit'
-                    [allowFiltering]='true' (change)='onChangeKindEdit($event)'>
+                  <ejs-dropdownlist #glueDropdownlist [dataSource]='parts'
+                    [(ngModel)]="data.partName" popupHeight='200px' popupWidth='250px' [fields]='fieldsPartEdit'
+                    [allowFiltering]='true' (change)='onChangePartEdit($event)'>
                   </ejs-dropdownlist>
                 </ng-template>
               </e-column>
@@ -137,8 +137,8 @@
                   {{'MATERIAL' | translate}}
                 </ng-template>
                 <ng-template #editTemplate let-data>
-                  <ejs-dropdownlist id='glueDropdownlist' #glueDropdownlist [dataSource]='materials'
-                    [(ngModel)]="data.materialID" popupHeight='200px' popupWidth='250px' [fields]='fieldsGlueEdit'
+                  <ejs-dropdownlist #glueDropdownlist [dataSource]='materials'
+                    [(ngModel)]="data.materialName" popupHeight='200px' popupWidth='250px' [fields]='fieldsMaterialEdit'
                     [allowFiltering]='true' (change)='onChangeMaterialEdit($event)'>
                   </ejs-dropdownlist>
                 </ng-template>
@@ -282,7 +282,7 @@
           <div class="col-md-6">
             <div class="card-body table-responsive p-0">
               <div class="control-section">
-                <ejs-grid #grid height='675px'
+                <ejs-grid #grid2 height='675px'
                   [dataSource]='ingredients2'
                   [allowSorting]='true'
                   showColumnMenu='true'
@@ -331,7 +331,7 @@
                         </div>
                       </ng-template>
                       <ng-template #template let-data>
-                        <span>&#177; {{data.allow}}</span>
+                        <div [class]="changeAllowColor(data)">&#177; {{data.allow}}</div>
                       </ng-template>
                     </e-column>
                   </e-columns>

@@ -18,7 +18,7 @@ export class GlueIngredientService {
   baseUrl = environment.apiUrlEC;
   gueIngredientSource = new BehaviorSubject<object>({});
   currentGlueIngredient = this.gueIngredientSource.asObservable();
-  flagSource = new BehaviorSubject<string>("0");
+  flagSource = new BehaviorSubject<string>('0');
   currentFlag = this.flagSource.asObservable();
   constructor(private http: HttpClient) { }
   getIngredients(glueid, page?, itemsPerPage?): Observable<PaginatedResult<IIngredient[]>> {
@@ -50,18 +50,20 @@ export class GlueIngredientService {
         }),
       );
   }
-  
   mappGlueIngredient(glueIngredient) {
     return this.http.post(`${this.baseUrl}GlueIngredient/MapGlueIngredient`, glueIngredient);
+  }
+  mapGlueIngredient(glueIngredients: any[]) {
+    return this.http.post(`${this.baseUrl}GlueIngredient/MapGlueIngredients`, glueIngredients);
   }
   delete(glueid, ingredient) {
     return this.http.get(`${this.baseUrl}GlueIngredient/${glueid}/${ingredient}/delete`);
   }
   editPercentage(glueIngredient) {
-    return this.http.put(`${this.baseUrl}GlueIngredient/editPercentage`,glueIngredient);
+    return this.http.put(`${this.baseUrl}GlueIngredient/editPercentage`, glueIngredient);
   }
   editAllow(glueIngredient) {
-    return this.http.put(`${this.baseUrl}GlueIngredient/editAllow`,glueIngredient);
+    return this.http.put(`${this.baseUrl}GlueIngredient/editAllow`, glueIngredient);
   }
   getDetail(id: number) {
     return this.http.get(this.baseUrl + `GlueIngredient/${id}/detail`);

@@ -11,6 +11,7 @@ namespace DMR_API._Services.Interface
         Task<PagedList<GlueCreateDto>> GetGluesWithPaginations(PaginationParams param);
         Task<PagedList<IngredientDto>> GetIngredientsWithPaginations(PaginationParams param, int glueid);
         Task<bool> MapGlueIngredient(GlueIngredient glueIngredient);
+        Task<bool> MapGlueIngredient(List<GlueIngredient> glueIngredients);
         Task<bool> Delete(int glueid, int ingredientid);
         Task<object> GetIngredientsByGlueID(int glueid,int supID);
         Task<List<IngredientDto>> GetIngredientsByGlueID1(int glueid);

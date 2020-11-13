@@ -65,7 +65,13 @@ namespace DMR_API._Services.Services
 
         public async Task<List<MixingInfoDto>> GetMixingInfoByGlueName(string glueName)
         {
-            return await _repoMixingInfor.FindAll().Include(x => x.Glue).Where(x => x.GlueName.Equals(glueName) && x.Glue.isShow == true).ProjectTo<MixingInfoDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            return await _repoMixingInfor.FindAll()
+            .Include(x => x.Glue)
+            .ThenInclude(x=>x.GlueIngredients)
+            .ThenInclude(x=>x.Ingredient)
+            .Where(x => x.GlueName.Equals(glueName) && x.Glue.isShow == true)
+            .ProjectTo<MixingInfoDto>(_configMapper)
+            .OrderByDescending(x => x.ID).ToListAsync();
         }
 
         public async Task<object> Stir(string glueName)

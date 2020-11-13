@@ -23,7 +23,7 @@ namespace DMR_API._Repositories.Repositories
         }
         public async Task<bool> CheckBarCodeExists(string code)
         {
-            return await _context.Ingredients.AnyAsync(x => x.Code.Equals(code));
+            return await _context.Ingredients.AnyAsync(x => x.MaterialNO.Equals(code));
         }
 
     }

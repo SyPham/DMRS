@@ -78,6 +78,7 @@ export class GlueHistoryComponent implements OnInit {
     }
      .content {
         height: 221px;
+        display:block;
          border: 1px #D3D3D3 solid;
     }
     .content .qrcode {
@@ -133,6 +134,10 @@ export class GlueHistoryComponent implements OnInit {
     WindowPrt.document.close();
   }
   printData() {
+    if (this.dataSelected === []) {
+      alert('Please select a glue first!');
+      return;
+    }
     let html = '';
     for (const item of this.dataSelected) {
       const content = document.getElementById(item.code);
@@ -143,10 +148,10 @@ export class GlueHistoryComponent implements OnInit {
          </div>
           <div class='info'>
           <ul>
-            <li class='subInfo'>Name: ${ item.glue}</li>
+              <li class='subInfo'>Name: ${ item.glue}</li>
               <li class='subInfo'>QR Code: ${ item.code}</li>
-              <li class='subInfo'>MFG: ${ this.datePipe.transform(new Date(item.createdTime), 'yyyyMMdd')}</li>
-              <li class='subInfo'>EXP: ${ this.datePipe.transform(new Date(item.expiredTime), 'yyyyMMdd')}</li>
+              <li class='subInfo'>MFG: ${ this.datePipe.transform(new Date(item.createdTime), 'yyyyMMdd HH:mm')}</li>
+              <li class='subInfo'>EXP: ${ this.datePipe.transform(new Date(item.expiredTime), 'yyyyMMdd HH:mm')}</li>
           </ul>
          </div>
       </div>
@@ -168,7 +173,7 @@ export class GlueHistoryComponent implements OnInit {
     });
   }
   username(id) {
-    return (this.users.find(item => item.ID === id) as any).Username;
+    return (this.users.find(item => item.ID === id) as any)?.Username;
   }
   getMixingInfoByGlueID(glueID) {
     this.makeGlueService.getMixingInfoByGlueID(glueID).subscribe((data: any) => {
@@ -176,10 +181,11 @@ export class GlueHistoryComponent implements OnInit {
         return {
           code: item.code,
           createdTime: new Date(item.createdTime),
-          expiredTime: new Date(item.expiredTime),
+          expiredTime: item.expiredTime,
           glue: item.glue.name,
           mixBy: this.username(item.mixBy),
-          realTotal: item.realTotal
+          realTotal: +parseFloat(item.realTotal).toFixed(3) ,
+          batchA: item.batchA
         };
       });
     });

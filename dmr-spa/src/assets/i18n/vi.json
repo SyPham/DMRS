@@ -83,7 +83,7 @@
     "ACTUAL": "Thực Tế",
     "ACTUAL_TODOLIST": "Đã Giao/Thực Tế",
     "BACK": "Quay Lại",
-    "SCAN_QRCODE": "Quét QRCode",
+    "SCAN_QRCODE": "Quét QR Code",
     "HISTORY": "Lịch Sử",
     "History": "Lịch Sử",
     "MIXING": "Pha Keo",
@@ -144,7 +144,8 @@
     "Stirred": "Đã Khuấy",
     "Not Stirred Yet": "Chưa Khuấy",
     "#N/A": "#N/A",
-    "OUTPUT_QUANTITY": "Nhập Số Lượng Đầu Ra"
+    "OUTPUT_QUANTITY": "Nhập Số Lượng Đầu Ra",
+    "Scaling Setting": "Cài Đặt Cân Theo Tòa Nhà"
     
     
 

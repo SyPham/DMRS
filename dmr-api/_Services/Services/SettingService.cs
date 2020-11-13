@@ -15,18 +15,20 @@ namespace DMR_API._Services.Services
 {
     public class SettingService : ISettingService
     {
-        private readonly IMixingRepository _repoMixing;
+private readonly IMixingRepository _repoMixing;
         private readonly IMixingInfoRepository _repoMixingInfo;
         private readonly ISettingRepository _repoSetting;
+        private readonly IScaleMachineRepository _repoScale;
         private readonly IStirRepository _repoStir;
         private readonly IMapper _mapper;
-        public SettingService(IMixingInfoRepository repoMixingInfo, IStirRepository repoStir,IMixingRepository repoMixing , IMapper mapper , ISettingRepository repoSetting)
+        public SettingService(IScaleMachineRepository repoScale, IMixingInfoRepository repoMixingInfo, IStirRepository repoStir, IMixingRepository repoMixing, IMapper mapper, ISettingRepository repoSetting)
         {
-            _repoMixing = repoMixing ;
-            _repoSetting = repoSetting ;
+            _repoMixing = repoMixing;
+            _repoSetting = repoSetting;
             _repoMixingInfo = repoMixingInfo;
+            _repoScale = repoScale;
             _repoStir = repoStir;
-            _mapper = mapper ;
+            _mapper = mapper;
         }
 
         public async Task<object> GetAllAsync()
@@ -36,7 +38,12 @@ namespace DMR_API._Services.Services
         }
         public async Task<object> GetSettingByBuilding(int buildingID)
         {
-            return await _repoSetting.FindAll().Where(x=>x.BuildingID == buildingID).ToListAsync();
+            return await _repoSetting.FindAll().Where(x => x.BuildingID == buildingID).ToListAsync();
+        }
+
+        public async Task<object> GetMachineByBuilding(int buildingID)
+        {
+            return await _repoScale.FindAll().Where(x => x.BuildingID == buildingID).ToListAsync();
         }
         public async Task<bool> Add(StirDTO model)
         {
@@ -45,11 +52,11 @@ namespace DMR_API._Services.Services
                 var stir = _mapper.Map<Stir>(model);
                 _repoStir.Add(stir);
                 return await _repoStir.SaveAll();
-                
+
             }
             catch (System.Exception)
             {
-                
+
                 throw;
             }
         }
@@ -58,7 +65,7 @@ namespace DMR_API._Services.Services
             try
             {
                 var item = await _repoStir.FindAll().FirstOrDefaultAsync(x => x.ID == model.ID);
-                if (item == null) 
+                if (item == null)
                     return false;
                 item.RPM = model.RPM;
                 item.Status = model.Status;
@@ -103,6 +110,52 @@ namespace DMR_API._Services.Services
             }
         }
 
+        public async Task<bool> AddMachine(ScaleMachineDto model)
+        {
+            try
+            {
+                var scale = _mapper.Map<ScaleMachine>(model);
+                _repoScale.Add(scale);
+                return await _repoScale.SaveAll();
+
+            }
+            catch (System.Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<bool> UpdateMachine(ScaleMachineDto model)
+        {
+            try
+            {
+                var scale = _mapper.Map<ScaleMachine>(model);
+                _repoScale.Update(scale);
+                return await _repoScale.SaveAll();
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<bool> DeleteMachine(int id)
+        {
+            try
+            {
+                var item = await _repoScale.FindAll().FirstOrDefaultAsync(x => x.ID == id);
+                if (item == null)
+                    return false;
+                _repoScale.Remove(item);
+                return await _repoScale.SaveAll();
+
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
         public async Task<bool> DeleteSetting(int id)
         {
             try

@@ -41,7 +41,7 @@ namespace DMR_API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-
+            services.AddLogging();
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -165,7 +165,7 @@ namespace DMR_API
             services.AddScoped<IRawDataRepository, RawDataRepository>();
             services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
-
+            services.AddScoped<IScaleMachineRepository, ScaleMachineRepository>();
 
             //Services
             services.AddScoped<IMixingService, MixingService>();
@@ -198,14 +198,17 @@ namespace DMR_API
             services.AddScoped<IAbnormalService, AbnormalService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IUserRoleService, UserRoleService>();
+            services.AddScoped<IScaleMachineService, ScaleMachineService>();
             //extension
             services.AddScoped<IMailExtension, MailExtension>();
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext dataContext)
         {
+            
+            dataContext.Database.Migrate();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -219,7 +222,12 @@ namespace DMR_API
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Electronic Scale");
             });
-            app.UseCors("CorsPolicy");
+            // app.UseCors("CorsPolicy");
+            app.UseCors(x => x
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .SetIsOriginAllowed(origin => true) // allow any origin
+                           .AllowCredentials()); // allow credentials
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseDefaultFiles();

@@ -11,7 +11,7 @@ namespace DMR_API._Services.Interface
         Task<bool> CheckExists(int id); 
         Task<bool> CheckBarCodeExists(string code);
         Task<bool> Add1(IngredientDto1 ingredientIngredientDto);
-        Task<bool> AddRangeAsync(List<IngredientForImportExcelDto> model);
+        Task<string> AddRangeAsync(List<IngredientForImportExcelDto> model);
         Task<bool> DeleteIngredientInfo(int id, string code , int qty ,string batch);
         Task<bool> UpdatePrint(QrPrintDto entity);
         Task<IngredientDto> ScanQRCode(string qrCode);

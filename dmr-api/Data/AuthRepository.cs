@@ -44,5 +44,25 @@ namespace DMR_API.Data
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
+        // public bool RevokeToken(string token, string ipAddress)
+        // {
+        //     var user = _context.Users.FirstOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+
+        //     // return false if no user found with token
+        //     if (user == null) return false;
+
+        //     var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
+
+        //     // return false if token is not active
+        //     if (!refreshToken.IsActive) return false;
+
+        //     // revoke token and save
+        //     refreshToken.Revoked = DateTime.UtcNow;
+        //     refreshToken.RevokedByIp = ipAddress;
+        //     _context.Update(user);
+        //     _context.SaveChanges();
+
+        //     return true;
+        // }
     }
 }

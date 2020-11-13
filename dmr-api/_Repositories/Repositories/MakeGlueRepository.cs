@@ -87,6 +87,7 @@ namespace DMR_API._Repositories.Repositories
                         Name = item.Ingredient.Name,
                         Percentage = item.Percentage,
                         Code = item.Ingredient.Code,
+                        MaterialNO = item.Ingredient.MaterialNO,
                         Position = item.Position,
                         Allow = item.Allow
                     });

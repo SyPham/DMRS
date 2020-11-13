@@ -33,8 +33,8 @@ export class PlanService {
   getAll() {
     return this.http.get<Plan[]>(this.baseUrl + 'Plan/GetAll', {});
   }
-  search(min, max) {
-    return this.http.get<Plan[]>(`${this.baseUrl}Plan/Search/${min}/${max}`, {});
+  search(lineId, min, max) {
+    return this.http.get<Plan[]>(`${this.baseUrl}Plan/Search/${lineId}/${min}/${max}`, {});
   }
   getAllPlanByDefaultRange() {
     return this.http.get<Plan[]>(this.baseUrl + 'Plan/GetAllPlanByDefaultRange', {});

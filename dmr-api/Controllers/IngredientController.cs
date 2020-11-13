@@ -95,11 +95,11 @@ namespace DMR_API.Controllers
         [HttpGet("{min}/{max}/{buildingName}")]
         public async Task<IActionResult> SearchWithBuildingName(DateTime min, DateTime max, string buildingName)
         {
-            var lists = await _ingredientService.GetAllIngredientReportByRangeWithBuilding(min, max , buildingName);
+            var lists = await _ingredientService.GetAllIngredientReportByRangeWithBuilding(min, max, buildingName);
             return Ok(lists);
         }
 
-        
+
 
         [HttpGet("{text}")]
         public async Task<IActionResult> Search([FromQuery] PaginationParams param, string text)
@@ -108,7 +108,7 @@ namespace DMR_API.Controllers
             Response.AddPagination(lists.CurrentPage, lists.PageSize, lists.TotalCount, lists.TotalPages);
             return Ok(lists);
         }
-        
+
         //[HttpGet("{ingredientid}", Name = "GetIngredientOfIngredient")]
         //public async Task<IActionResult> Ingredient(int ingredientid)
         //{
@@ -120,8 +120,8 @@ namespace DMR_API.Controllers
         {
             if (await _ingredientService.CheckExists(ingredientIngredientDto.ID))
                 return BadRequest("Ingredient ID already exists!");
-            if (await _ingredientService.CheckBarCodeExists(ingredientIngredientDto.Code))
-                return BadRequest("Ingredient Barcode already exists!");
+            if (await _ingredientService.CheckBarCodeExists(ingredientIngredientDto.MaterialNO))
+                return BadRequest("Ingredient Material# already exists!");
             if (await _ingredientService.CheckExistsName(ingredientIngredientDto.Name))
                 return BadRequest("Ingredient Name already exists!");
             ingredientIngredientDto.CreatedDate = DateTime.Now.ToString("MMMM dd, yyyy HH:mm:ss tt");
@@ -137,8 +137,8 @@ namespace DMR_API.Controllers
         {
             if (await _ingredientService.CheckExists(ingredientIngredientDto.ID))
                 return BadRequest("Ingredient ID already exists!");
-            if (await _ingredientService.CheckBarCodeExists(ingredientIngredientDto.Code))
-                return BadRequest("Ingredient Barcode already exists!");
+            if (await _ingredientService.CheckBarCodeExists(ingredientIngredientDto.MaterialNO))
+                return BadRequest("Ingredient Material# already exists!");
             if (await _ingredientService.CheckExistsName(ingredientIngredientDto.Name))
                 return BadRequest("Ingredient Name already exists!");
             ingredientIngredientDto.CreatedDate = DateTime.Now.ToString("MMMM dd, yyyy HH:mm:ss tt");
@@ -155,7 +155,7 @@ namespace DMR_API.Controllers
         {
 
             ingredientIngredientDto.CreatedDate = DateTime.Now.ToString("MMMM dd, yyyy HH:mm:ss tt");
-            
+
             if (await _ingredientService.Update(ingredientIngredientDto))
                 return NoContent();
 
@@ -181,21 +181,21 @@ namespace DMR_API.Controllers
         }
 
         [HttpGet("{qrCode}/{start}/{end}")]
-        public async Task<IActionResult> ScanQRCodeFromChemialWareHouseDate(string qrCode , string start , string end)
+        public async Task<IActionResult> ScanQRCodeFromChemialWareHouseDate(string qrCode, string start, string end)
         {
-            return Ok(await _ingredientService.ScanQRCodeFromChemialWareHouseDate(qrCode,start, end));
+            return Ok(await _ingredientService.ScanQRCodeFromChemialWareHouseDate(qrCode, start, end));
         }
 
         [HttpPost("{qrCode}/{consump}")]
-        public async Task<IActionResult> UpdateConsumptionChemialWareHouse(string qrCode , int consump)
+        public async Task<IActionResult> UpdateConsumptionChemialWareHouse(string qrCode, int consump)
         {
-            return Ok(await _ingredientService.UpdateConsumptionChemialWareHouse(qrCode,consump));
+            return Ok(await _ingredientService.UpdateConsumptionChemialWareHouse(qrCode, consump));
         }
 
         [HttpPost("{qrCode}/{batch}/{consump}")]
-        public async Task<IActionResult> UpdateConsumptionIngredientReport(string qrCode, string batch , int consump)
+        public async Task<IActionResult> UpdateConsumptionIngredientReport(string qrCode, string batch, int consump)
         {
-            return Ok(await _ingredientService.UpdateConsumptionIngredientReport(qrCode,batch,consump));
+            return Ok(await _ingredientService.UpdateConsumptionIngredientReport(qrCode, batch, consump));
         }
 
         [HttpPost]
@@ -271,15 +271,20 @@ namespace DMR_API.Controllers
                 {
                     var currentSheet = package.Workbook.Worksheets;
                     var workSheet = currentSheet.First();
-                    var noOfCol = workSheet.Dimension.End.Column;
-                    var noOfRow = workSheet.Dimension.End.Row;
+                    var noOfCol = workSheet.Dimension.Columns;
+                    var noOfRow = workSheet.Dimension.Rows;
 
                     for (int rowIterator = 2; rowIterator <= noOfRow; rowIterator++)
                     {
                         datasList.Add(new IngredientForImportExcelDto()
                         {
-                            Name = workSheet.Cells[rowIterator, 1].Value.ToSafetyString(),
-                            SupplierID = workSheet.Cells[rowIterator, 2].Value.ToInt(),
+                            SupplierName = workSheet.Cells[rowIterator, 1].Value.ToSafetyString(),
+                            Name = workSheet.Cells[rowIterator, 2].Value.ToSafetyString(),
+                            VOC = workSheet.Cells[rowIterator, 3].Value.ToInt().ToSafetyString(),
+                            DaysToExpiration = workSheet.Cells[rowIterator, 4].Value.ToInt(),
+                            ExpiredTime = workSheet.Cells[rowIterator, 5].Value.ToInt(),
+                            MaterialNO = workSheet.Cells[rowIterator, 6].Value.ToSafetyString(),
+                            Unit = workSheet.Cells[rowIterator, 7].Value.ToInt().ToSafetyString(),
                         });
                     }
                 }
@@ -292,17 +297,20 @@ namespace DMR_API.Controllers
                         code = generator.RandomStringNumber(8);
                     }
                     item.Code = code;
-                    item.CreatedDate = DateTime.Now;
                     item.CreatedBy = userid;
                 });
-
-                return Ok(await _ingredientService.AddRangeAsync(datasList));
+                var check = await _ingredientService.AddRangeAsync(datasList);
+                if (check == "ok")
+                    return Ok();
+                else
+                {
+                    return BadRequest(check);
+                }
             }
             else
             {
-                return StatusCode(500);
+                return BadRequest();
             }
-
         }
         [HttpGet]
         public async Task<IActionResult> ExcelExport()
@@ -387,11 +395,11 @@ namespace DMR_API.Controllers
             return Ok(_ingredientService.GetById(ID));
         }
         [HttpDelete("{id}/{code}/{qty}/{batch}")]
-        public async Task<IActionResult> DeleteIngredientInfo(int id, string code, int qty , string batch)
+        public async Task<IActionResult> DeleteIngredientInfo(int id, string code, int qty, string batch)
         {
-            return Ok(await _ingredientService.DeleteIngredientInfo(id , code , qty , batch));
+            return Ok(await _ingredientService.DeleteIngredientInfo(id, code, qty, batch));
         }
-       [HttpGet("{ingredientName}/{batch}/{building}")]
+        [HttpGet("{ingredientName}/{batch}/{building}")]
         public async Task<IActionResult> CheckIncoming(string ingredientName, string batch, string building)
         {
             return Ok(await _ingredientService.CheckIncoming(ingredientName, batch, building));

@@ -222,5 +222,47 @@ namespace DMR_API._Services.Services
         {
             return await _repoGlueIngredient.Guidance(glueIngredientForGuidanceDto);
         }
+
+        public async Task<bool> MapGlueIngredient(List<GlueIngredient> glueIngredients)
+        {
+            bool flag = false;
+            if (glueIngredients.Any(x=> x.Position.IsNullOrEmpty()))
+            {
+                return false;
+            }
+            foreach (var glueIngredient in glueIngredients)
+            {
+                var item = await _repoGlueIngredient.FindAll().FirstOrDefaultAsync(x => x.GlueID == glueIngredient.GlueID && x.IngredientID == glueIngredient.IngredientID);
+                if (item == null)
+                {
+                    _repoGlueIngredient.Add(glueIngredient);
+                    try
+                    {
+                     await _repoGlueIngredient.SaveAll();
+                        flag = true;
+                    }
+                    catch 
+                    {
+                        flag = false;
+                    }
+                }
+                else
+                {
+                    item.Percentage = glueIngredient.Percentage;
+                    item.Allow = glueIngredient.Allow;
+                    item.Position = glueIngredient.Position;
+                    try
+                    {
+                        await _repoGlueIngredient.SaveAll();
+                        flag = true;
+                    }
+                    catch
+                    {
+                        flag = false;
+                    }
+                }
+            }
+            return flag;
+        }
     }
 }

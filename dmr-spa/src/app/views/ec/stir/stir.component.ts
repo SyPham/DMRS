@@ -20,6 +20,8 @@ declare const $: any;
   ]
 })
 export class StirComponent implements OnInit {
+  public ADMIN = 1;
+  public SUPERVISOR = 2;
   STIRRED = 1;
   NOT_STIRRED_YET = 0;
   NA = 2;
@@ -34,7 +36,8 @@ export class StirComponent implements OnInit {
   public interval = 1;
   public customFormat = 'HH:mm:ss a';
   public ingredients: any = [];
-  public building = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
+  public role = JSON.parse(localStorage.getItem('level'));
   timeStir = 0 ;
   glueID: number;
   settingID: number ;
@@ -193,7 +196,9 @@ export class StirComponent implements OnInit {
       this.loadStir();
     });
   }
-
+  dataBound() {
+    this.grid.autoFitColumns();
+  }
   updateStir() {
     const model = {
       id: this.stir.stirID,
@@ -214,11 +219,12 @@ export class StirComponent implements OnInit {
   }
 
   getAllSetting() {
-    let level = this.building.level;
-    if ([1, 2, 3, 4, 5].includes(level)) {
-      level = 8;
+    let buildingId = this.building.level;
+    const roles = [this.ADMIN, this.SUPERVISOR];
+    if (roles.includes(this.role.id)) {
+      buildingId = 8;
     }
-    this.settingService.getSettingByBuilding(level).subscribe((res) => {
+    this.settingService.getSettingByBuilding(buildingId).subscribe((res) => {
     this.settingData = res ;
     });
   }

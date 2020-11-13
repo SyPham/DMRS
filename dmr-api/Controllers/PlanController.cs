@@ -114,6 +114,7 @@ namespace DMR_API.Controllers
                 return NoContent();
             throw new Exception("Error deleting the model no");
         }
+        [AllowAnonymous]
         [HttpGet("{buildingID}")]
         public async Task<IActionResult> Summary(int buildingID)
         {
@@ -141,10 +142,10 @@ namespace DMR_API.Controllers
         {
             return Ok(await _planService.DispatchGlue(create));
         }
-        [HttpGet("{min}/{max}")]
-        public async Task<IActionResult> Search(DateTime min, DateTime max)
+        [HttpGet("{building}/{min}/{max}")]
+        public async Task<IActionResult> Search(int building, DateTime min, DateTime max)
         {
-            var lists = await _planService.GetAllPlanByRange(min, max);
+            var lists = await _planService.GetAllPlanByRange(building, min, max);
             return Ok(lists);
         }
         

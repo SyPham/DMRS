@@ -12,7 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { QRCodeGenerator, DisplayTextModel } from '@syncfusion/ej2-angular-barcode-generator';
 import { ExcelExportProperties, Column, ColumnModel, GridComponent, RowDataBoundEventArgs, RowDDService } from '@syncfusion/ej2-angular-grids';
 import { DatePipe } from '@angular/common';
-
+import { DataManager } from '@syncfusion/ej2-data';
 declare let $: any;
 const CURRENT_DATE = new Date();
 @Component({
@@ -25,6 +25,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   editSettings = { showDeleteConfirmDialog: false, allowEditing: true, mode: 'Normal' };
   pageSettings = { pageCount: 20, pageSizes: true, currentPage: 1, pageSize: 20 };
   data: any;
+  @ViewChild('importModal') importModal: NgbModalRef;
   destData: object[] = [];
   modalReference: NgbModalRef;
   excelDownloadUrl: string;
@@ -109,7 +110,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   ) { }
   ngOnInit() {
     this.filterSettings = { type: 'Excel' };
-    this.toolbarOptions = ['ExcelExport', 'Search'];
+    this.toolbarOptions = ['Search', 'Add ', 'Import Excel', 'Print QR Code', 'Excel Export'];
     this.excelDownloadUrl = `${environment.apiUrlEC}Ingredient/ExcelExport`;
     this.ingredientService.currentIngredient.subscribe(res => {
       if (res === 300) {
@@ -206,56 +207,82 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   toolbarClick(args): void {
     switch (args.item.text) {
       case 'Excel Export':
-        const data = this.data.map(item => {
-          return {
-            supplier: item.supplier,
-            name: item.name,
-            unit: item.unit,
-            code: item.code
+        let pdfdata;
+        const query = this.ingredientGrid.renderModule.data.generateQuery(); // get grid corresponding query
+        for (let i = 0; i < query.queries.length; i++) {
+          if (query.queries[i].fn === 'onPage') {
+            query.queries.splice(i, 1);       // remove page query to get all records
+            break;
+          }
+        }
+        const fdata = new DataManager({ json: this.data }).executeQuery(query).then((e: any) => {
+          pdfdata = e.result as object[];  // get all filtered records
+          const exportProperties = {
+            dataSource: pdfdata,
           };
-        });
-        const supplierModel: ColumnModel =
-        {
-          field: 'supplier',
-          headerText: 'Supplier',
-          textAlign: 'Center',
-          autoFit: true,
-          width: 120,
-        };
-        const nameModel: ColumnModel =
-        {
-          field: 'name',
-          headerText: 'Ingredient',
-          textAlign: 'Center',
-          autoFit: true,
-          width: 120,
-        };
-        const unitModel: ColumnModel =
-        {
-          field: 'unit',
-          headerText: 'Unit',
-          textAlign: 'Center',
-          autoFit: true,
-          width: 80,
-        };
-        const qrCoderModel: ColumnModel = {
-          field: 'code',
-          headerText: 'Code',
-          textAlign: 'Center',
-          autoFit: true,
-          width: 200,
-        };
-        const excelExportProperties: ExcelExportProperties = {
-          dataSource: data,
-          columns: [
-            new Column(supplierModel),
-            new Column(nameModel),
-            new Column(unitModel),
-            new Column(qrCoderModel)
-          ],
-        };
-        this.ingredientGrid.excelExport(excelExportProperties);
+          const data = pdfdata.map(item => {
+            return {
+              supplier: item.supplier,
+              name: item.name,
+              unit: item.unit,
+              code: item.materialNO,
+              daysToExpiration: item.daysToExpiration
+            };
+          });
+          const supplierModel: ColumnModel =
+          {
+            field: 'supplier',
+            headerText: 'Supplier',
+            textAlign: 'Center',
+            autoFit: true,
+            width: 120,
+          };
+          const nameModel: ColumnModel =
+          {
+            field: 'name',
+            headerText: 'Ingredient',
+            textAlign: 'Center',
+            autoFit: true,
+            width: 120,
+          };
+          const unitModel: ColumnModel =
+          {
+            field: 'unit',
+            headerText: 'Unit',
+            textAlign: 'Center',
+            autoFit: true,
+            width: 80,
+          };
+          const qrCoderModel: ColumnModel = {
+            field: 'code',
+            headerText: 'Code',
+            textAlign: 'Center',
+            autoFit: true,
+            width: 200,
+          };
+          const daysToExpirationModel: ColumnModel = {
+            field: 'daysToExpiration',
+            headerText: 'Expired After',
+            textAlign: 'Center',
+            autoFit: true,
+            width: 200,
+          };
+          const excelExportProperties: ExcelExportProperties = {
+            dataSource: data,
+            columns: [
+              new Column(supplierModel),
+              new Column(nameModel),
+              new Column(unitModel),
+              new Column(qrCoderModel),
+              new Column(daysToExpirationModel)
+            ],
+          };
+          this.ingredientGrid.excelExport(excelExportProperties);
+        }).catch((e) => true);
         break;
+      case 'Add ': this.openIngredientModalComponent(); break;
+      case 'Import Excel': this.showModal(); break;
+      case 'Print QR Code': this.printBarcode(); break;
       default:
         break;
     }
@@ -376,7 +403,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
           <div class='info'>
           <ul>
             <li class='subInfo'>Name: ${item.name}</li>
-              <li class='subInfo'>QR Code: ${item.productionDate}-${item.batch}-${item.code}</li>
+              <li class='subInfo'>QR Code: ${this.datePipe.transform(item.productionDate, 'yyyyMMdd')}-${item.batch}-${item.code}</li>
               <li class='subInfo'>MFG: ${this.datePipe.transform(item.productionDate, 'yyyyMMdd')}</li>
               <li class='subInfo'>EXP: ${item.exp}</li>
           </ul>
@@ -497,7 +524,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
         this.dataPrint = res.map((item: any) => {
           return {
             id: item.id,
-            code: item.code,
+            code: item.materialNO,
             name: item.name,
             supplier: item.supplier,
             supplierID: item.supplierID,
@@ -506,7 +533,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
             expiredTime: item.expiredTime,
             daysToExpiration: item.daysToExpiration,
             productionDate: new Date(),
-            qrCode: `${this.datePipe.transform(new Date(), 'yyyyMMdd')}-DEFAULT-${item.code}`,
+            qrCode: `${this.datePipe.transform(new Date(), 'yyyyMMdd')}-DEFAULT-${item.materialNO}`,
             exp: this.datePipe.transform(new Date(new Date().setDate(new Date().getDate() + item.daysToExpiration)), 'yyyyMMdd')
           };
         });
@@ -592,10 +619,13 @@ export class IngredientComponent implements OnInit, AfterViewInit {
       .subscribe((res: any) => {
         this.getAll();
         this.alertify.success('The excel has been imported into system!');
+        this.modalService.dismissAll();
+      }, error => {
+          this.alertify.error(error, true);
       });
   }
-  showModal(name) {
-    this.modalReference = this.modalService.open(name, { size: 'xl' });
+  showModal() {
+    this.modalReference = this.modalService.open(this.importModal, { size: 'xl' });
   }
   NO(index) {
     return (this.ingredientGrid.pageSettings.currentPage - 1) * this.ingredientGrid.pageSettings.pageSize + Number(index) + 1;

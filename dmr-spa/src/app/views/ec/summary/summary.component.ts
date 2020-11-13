@@ -19,8 +19,9 @@ import { AuthService } from 'src/app/_core/_service/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { MakeGlueService } from 'src/app/_core/_service/make-glue.service';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
-
+import { DropDownListComponent, FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
+import { EmitType } from '@syncfusion/ej2-base/';
+import { Query } from '@syncfusion/ej2-data/';
 import { DisplayTextModel } from '@syncfusion/ej2-angular-barcode-generator';
 import { IngredientService } from 'src/app/_core/_service/ingredient.service';
 import { Router } from '@angular/router';
@@ -28,11 +29,13 @@ import { NgxSpinnerService } from 'ngx-spinner';
 
 import { AbnormalService } from 'src/app/_core/_service/abnormal.service.js';
 import { TooltipComponent, Position } from '@syncfusion/ej2-angular-popups';
-import { RoleService } from 'src/app/_core/_service/role.service';
 import { BuildingService } from 'src/app/_core/_service/building.service';
-
+import { IBuilding } from 'src/app/_core/_model/building';
+import { SettingService } from 'src/app/_core/_service/setting.service';
+const UNIT_BIG_MACHINE = 'k';
+const UNIT_SMALL_MACHINE = 'g';
+const BUILDING_LEVEL = 2;
 declare var $: any;
-declare var Swal: any;
 @Component({
   selector: 'app-summary',
   templateUrl: './summary.component.html',
@@ -40,6 +43,9 @@ declare var Swal: any;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryComponent implements OnInit, AfterViewInit {
+  public ADMIN = 1;
+  public SUPERVISOR = 2;
+  public IsAdmin = false;
   @ViewChild('fullScreen') divRef;
   @ViewChildren('tooltip') tooltip: QueryList<any>;
   @ViewChild('tooltip') public control: TooltipComponent;
@@ -64,7 +70,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   public glueID: number;
   public glueName: number;
   public quantity: string;
-  public level = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
+  public role = JSON.parse(localStorage.getItem('level'));
   public A: any;
   public B: any;
   public C: any;
@@ -113,6 +120,10 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   dataSignal: any;
   unit: string;
   ingredientsTamp: [];
+  public fieldsBuildings: object = { text: 'name', value: 'id' };
+  buildings: IBuilding[];
+  buildingName: any;
+  scalingSetting: any;
   @HostListener('window:keyup.alt.enter', ['$event']) enter(e: KeyboardEvent) {
     if (!this.disabled) {
       this.Finish();
@@ -132,7 +143,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
   constructor(
     private planService: PlanService,
-    private authService: AuthService,
+    private settingService: SettingService,
     private dataService: DataService,
     private buildingService: BuildingService,
     public modalService: NgbModal,
@@ -149,7 +160,6 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   public ngOnInit(): void {
     // deactivate the change detection for this component and its children
     this.cdr.detach();
-
     // interval for doing the change detection every 5 seconds
     setInterval(() => {
       this.cdr.detectChanges();
@@ -166,10 +176,10 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     this.showQRCode = false;
     this.disabled = true;
     this.qrCode = '';
-    this.getBuilding();
     this.existGlue = true;
     this.hasWarning = false;
     this.connection = signalr.CONNECTION_HUB;
+    this.checkRole();
     if (signalr.CONNECTION_HUB.state === 'Connected') {
       signalr.CONNECTION_HUB.on('summaryRecieve', (status) => {
         if (status === 'ok') {
@@ -178,7 +188,11 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       });
     }
   }
-
+  private getScalingSetting() {
+    this.settingService.getMachineByBuilding(this.buildingID).subscribe((data: any) => {
+      this.scalingSetting = data.map(item => item.machineID);
+    });
+  }
   public ngAfterViewInit(): void {
     this.screenHeight = window.innerHeight;
 
@@ -186,6 +200,23 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       placement: 'right',
       trigger: 'focus',
     });
+  }
+  public onFilteringBuilding: EmitType<FilteringEventArgs> = (
+    e: FilteringEventArgs
+  ) => {
+    let query: Query = new Query();
+    // frame the query based on search string with filter type.
+    query =
+      e.text !== '' ? query.where('name', 'contains', e.text, true) : query;
+    // pass the filter data source, filter query to updateData method.
+    e.updateData(this.buildings as any, query);
+  }
+  onChangeBuilding(args) {
+    this.buildingID = args.itemData.id;
+    this.buildingName = args.itemData.name;
+    localStorage.setItem('buildingID', args.itemData.id );
+    this.getScalingSetting();
+    this.summary();
   }
   actionBegin(args) {
     if (args.requestType === 'delete') {
@@ -206,7 +237,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
             this.modalReference.close();
             this.summary();
           }
-      });
+        });
       }
     }
   }
@@ -361,10 +392,9 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
   // api
   hasLock(ingredient, building, batch): Promise<any> {
-    const levels = [1, 2, 3, 4];
     let buildingName = building;
-    if (levels.includes(this.level.level)) {
-      buildingName = 'E';
+    if (this.IsAdmin) {
+      buildingName = this.buildingName;
     }
     return new Promise((resolve, reject) => {
       this.abnormalService.hasLock(ingredient, buildingName, batch).subscribe(
@@ -379,10 +409,9 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   checkIncoming(ingredient, building, batch): Promise<any> {
-    const levels = [1, 2, 3, 4];
     let buildingName = building;
-    if (levels.includes(this.level.level)) {
-      buildingName = 'E';
+    if (this.IsAdmin) {
+      buildingName = this.buildingName;
     }
     return new Promise((resolve, reject) => {
       this.ingredientService
@@ -414,45 +443,34 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
     return res;
   }
-
-  getBuilding() {
-    // tslint:disable-next-line:one-variable-per-declaration
-    const ADMIN = 1, SUPERVISER = 2;
-    const ROLES = [ADMIN, SUPERVISER];
-    const building = JSON.parse(localStorage.getItem('building'));
-    const role = JSON.parse(localStorage.getItem('level')).id;
-    if (ROLES.includes(role)) {
-      this.buildingService.getBuildings().subscribe(async (buildingData) => {
-        const buildings = buildingData.filter(item => item.level === 2);
-        const inputOptions = {};
-        buildings.map(item => {
-          const id = item.id;
-          inputOptions[id] = item.name;
-          return { id: item.id, name: item.name };
-        });
-        this.sweetalertSelect(inputOptions).then(buildingID => {
-          this.buildingID = buildingID;
-          this.summary();
-        }).catch(err => this.alertify.error(err));
-      });
+  private checkRole(): void {
+    const roles = [this.ADMIN, this.SUPERVISOR];
+    if (roles.includes(this.role.id)) {
+      this.IsAdmin = true;
+      this.getBuilding();
+      const buildingId = +localStorage.getItem('buildingID');
+      if (buildingId === 0) {
+        this.alertify.message('Please select a building!', true);
+      } else {
+        this.buildingID = buildingId;
+      }
     } else {
-      const userID = JSON.parse(localStorage.getItem('user')).User.ID;
-      this.authService.getBuildingByUserID(userID).subscribe((res: any) => {
-        res = res || {};
-        if (res !== {}) {
-          this.buildingID = res.id;
-          this.summary();
-        }
-      });
+      this.buildingID = this.building.id;
+      this.getScalingSetting();
+      this.summary();
     }
   }
-
+  private getBuilding(): void {
+    this.buildingService.getBuildings().subscribe(async (buildingData) => {
+      this.buildings = buildingData.filter(item => item.level === BUILDING_LEVEL);
+    });
+  }
   // make glue
   findIngredientRealByPosition(position) {
     let real = 0;
     for (const item of this.ingredients) {
       if (item.position === position) {
-        if (item.unit === 'k') {
+        if (item.unit === UNIT_BIG_MACHINE) {
           real = item.real;
         } else {
           real = (item.real) / 1000;
@@ -475,13 +493,12 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   Finish() {
-    const date = new Date();
-    const levels = [1, 2, 3, 4];
-    const building = JSON.parse(localStorage.getItem('level'));
-    let buildingID = building.id;
-    if (levels.includes(building.level)) {
-      buildingID = 8;
+    if (this.IsAdmin) {
+      this.alertify.warning(`Only the workers are able to press "Finished" button!<br> Chỉ có công nhân mới được nhấn "Hoàn Thành!"`, true);
+      return;
     }
+    const date = new Date();
+    const buildingID = this.building.id;
     this.guidances = {
       id: 0,
       glueID: this.glueID,
@@ -500,16 +517,15 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       mixBy: JSON.parse(localStorage.getItem('user')).User.ID,
       buildingID,
     };
+    signalr.SCALING_CONNECTION_HUB.on('Welcom');
     if (this.guidances) {
       this.makeGlueService.Guidance(this.guidances).subscribe((glue: any) => {
         this.alertify.success('The Glue has been finished successfully');
         this.showQRCode = true;
-        this.show = true;
         this.code = glue.code;
-        signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        this.back();
         this.summary();
       });
-      this.dataService.setValue(false);
     }
   }
 
@@ -531,6 +547,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
             id: item.id,
             scanStatus: item.position === 'A',
             code: item.code,
+            materialNO: item.materialNO,
             scanCode: '',
             name: item.name,
             percentage: item.percentage,
@@ -562,6 +579,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
             scanStatus: item.position === 'A',
             code: item.code,
             scanCode: '',
+            materialNO: item.materialNO,
             name: item.name,
             percentage: item.percentage,
             position: item.position,
@@ -580,82 +598,56 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   signal() {
-    this.dataService.getValue().subscribe((show) => {
-      if (this.show) {
-        if (signalr.SCALING_CONNECTION_HUB.state === 'Connected') {
-          signalr.SCALING_CONNECTION_HUB.on(
-            'Welcom',
-            (scalingMachineID, message, unit) => {
-              if (scalingMachineID === this.scalingKG) {
-                this.volume = parseFloat(message);
-                this.unit = unit;
-                /// update real A sau do show real B, tinh lai expected
-                switch (this.position) {
-                  case 'A':
-                    this.volumeA = this.volume;
-                    break;
-                  case 'B':
-                    if (scalingMachineID === '2') {
-                      this.volumeB = this.volume;
-                      this.changeActualByPosition('A', this.volumeB, unit);
-                      this.checkValidPosition(this.ingredientsTamp, this.volumeB);
-                    } else {
-                      this.changeActualByPosition('A', this.volumeB, unit);
-                      this.checkValidPosition(this.ingredientsTamp, this.volumeB);
-                    }
-                    break;
-                  case 'C':
-                    this.volumeC = this.volume;
-                    this.changeActualByPosition('B', this.volumeC, unit);
-                    this.checkValidPosition(this.ingredientsTamp, this.volumeC);
-                    break;
-                  case 'D':
-                    this.volumeD = this.volume;
-                    this.changeActualByPosition('C', this.volumeD, unit);
-                    this.checkValidPosition(this.ingredientsTamp, this.volumeD);
-                    break;
-                  case 'E':
-                    this.volumeE = this.volume;
-                    this.changeActualByPosition('D', this.volumeE, unit);
-                    this.checkValidPosition(this.ingredientsTamp, this.volumeE);
-                    break;
-                  case 'H':
-                    this.volumeH = this.volume;
-                    this.changeActualByPosition('E', this.volumeH, unit);
-                    this.checkValidPosition(this.ingredientsTamp, this.volumeH);
-                    break;
-                }
+    if (signalr.SCALING_CONNECTION_HUB.state === 'Connected') {
+      signalr.SCALING_CONNECTION_HUB.on(
+        'Welcom',
+        (scalingMachineID, message, unit) => {
+          if (this.scalingSetting.includes(+scalingMachineID)) {
+            if (unit === this.scalingKG) {
+              this.volume = parseFloat(message);
+              this.unit = unit;
+              // console.log('Unit', unit);
+              /// update real A sau do show real B, tinh lai expected
+              switch (this.position) {
+                case 'A':
+                  this.volumeA = this.volume;
+                  break;
+                case 'B':
+                  if (unit === UNIT_BIG_MACHINE) {
+                    this.volumeB = this.volume;
+                    this.changeActualByPosition('A', this.volumeB, unit);
+                    this.checkValidPosition(this.ingredientsTamp, this.volumeB);
+                  } else {
+                    this.changeActualByPosition('A', this.volumeB, unit);
+                    this.checkValidPosition(this.ingredientsTamp, this.volumeB);
+                  }
+                  break;
+                case 'C':
+                  this.volumeC = this.volume;
+                  this.changeActualByPosition('B', this.volumeC, unit);
+                  this.checkValidPosition(this.ingredientsTamp, this.volumeC);
+                  break;
+                case 'D':
+                  this.volumeD = this.volume;
+                  this.changeActualByPosition('C', this.volumeD, unit);
+                  this.checkValidPosition(this.ingredientsTamp, this.volumeD);
+                  break;
+                case 'E':
+                  this.volumeE = this.volume;
+                  this.changeActualByPosition('D', this.volumeE, unit);
+                  this.checkValidPosition(this.ingredientsTamp, this.volumeE);
+                  break;
+                case 'H':
+                  this.volumeH = this.volume;
+                  this.changeActualByPosition('E', this.volumeH, unit);
+                  this.checkValidPosition(this.ingredientsTamp, this.volumeH);
+                  break;
               }
-              // else{
-              //   switch (this.position) {
-              //     case "B":
-              //       this.volumeB = this.volume ;
-              //       this.changeActualByPosition("A",  this.volumeA);
-              //       this.checkValidPosition(this.ingredientsTamp, this.volumeB);
-
-              //       break;
-              //     case "C":
-              //       this.volumeC = this.volume ;
-              //       this.changeActualByPosition("B",  this.volumeC);
-              //       this.checkValidPosition(this.ingredientsTamp, this.volumeC);
-              //       break;
-              //     case "D":
-              //       this.volumeD = this.volume ;
-              //       this.changeActualByPosition("C",  this.volumeD);
-              //       this.checkValidPosition(this.ingredientsTamp, this.volumeD);
-              //       break;
-              //     case "E":
-              //       this.volumeE = this.volume ;
-              //       this.changeActualByPosition("D", this. volumeE);
-              //       this.checkValidPosition(this.ingredientsTamp, this.volumeE);
-              //       break;
-              //   }
-              // }
             }
-          );
+          }
         }
-      }
-    });
+      );
+    }
   }
 
   scanQRCode(): Promise<any> {
@@ -722,9 +714,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onFocusScanQRCode(args, item) {
-    // this.signal();
-  }
+  onFocusScanQRCode(args, item) { }
 
   // khi scan qr-code
   async onNgModelChangeScanQRCode(args, item) {
@@ -735,7 +725,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       try {
         this.qrCode = input[2];
         const result = await this.scanQRCode();
-        if (this.qrCode !== item.code) {
+        if (this.qrCode !== item.materialNO) {
           this.alertify.warning(`Please you should look for the chemical name "${item.name}"`);
           this.qrCode = '';
           this.errorScan();
@@ -751,7 +741,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
         const checkLock = await this.hasLock(
           item.name,
-          this.level.name,
+          this.building.name,
           input[1]
         );
         if (checkLock === true) {
@@ -779,10 +769,6 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         }
         // chuyển vị trí quét khi scan
         switch (this.position) {
-          // case "A":
-          //   this.changeScanStatusByPosition("B", true);
-          //   break;
-
           case 'B':
             this.changeScanStatusByPosition('C', true);
             break;
@@ -815,10 +801,16 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   showArrow(item): boolean {
-    if (item.scanStatus === false && item.focusExpected === false) {
-      return false;
+    if (item.position === 'A' && item.scanStatus === true) {
+      return true;
     }
-    return true;
+    if (item.position === 'A' && item.scanStatus === false && item.focusExpected === true) {
+      return true;
+    }
+    if (item.position !== 'A' && item.scanStatus === true) {
+      return true;
+    }
+    return false;
   }
 
   mixingSection(data) {
@@ -826,7 +818,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     this.glueID = data.glueID;
     this.glue = data;
     this.scanStatus = true;
-    this.scalingKG = '2';
+    // Nhan pha keo thi gan mac dinh la can to
+    this.scalingKG = UNIT_BIG_MACHINE;
     this.getGlueWithIngredientByGlueID(this.glueID);
   }
 
@@ -839,7 +832,6 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     if (args.keyCode === 13) {
       if (item.position === 'A') {
         this.changeExpected('A', args.target.value);
-        // this.checkValidPosition(item, this.volumeA);
         switch (item.position) {
           case 'A':
             this.changeScanStatusByPosition('B', true);
@@ -865,6 +857,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         id: item.id,
         scanStatus: true,
         code: item.code,
+        materialNO: item.materialNO,
         name: item.name,
         percentage: item.percentage,
         position: item.position,
@@ -877,7 +870,6 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       };
     });
   }
-
   changeExpectedRange(args, position) {
     const positionArray = ['A', 'B', 'C', 'D', 'E'];
     if (positionArray.includes(position)) {
@@ -903,26 +895,20 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       const max = expected + allow;
       const minRange = this.toFixedIfNecessary(min / 1000, 3);
       const maxRange = this.toFixedIfNecessary(max / 1000, 3);
-      let expectedRange =
+      const expectedRange =
         maxRange > 3
           ? `${minRange}kg - ${maxRange}kg`
-          : ` ${this.toFixedIfNecessary(min, 1)}g - ${this.toFixedIfNecessary(
-            max,
-            1
-          )}g `;
+          : ` ${this.toFixedIfNecessary(min, 1)}g - ${this.toFixedIfNecessary(max, 1)}g `;
       if (allow === 0) {
         const kgValue = this.toFixedIfNecessary(expected / 1000, 3);
-        expectedRange =
-          kgValue > 3
-            ? `${kgValue}kg`
-            : ` ${this.toFixedIfNecessary(kgValue, 1)}g`;
+        // tslint:disable-next-line:no-shadowed-variable
+        const expectedRange = kgValue > 3 ? `${kgValue}kg` : ` ${this.toFixedIfNecessary(kgValue * 1000, 1)}g`;
         this.changeExpected(position, expectedRange);
       } else {
         this.changeExpected(position, expectedRange);
       }
     }
   }
-
   checkValidPosition(ingredient, args) {
     let min;
     let max;
@@ -932,7 +918,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
     if (ingredient.allow === 0) {
       const unit = ingredient.expected.replace(/[0-9|.]+/g, '').trim();
-      if (unit === 'kg') {
+      if (unit === UNIT_BIG_MACHINE) {
         min = parseFloat(ingredient.expected);
         max = parseFloat(ingredient.expected);
       } else {
@@ -944,7 +930,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     } else {
       const exp2 = ingredient.expected.split('-');
       const unit = exp2[0].replace(/[0-9|.]+/g, '').trim();
-      if (unit === 'kg') {
+      if (unit === UNIT_BIG_MACHINE) {
         min = parseFloat(exp2[0]);
         max = parseFloat(exp2[1]);
       } else {
@@ -972,7 +958,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     // Nếu Chemical là B, focus vào chemical C
     if (ingredient.position === 'B') {
       if (max > 3) {
-        this.scalingKG = '2';
+        this.scalingKG = UNIT_BIG_MACHINE;
         if (currentValue <= max && currentValue >= min) {
           this.changeScanStatusFocus('B', false);
           this.changeScanStatusFocus('C', true);
@@ -988,7 +974,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
           // this.alertify.warning(`Invalid!`, true);
         }
       } else {
-        this.scalingKG = '1';
+        this.scalingKG = UNIT_SMALL_MACHINE;
         if (currentValue <= maxG && currentValue >= minG) {
           this.changeScanStatusFocus('B', false);
           this.changeScanStatusFocus('C', true);
@@ -1009,7 +995,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     // Nếu Chemical là C, focus vào chemical D
     if (ingredient.position === 'C') {
       if (max > 3) {
-        this.scalingKG = '2';
+        this.scalingKG = UNIT_BIG_MACHINE;
         if (currentValue <= max && currentValue >= min) {
           this.changeScanStatusFocus('C', false);
           this.changeScanStatusFocus('D', true);
@@ -1025,7 +1011,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
           // this.alertify.warning(`Invalid!`, true);
         }
       } else {
-        this.scalingKG = '1';
+        this.scalingKG = UNIT_SMALL_MACHINE;
         if (currentValue <= maxG && currentValue >= minG) {
           this.changeScanStatusFocus('C', false);
           this.changeScanStatusFocus('D', true);
@@ -1046,7 +1032,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     // Nếu Chemical là D, focus vào chemical E
     if (ingredient.position === 'D') {
       if (max > 3) {
-        this.scalingKG = '2';
+        this.scalingKG = UNIT_BIG_MACHINE;
         if (currentValue <= max && currentValue >= min) {
           this.changeScanStatusFocus('D', false);
           this.changeScanStatusFocus('E', true);
@@ -1062,7 +1048,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
           // this.alertify.warning(`Invalid!`, true);
         }
       } else {
-        this.scalingKG = '1';
+        this.scalingKG = UNIT_SMALL_MACHINE;
         if (currentValue <= maxG && currentValue >= minG) {
           this.changeScanStatusFocus('D', false);
           this.changeScanStatusFocus('E', true);
@@ -1082,7 +1068,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
     if (ingredient.position === 'E') {
       if (max > 3) {
-        this.scalingKG = '2';
+        this.scalingKG = UNIT_BIG_MACHINE;
         if (currentValue <= max && currentValue >= min) {
           this.changeScanStatusFocus('D', false);
           this.changeScanStatusFocus('E', true);
@@ -1098,7 +1084,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
           // this.alertify.warning(`Invalid!`, true);
         }
       } else {
-        this.scalingKG = '1';
+        this.scalingKG = UNIT_SMALL_MACHINE;
         if (currentValue <= maxG && currentValue >= minG) {
           this.changeScanStatusFocus('D', false);
           this.changeScanStatusFocus('E', true);
@@ -1115,27 +1101,269 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         }
       }
     }
-
+    // console.log('change real', this.ingredients);
     this.changeReal(ingredient.code, args);
   }
+  onDblClicked(ingredient, args) {
+    this.ingredients.forEach( (part, index, theArray) => {
+      this.ingredients[index].scanStatus = false;
+    });
+    ingredient.focusReal = true;
+    signalr.SCALING_CONNECTION_HUB.off('Welcom');
+  }
+  checkValidPositionForRealEvent(ingredient, args) {
+    let min;
+    let max;
+    let minG;
+    let maxG;
+    const currentValue = parseFloat(args.target.value);
 
-  onKeyupReal(item, args) {
-    if (args.keyCode === 13) {
-      this.checkValidPosition(item, args);
-      const levels = [1, 2, 3, 4];
-      const building = JSON.parse(localStorage.getItem('level'));
-      let buildingName = building.name;
-      if (levels.includes(building.level)) {
-        buildingName = 'E';
+    if (ingredient.allow === 0) {
+      const unit = ingredient.expected.replace(/[0-9|.]+/g, '').trim();
+      if (unit === UNIT_BIG_MACHINE) {
+        min = parseFloat(ingredient.expected);
+        max = parseFloat(ingredient.expected);
+        for (const key in this.ingredients) {
+          if (this.ingredients[key].id === ingredient.id) {
+            this.ingredients[key].valid = currentValue !== max;
+            this.ingredients[key].real = currentValue;
+            break;
+          }
+        }
+      } else {
+        minG = parseFloat(ingredient.expected);
+        maxG = parseFloat(ingredient.expected);
+        min = parseFloat(ingredient.expected) / 1000;
+        max = parseFloat(ingredient.expected) / 1000;
+        for (const key in this.ingredients) {
+          if (this.ingredients[key].id === ingredient.id) {
+            this.ingredients[key].valid = currentValue <= minG || currentValue >= maxG;
+            this.ingredients[key].real = currentValue;
+            break;
+          }
+        }
       }
+    } else {
+      const exp2 = ingredient.expected.split('-');
+      const unit = exp2[0].replace(/[0-9|.]+/g, '').trim();
+      if (unit === UNIT_BIG_MACHINE) {
+        min = parseFloat(exp2[0]);
+        max = parseFloat(exp2[1]);
+        for (const key in this.ingredients) {
+          if (this.ingredients[key].id === ingredient.id) {
+            this.ingredients[key].valid = currentValue !== max;
+            this.ingredients[key].real = currentValue;
+            break;
+          }
+        }
+      } else {
+        minG = parseFloat(exp2[0]);
+        maxG = parseFloat(exp2[1]);
+        min = parseFloat(exp2[0]) / 1000;
+        max = parseFloat(exp2[1]) / 1000;
+        for (const key in this.ingredients) {
+          if (this.ingredients[key].id === ingredient.id) {
+            this.ingredients[key].valid = currentValue <= minG || currentValue >= maxG;
+            this.ingredients[key].real = currentValue;
+            break;
+          }
+        }
+      }
+    }
+    // Nếu Chemical là A, focus vào chemical B
+    if (ingredient.position === 'A') {
+      const positionArray = ['B', 'C', 'D', 'E'];
+      for (const position of positionArray) {
+        this.changeExpectedRange(args, position);
+      }
+      this.changeScanStatusFocus('A', false);
+      this.changeScanStatusFocus('B', true);
+      this.changeFocusStatus(ingredient.code, false, false);
+      if (this.ingredients.length === 1) {
+        this.disabled = false;
+      } else {
+        signalr.SCALING_CONNECTION_HUB.on('Welcom');
+      }
+    }
+
+    // Nếu Chemical là B, focus vào chemical C
+    if (ingredient.position === 'B') {
+      if (max > 3) {
+        this.scalingKG = UNIT_BIG_MACHINE;
+        if (currentValue <= max && currentValue >= min) {
+          this.changeScanStatusFocus('B', false);
+          this.changeScanStatusFocus('C', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length === 2) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      } else {
+        this.scalingKG = UNIT_SMALL_MACHINE;
+        if (currentValue <= maxG && currentValue >= minG) {
+          this.changeScanStatusFocus('B', false);
+          this.changeScanStatusFocus('C', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length === 2) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      }
+    }
+
+    // Nếu Chemical là C, focus vào chemical D
+    if (ingredient.position === 'C') {
+      if (max > 3) {
+        this.scalingKG = UNIT_BIG_MACHINE;
+        if (currentValue <= max && currentValue >= min) {
+          this.changeScanStatusFocus('C', false);
+          this.changeScanStatusFocus('D', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length === 3) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      } else {
+        this.scalingKG = UNIT_SMALL_MACHINE;
+        if (currentValue <= maxG && currentValue >= minG) {
+          this.changeScanStatusFocus('C', false);
+          this.changeScanStatusFocus('D', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length === 3) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      }
+    }
+
+    // Nếu Chemical là D, focus vào chemical E
+    if (ingredient.position === 'D') {
+      if (max > 3) {
+        this.scalingKG = UNIT_BIG_MACHINE;
+        if (currentValue <= max && currentValue >= min) {
+          this.changeScanStatusFocus('D', false);
+          this.changeScanStatusFocus('E', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length >= 4) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      } else {
+        this.scalingKG = UNIT_SMALL_MACHINE;
+        if (currentValue <= maxG && currentValue >= minG) {
+          this.changeScanStatusFocus('D', false);
+          this.changeScanStatusFocus('E', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length >= 4) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      }
+    }
+
+    if (ingredient.position === 'E') {
+      if (max > 3) {
+        this.scalingKG = UNIT_BIG_MACHINE;
+        if (currentValue <= max && currentValue >= min) {
+          this.changeScanStatusFocus('D', false);
+          this.changeScanStatusFocus('E', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length >= 4) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      } else {
+        this.scalingKG = UNIT_SMALL_MACHINE;
+        if (currentValue <= maxG && currentValue >= minG) {
+          this.changeScanStatusFocus('D', false);
+          this.changeScanStatusFocus('E', true);
+          this.changeValidStatus(ingredient.code, false);
+          this.changeFocusStatus(ingredient.code, false, false);
+          if (this.ingredients.length >= 4) {
+            this.disabled = false;
+          } else {
+            signalr.SCALING_CONNECTION_HUB.on('Welcom');
+          }
+        } else {
+          this.disabled = true;
+          this.changeFocusStatus(ingredient.code, false, false);
+          this.changeValidStatus(ingredient.code, true);
+          // this.alertify.warning(`Invalid!`, true);
+        }
+      }
+    }
+    // console.log('change real', this.ingredients);
+    // this.changeReal(ingredient.code, args);
+  }
+  onKeyupReal(ingredient, args) {
+    if (args.keyCode === 13) {
+      this.checkValidPositionForRealEvent(ingredient, args);
+      // this.checkValidPosition(item, args);
+      // const buildingName = this.building.name;
       // this.UpdateConsumption(item.code, item.batch, item.real);
-      const obj = {
-        qrCode: item.code,
-        batch: item.batch,
-        consump: item.real,
-        buildingName,
-      };
-      this.UpdateConsumptionWithBuilding(obj);
+      // const obj = {
+      //   qrCode: ingredient.code,
+      //   batch: ingredient.batch,
+      //   consump: ingredient.real,
+      //   buildingName,
+      // };
+      // this.UpdateConsumptionWithBuilding(obj);
     }
   }
 
@@ -1288,19 +1516,90 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       }
     }
   }
+  changeScanStatusByLength(length, item) {
+    switch (length) {
+      case 2:
+        signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        break;
+      case 3:
+        if (item.position === 'B') {
+          this.changeScanStatusByPosition('B', false);
+          this.changeScanStatusByPosition('C', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else {
+          this.changeScanStatusByPosition('B', false);
+          this.changeScanStatusByPosition('C', false);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        }
+        break; // Focus C
+      case 4:
+        if (item.position === 'B') {
+          this.changeScanStatusByPosition('B', false);
+          this.changeScanStatusByPosition('C', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else if (item.position === 'C') {
+          this.changeScanStatusByPosition('C', false);
+          this.changeScanStatusByPosition('D', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else {
+          this.changeScanStatusByPosition('C', false);
+          this.changeScanStatusByPosition('D', false);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        }
+        break; // Focus D
+      case 5:
+        if (item.position === 'B') {
+          this.changeScanStatusByPosition('B', false);
+          this.changeScanStatusByPosition('C', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else if (item.position === 'C') {
+          this.changeScanStatusByPosition('C', false);
+          this.changeScanStatusByPosition('D', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else if (item.position === 'D') {
+          this.changeScanStatusByPosition('D', false);
+          this.changeScanStatusByPosition('E', true);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        } else {
+          this.changeScanStatusByPosition('D', false);
+          this.changeScanStatusByPosition('E', false);
+          signalr.SCALING_CONNECTION_HUB.off('Welcom');
+        }
+        break; // Focus E
+    }
+  }
+  setActualByExpectedRange(i) {
+    const ingredient = this.ingredients[i];
+    if (ingredient.allow > 0) {
+      const expectedRange = this.ingredients[i].expected.split('-');
+      const min = parseFloat(expectedRange[0]);
+      const max = parseFloat(expectedRange[1]);
+      const actual = this.ingredients[i].real;
+      if (actual >= min && actual <= max) {
+        const length = this.ingredients.length ?? 0;
+        this.changeScanStatusByLength(length, ingredient);
+      }
+    } else {
+      const expected = this.ingredients[i].expected;
+      const actual = this.ingredients[i].real;
+      if (actual === expected) {
+        const length = this.ingredients.length ?? 0;
+        this.changeScanStatusByLength(length, ingredient);
+      }
+    }
+  }
 
   changeReal(code, real) {
     for (const i in this.ingredients) {
       if (this.ingredients[i].code === code) {
+        if (this.ingredients[i].position !== 'A') {
+          this.setActualByExpectedRange(i);
+        }
         this.ingredients[i].real = this.toFixedIfNecessary(real, 3);
         break; // Stop this loop, we found it!
       }
     }
   }
-
-  chartHovered($event) { }
-  chartClicked($event) { }
-
   back() {
     this.existGlue = true;
     this.show = false;
@@ -1312,7 +1611,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
 
     signalr.SCALING_CONNECTION_HUB.off('Welcom');
     this.dataService.setValue(false);
-    this.scalingKG = '2';
+    // Nhan quay lai thi reset ve can to
+    this.scalingKG = UNIT_BIG_MACHINE;
     this.ingredientsTamp = [];
     this.ingredients = [];
   }
@@ -1368,11 +1668,13 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   editDomain(data: any) {
-    if (data.consumption === 0) {
-      // this.alertify.warning(`This glue ${data.glueName} has not been mixed!!!`);
+    if (data.status === false) {
       this.alertify.warning(
-        `Chuyền ${data.line} không sử dụng keo này!<br>
-        The line ${data.line} doesn't use this glue.
+        `<ul style="list-style: decimal; color:red">
+            <li> Chuyền ${data.line} và ${data.modelName} không sử dụng keo ${data.glueName}!</li>
+            <li>Bởi vì trong "Kế Hoạch Làm Việc" không có gán keo ${data.glueName} cho chuyền ${data.line} và ${data.modelName}.</li>
+            <li> Nếu "Kế Hoạch Làm Việc" có sự thay đổi thì vui lòng cập nhật lại.</li>
+          </ul>
       `,
         true
       );
@@ -1381,7 +1683,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     if (data.maxReal === 0) {
       // this.alertify.warning(`This glue ${data.glueName} has not been mixed!!!`);
       this.alertify.warning(
-        `Keo ${data.glueName} chưa trộn mà!<br>
+        `Keo ${data.glueName} chưa trộn. Vui lòng hãy trộn keo trước khi giao!<br>
        This glue ${data.glueName} hasn't mixed yet.
       `,
         true
@@ -1408,14 +1710,18 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         );
         return;
       }
+      // if (data.deliveredTotal === data.maxReal) {
+      //   this.alertify.warning(`Đã giao hết keo.<br>`, true);
+      //   return;
+      // }
       const remainingGlue = this.toFixedIfNecessary(
-        data.maxReal - data.delivered,
+        data.maxReal - data.deliveredTotal,
         3
       );
       if (remainingGlue === 0) {
         this.alertify.warning(
           `
-        Keo ${data.glueName} đã giao hết ${data.delivered}kg rồi!!!
+        Keo ${data.glueName} đã giao hết ${data.deliveredTotal}kg rồi!!!
         `,
           true
         );
@@ -1424,7 +1730,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       if (qty > remainingGlue) {
         this.alertify.warning(
           `
-        Keo ${data.glueName} đã giao ${data.delivered}kg còn lại ${remainingGlue}kg. <br>
+        Keo ${data.glueName} đã giao ${data.deliveredTotal}kg còn lại ${remainingGlue}kg. <br>
         Nhập giá trị nhỏ hơn hoặc bằng ${remainingGlue}kg!!!
         `,
           true
