@@ -14,7 +14,22 @@ import { AvatarModalComponent } from './avatar-modal/avatar-modal.component';
 import { TranslateService } from '@ngx-translate/core';
 import { RoleService } from 'src/app/_core/_service/role.service';
 import { DataService } from 'src/app/_core/_service/data.service';
-import { setCulture, loadCldr, L10n } from '@syncfusion/ej2-base';
+import { setCulture, loadCldr, L10n, Ajax } from '@syncfusion/ej2-base';
+// setCulture('vi');
+// loadCldr(
+//   require('cldr-data/main/vi/ca-gregorian.json'),
+//   require('cldr-data/main/vi/numbers.json'),
+//   require('cldr-data/main/vi/timeZoneNames.json'),
+//   require('cldr-data/supplemental/numberingSystems.json')
+// );
+// L10n.load({
+//   vi: {
+//     grid: {
+//       Cancel: 'Huy',
+//     }
+//   },
+// });
+
 
 declare var require: any;
 @Component({

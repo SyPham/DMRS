@@ -2,17 +2,6 @@
 <div class="row pt-2" >
     <div class="col-md-12 ">
         <div class="card">
-            <!-- <div class="card-header">
-                <h5 class="card-title">
-                    {{'WORK_PLAN_LABEL' | translate}}
-                </h5>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-            </div> -->
-
            <div class="card-body table-responsive p-0">
                 <div class="row my-3" *ngIf="!hasWorker">
                     <div class="col-md-12">
@@ -52,6 +41,7 @@
                     [toolbar]='toolbarOptions'
                      (toolbarClick)='toolbarClick($event)'
                     [pageSettings]='pageSettings'
+                    (recordDoubleClick)='onDoubleClick($event)'
                     [editSettings]='editSettings'>
                     <e-columns>
                         <e-column type='checkbox' width='40'></e-column>
@@ -63,7 +53,7 @@
                                 <ejs-dropdownlist
                                     #buildingNameDropdownlist
                                     [dataSource]='buildingName'
-                                    [(ngModel)]="data.name"
+                                    [(ngModel)]="data.buildingName"
                                     popupHeight='200px' popupWidth='250px'
                                     [fields]='fieldsLine'
                                     [allowFiltering]='true'
@@ -115,9 +105,15 @@
                                 format='dd MMM, yyyy'></ejs-datepicker>
                             </ng-template>
                         </e-column>
-                        <e-column field='createdDate' isPrimaryKey='true' type='date' format='dd MMM, yyyy HH:mm' headerText='Created Date' width='200' textAlign='Center'>
+                        <e-column field='createdDate' type='date' format='dd MMM, yyyy HH:mm' headerText='Created Date' width='200' textAlign='Center'>
                         <ng-template #headerTemplate let-data>
                             {{'CREATED_DATE_LABEL' | translate}}
+                        </ng-template>
+                        <ng-template #editTemplate let-data>
+                            {{ data.createdDate | date: 'dd MMM, yyyy HH:mm'}}
+                        </ng-template>
+                        <ng-template #template let-data>
+                            {{data.createdDate | date: 'dd MMM, yyyy HH:mm'}}
                         </ng-template>
                         </e-column>
                     </e-columns>

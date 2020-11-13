@@ -1,24 +1,14 @@
-import { ModalNameService } from './../../../_core/_service/modal-name.service';
-import { GlueService } from './../../../_core/_service/glue.service';
-import { GlueIngredientService } from './../../../_core/_service/glue-ingredient.service';
-import { LineService } from './../../../_core/_service/line.service';
 import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { PageSettingsModel, GridComponent, CellEditArgs, actionBegin, actionComplete } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EditService, ToolbarService, PageService } from '@syncfusion/ej2-angular-grids';
-import { ActivatedRoute } from '@angular/router';
+
 import { DatePipe } from '@angular/common';
-import { ModelNoService } from 'src/app/_core/_service/model-no.service';
-import { ArticleNoService } from 'src/app/_core/_service/article-no.service';
-import { ArtProcessService } from 'src/app/_core/_service/art-process.service';
+
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
-import { Tooltip } from '@syncfusion/ej2-popups';
-import { count } from 'console';
-import { async } from 'rxjs/internal/scheduler/async';
 import { BuildingService } from 'src/app/_core/_service/building.service';
 const WORKER = 4;
 @Component({
@@ -73,6 +63,7 @@ export class PlanComponent implements OnInit {
   BPFCs: any;
   bpfcEdit: number;
   glueDetails: any;
+  setFocus: any;
   constructor(
     private alertify: AlertifyService,
     public modalService: NgbModal,
@@ -115,6 +106,9 @@ export class PlanComponent implements OnInit {
   count(index) {
     return Number(index) + 1;
   }
+  onDoubleClick(args: any): void {
+    this.setFocus = args.column; // Get the column from Double click event
+  }
   async sweetalertSelect(inputOptions): Promise<any> {
     const { value: buildingID } = await this.alertify.$swal.fire({
       title: 'Select a building',
@@ -154,11 +148,10 @@ export class PlanComponent implements OnInit {
   }
 
   actionComplete(args) {
-    if (args.requestType === 'edit') {
-      (args.form.elements.namedItem('createdDate') as HTMLInputElement).disabled = true;
-    }
-    if (args.requestType === 'add') {
-      (args.form.elements.namedItem('createdDate') as HTMLInputElement).disabled = true;
+    if (args.requestType === 'beginEdit') {
+      if (this.setFocus.field !== 'buildingName' && this.setFocus.field !== 'bpfcName') {
+        (args.form.elements.namedItem(this.setFocus?.field) as HTMLInputElement).focus();
+      }
     }
   }
   actionBegin(args) {

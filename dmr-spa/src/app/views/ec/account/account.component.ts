@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AccountService } from 'src/app/_core/_service/account.service';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { EditService, ToolbarService, PageService, PageSettingsModel, ToolbarItems, GridComponent } from '@syncfusion/ej2-angular-grids';
+import { EditService, ToolbarService, PageService, PageSettingsModel, ToolbarItems, GridComponent, QueryCellInfoEventArgs } from '@syncfusion/ej2-angular-grids';
 import { RoleService } from 'src/app/_core/_service/role.service';
 import { IRole, IUserRole } from 'src/app/_core/_model/role';
 import { IUserCreate, IUserUpdate } from 'src/app/_core/_model/user';
 import { UserService } from 'src/app/_core/_service/user.service';
 import { environment } from 'src/environments/environment';
+import { Tooltip } from '@syncfusion/ej2-angular-popups';
 
 @Component({
   selector: 'app-account',
@@ -101,6 +102,13 @@ export class AccountComponent implements OnInit {
       this.delete(args.data[0].id);
     }
   }
+  tooltip(args: QueryCellInfoEventArgs) {
+    if (args.column.field !== 'ID' && args.column.field !== 'password' && args.column.field !== 'option') {
+      const tooltip: Tooltip = new Tooltip({
+        content: args.data[args.column.field] + ''
+      }, args.cell as HTMLTableCellElement);
+    }
+  }
   toolbarClick(args) {
     switch (args.item.text) {
       case 'Excel Export':
@@ -112,14 +120,12 @@ export class AccountComponent implements OnInit {
   }
   actionComplete(args) {
     if (args.requestType === 'beginEdit' ) {
-      if (this.setFocus?.field) {
+      if (this.setFocus.field !== 'role' && this.setFocus.field !== 'building') {
         args.form.elements.namedItem(this.setFocus.field).focus(); // Set focus to the Target element
       }
     }
     if (args.requestType === 'add') {
-      if (this.setFocus?.field) {
-      args.form.elements.namedItem('username').focus(); // Set focus to the Target element
-      }
+      args.form.elements.namedItem('employeeID').focus(); // Set focus to the Target element
     }
   }
   dataBound() {

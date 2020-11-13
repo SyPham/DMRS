@@ -452,7 +452,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     let real = 0;
     for (const item of this.ingredients) {
       if (item.position === position) {
-        if (item.unit === 'kg') {
+        if (item.unit === 'k') {
           real = item.real;
         } else {
           real = (item.real) / 1000;
