@@ -46,7 +46,7 @@
                 <ejs-grid #grid [dataSource]='data' [searchSettings]="searchSettings" showColumnMenu='true'
                     [allowExcelExport]='true' allowPaging='true' allowSorting='true' allowResizing='true'
                     gridLines='Both' (actionBegin)="actionBegin($event)" (actionComplete)="actionComplete($event)"
-                    (recordDoubleClick)='onDoubleClick($event)' (rowSelected)="rowSelected($event)"
+                    (recordDoubleClick)='onDoubleClick($event)' [sortSettings]="sortSettings" (rowSelected)="rowSelected($event)"
                     [toolbar]='toolbarOptions' (toolbarClick)='toolbarClick($event)' [pageSettings]='pageSettings'
                     [editSettings]='editSettings'>
                     <e-columns>

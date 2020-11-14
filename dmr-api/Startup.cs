@@ -13,6 +13,7 @@ using DMR_API.Helpers;
 using DMR_API.Helpers.AutoMapper;
 using DMR_API.SignalrHub;
 using EC_API._Services.Interface;
+using EC_API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 namespace DMR_API
@@ -42,6 +44,10 @@ namespace DMR_API
         {
             services.AddSignalR();
             services.AddLogging();
+            services.Configure<MongoDbSettings>(Configuration.GetSection("MongoDbSettings"));
+            services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+            services.AddSingleton<IMongoDbSettings>(serviceProvider =>
+        serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value);
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",

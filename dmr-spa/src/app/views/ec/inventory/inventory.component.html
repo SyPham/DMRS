@@ -8,11 +8,17 @@
       <div class="col-md-1">
         <div class="font-weight-bold">{{'FILTER_LABEL' | translate}}:</div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <ejs-datepicker [value]='startDate' (change)='startDateOnchange($event)' [(ngModel)]='startDate'></ejs-datepicker>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <ejs-datepicker [value]='endDate' (change)='endDateOnchange($event)' [(ngModel)]='endDate'></ejs-datepicker>
+      </div>
+      <div class="col-md-2" *ngIf="IsAdmin">
+          <ejs-dropdownlist #modelNameDropdownlist [dataSource]='buildings' [fields]='fieldsBuildings'
+            [allowFiltering]='true' [(ngModel)]="buildingID" (filtering)='onFilteringBuilding($event)'
+            (change)='onChangeBuilding($event)' placeholder="Select a building">
+          </ejs-dropdownlist>
       </div>
       <div class="col-md-2">
         <button class="btn btn-sm btn-default" (click)='onClickDefault()'>

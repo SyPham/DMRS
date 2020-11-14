@@ -26,6 +26,7 @@ export class PlanComponent implements OnInit {
   public pageSettings: PageSettingsModel;
   public toolbarOptions: object;
   public editSettings: object;
+  sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
   startDate: object = new Date();
   endDate: object;
   bpfcID: number;

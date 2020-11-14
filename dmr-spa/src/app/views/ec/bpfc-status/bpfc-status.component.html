@@ -17,7 +17,7 @@
 
             <ejs-grid #gridModel
                 [searchSettings]="searchSettings"
-                (dataBound)='dataBound'
+                (dataBound)='dataBound()'
                 (toolbarClick)='toolbarClick($event)'
                 (actionBegin)="actionBegin($event)"
                 (recordDoubleClick)='onDoubleClick($event)'
@@ -46,7 +46,7 @@
                     </e-column>
                     <e-column field='artProcess' isPrimaryKey='true' textAlign='Center' headerText='Process' width=97>
                     </e-column>
-                    <e-column field='createdDate' headerText='Created Date Time' type='date' format='dd MMM, yyyy hh:mm:ss a' width='155' textAlign='Center'>
+                    <e-column field='createdDate' headerText='Created Date Time' type='date' format='dd MMM, yyyy HH:mm' width='155' textAlign='Center'>
                         <ng-template #headerTemplate let-data>
                             {{'CREATED_DATETIME_LABEL' | translate}}
                         </ng-template>
@@ -73,7 +73,7 @@
                         </ng-template>
                         <ng-template #template let-data>
                             <span *ngIf="data.approvalStatus == false  && data.approvalBy === '#N/A'" class="badge badge-danger">YET</span>
-                            <span *ngIf="data.finishedStatus == false &&data.approvalStatus == false && data.approvalBy !== '#N/A'" class="badge badge-warning">NG</span>
+                            <span *ngIf="data.finishedStatus == false && data.approvalStatus == false && data.approvalBy !== '#N/A'" class="badge badge-warning">NG</span>
                             <span *ngIf="data.approvalStatus == true && data.approvalBy !== '#N/A'" class="badge badge-success">OK</span>
                         </ng-template>
                     </e-column>

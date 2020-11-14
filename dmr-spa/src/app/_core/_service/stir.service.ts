@@ -20,8 +20,8 @@ export class StirService {
   getStirInfo(glueName) {
     return this.http.get(`${this.baseUrl}Stir/GetStirInfo/${glueName}`);
   }
-  getRPM(mixingInfoID, building, startTime, endTime ) {
-    return this.http.get(`${this.baseUrl}Stir/GetRPM/${mixingInfoID}/${building}/${startTime}/${endTime}`);
+  getRPM(stirID) {
+    return this.http.get(`${this.baseUrl}Stir/GetRPM/${stirID}`);
   }
   getRPMByMachineCode(machineCode, startTime, endTime) {
     return this.http.get(`${this.baseUrl}Stir/GetRPMByMachineCode/${machineCode}/${startTime}/${endTime}`);

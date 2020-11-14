@@ -150,6 +150,18 @@ namespace DMR_API.Controllers
             return Ok(bpfc);
         }
         [HttpGet]
+        public async Task<IActionResult> DefaultFilter()
+        {
+            var bpfc = await _bPFCEstablishService.DefaultFilter();
+            return Ok(bpfc);
+        }
+        [HttpGet]
+        public async Task<IActionResult> RejectedFilter()
+        {
+            var bpfc = await _bPFCEstablishService.RejectedFilter();
+            return Ok(bpfc);
+        }
+        [HttpGet]
         public async Task<IActionResult> FilterByNotApprovedStatus()
         {
             var bpfc = await _bPFCEstablishService.FilterByNotApprovedStatus();

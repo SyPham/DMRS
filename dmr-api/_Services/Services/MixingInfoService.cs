@@ -5,9 +5,12 @@ using DMR_API._Services.Interface;
 using DMR_API.DTO;
 using DMR_API.Helpers;
 using DMR_API.Models;
+using EC_API.Data;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +23,7 @@ namespace DMR_API._Services.Services
         private readonly IGlueRepository _repoGlue;
         private readonly IRawDataRepository _repoRawData;
         private readonly IStirRepository _repoStir;
+        private readonly IMongoRepository<EC_API.Data.MongoModels.RawData> _rowDataRepository;
         private readonly ISettingRepository _repoSetting;
         private readonly IMapper _mapper;
         private readonly MapperConfiguration _configMapper;
@@ -28,6 +32,7 @@ namespace DMR_API._Services.Services
             IMixingInfoRepository repoMixingInfor,
             IMixingService repoMixing,
             IRawDataRepository repoRawData,
+            IMongoRepository<EC_API.Data.MongoModels.RawData> rowDataRepository,
             ISettingRepository repoSetting,
             IMapper mapper, IGlueRepository repoGlue,
             IStirRepository repoStir,
@@ -38,11 +43,12 @@ namespace DMR_API._Services.Services
             _repoGlue = repoGlue;
             _mapper = mapper;
             _repoStir = repoStir;
+            _rowDataRepository = rowDataRepository;
             _repoRawData = repoRawData;
             _configMapper = configMapper;
             _repoSetting = repoSetting;
         }
-    
+
         public async Task<MixingInfo> Mixing(MixingInfoForCreateDto mixing)
         {
             try
@@ -67,8 +73,8 @@ namespace DMR_API._Services.Services
         {
             return await _repoMixingInfor.FindAll()
             .Include(x => x.Glue)
-            .ThenInclude(x=>x.GlueIngredients)
-            .ThenInclude(x=>x.Ingredient)
+            .ThenInclude(x => x.GlueIngredients)
+            .ThenInclude(x => x.Ingredient)
             .Where(x => x.GlueName.Equals(glueName) && x.Glue.isShow == true)
             .ProjectTo<MixingInfoDto>(_configMapper)
             .OrderByDescending(x => x.ID).ToListAsync();
@@ -81,11 +87,12 @@ namespace DMR_API._Services.Services
             var NOT_STIRRED_YET = 0;
             var NA = 2;
             var minDate = DateTime.MinValue;
-           
-            var model = from a in _repoMixingInfor.FindAll().Where(x=> x.GlueName.Equals(glueName) && x.CreatedTime.Date == currentDate)
-                        join b in _repoStir.FindAll().Include(x=>x.Setting).Where(x => x.GlueName.Equals(glueName) && x.CreatedTime.Date == currentDate) on a.ID equals b.MixingInfoID into gj
+
+            var model = from a in _repoMixingInfor.FindAll().Where(x => x.GlueName.Equals(glueName) && x.CreatedTime.Date == currentDate)
+                        join b in _repoStir.FindAll().Include(x => x.Setting).Where(x => x.GlueName.Equals(glueName) && x.CreatedTime.Date == currentDate) on a.ID equals b.MixingInfoID into gj
                         from ab in gj.DefaultIfEmpty()
-                        select new {
+                        select new
+                        {
                             a.ID,
                             StirID = ab.ID,
                             a.GlueName,
@@ -104,16 +111,20 @@ namespace DMR_API._Services.Services
                             ab.TotalMinutes,
                             MixingStatus = ab.ID > 0 && ab.SettingID == null ? NA : ab.SettingID != null ? STIRRED : NOT_STIRRED_YET
                         };
-           return await model.ToListAsync();
+            return await model.ToListAsync();
         }
 
         public async Task<object> GetRPM(int mixingInfoID, string building, string startTime, string endTime)
         {
-            var start = Convert.ToDateTime(startTime);
-            var end = Convert.ToDateTime(endTime);
+            var setting = await _repoSetting.FindAll().Include(x => x.Building).FirstOrDefaultAsync(x => x.Building.Name == building);
+            var mixing = await _repoStir.FindAll(x => x.MixingInfoID == mixingInfoID).FirstOrDefaultAsync();
+            var machineID = setting.MachineCode.ToInt();
+            var start = mixing.StartTime;
+            var end = mixing.EndTime;
             TimeSpan minutes = new TimeSpan();
-            var model = await _repoRawData.FindAll().Where(x=> x.MixingInfoID == mixingInfoID && x.CreatedDateTime >= start && x.CreatedDateTime <= end).Select(x=> new{x.RPM , x.CreatedDateTime} ).OrderByDescending(x=> x.CreatedDateTime).ToListAsync();
-           if (model.Count() > 0) {
+            var model = _rowDataRepository.FilterBy(x => x.MachineID == machineID && x.CreatedDateTime >= start && x.CreatedDateTime <= end).Select(x => new { x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList();
+            if (model.Count() > 0)
+            {
                 var max = model.Select(x => x.CreatedDateTime).FirstOrDefault();
                 var min = model.Select(x => x.CreatedDateTime).LastOrDefault();
                 if (min != DateTime.MinValue && max != DateTime.MinValue)
@@ -126,7 +137,7 @@ namespace DMR_API._Services.Services
                     totalMinutes = Math.Round(minutes.TotalMinutes, 2),
                     minutes
                 };
-           }
+            }
             return new
             {
                 rpm = 0,
@@ -167,6 +178,59 @@ namespace DMR_API._Services.Services
                 totalMinutes = 0,
                 minutes
             };
+        }
+
+        public async Task<object> GetRPM(int stirID)
+        {
+            TimeSpan minutes = new TimeSpan();
+            var stir = await _repoStir.GetAll().Include(x => x.Setting).FirstOrDefaultAsync(x => x.ID == stirID);
+            if (stir == null) return new
+            {
+                rpm = 0,
+                totalMinutes = 0,
+                minutes
+            };
+            if (stir.Setting == null) return new
+            {
+                rpm = 0,
+                totalMinutes = 0,
+                minutes
+            };
+            var machineID = stir.Setting.MachineCode.ToInt();
+            var start = stir.StartTime;
+            var end = stir.EndTime;
+            var model = _rowDataRepository.FilterBy(x => x.MachineID == machineID).Select(x => new { x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList().Where(x => x.CreatedDateTime >= start && x.CreatedDateTime <= end);
+            if (model.Count() > 0)
+            {
+                var max = model.Select(x => x.CreatedDateTime).FirstOrDefault();
+                var min = model.Select(x => x.CreatedDateTime).LastOrDefault();
+                if (min != DateTime.MinValue && max != DateTime.MinValue)
+                {
+                    minutes = max - min;
+                }
+                return new
+                {
+                    rpm = Math.Round(model.Select(x => x.RPM).Average()),
+                    totalMinutes = Math.Round(minutes.TotalMinutes, 2),
+                    minutes
+                };
+            }
+            return new
+            {
+                rpm = 0,
+                totalMinutes = 0,
+                minutes
+            };
+        }
+
+        public object GetRawData(int machineID, string startTime, string endTime)
+        {
+            var start = DateTime.Parse(startTime, CultureInfo.CurrentCulture,
+                                    DateTimeStyles.None);
+            var end = DateTime.Parse(endTime, CultureInfo.CurrentCulture,
+                                    DateTimeStyles.None);
+            var model = _rowDataRepository.AsQueryable().Select(x => new {x.MachineID, x.RPM, x.CreatedDateTime }).OrderByDescending(x=>x.CreatedDateTime).ToList();
+            return model;
         }
     }
 }

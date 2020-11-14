@@ -1,14 +1,18 @@
-import { Component, OnInit, PipeTransform, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { IngredientService } from 'src/app/_core/_service/ingredient.service';
 import { DatePipe } from '@angular/common';
-import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
+import { EmitType } from '@syncfusion/ej2-base/';
+import { Query } from '@syncfusion/ej2-data/';
 import { DecimalPipe } from '@angular/common';
 import { GridComponent } from '@syncfusion/ej2-angular-grids';
-
+import { BuildingService } from 'src/app/_core/_service/building.service';
+import { IBuilding } from 'src/app/_core/_model/building';
+const ADMIN = 1;
+const SUPERVISER = 2;
+const BUILDING_LEVEL = 2;
 @Component({
   selector: 'app-inventory',
   templateUrl: './inventory.component.html',
@@ -23,26 +27,62 @@ export class InventoryComponent implements OnInit {
   endDate: object = new Date();
   qrcodeChange: any;
   searchText: any;
+  public role = JSON.parse(localStorage.getItem('level'));
+  public building = JSON.parse(localStorage.getItem('building'));
   toolbarOptions = ['Search', 'ExcelExport'];
   pageSettings = { pageCount: 20, pageSizes: true, pageSize: 20 };
   filterSettings = { type: 'Excel' };
+  public fieldsBuildings: object = { text: 'name', value: 'id' };
+
   @ViewChild('ingredientinforeportGrid') ingredientinforeportGrid: GridComponent;
   data: any = [];
   public ingredients: any = [];
+  buildingID: any;
+  buildings: IBuilding[];
+  IsAdmin = false;
+  buildingName: any;
   constructor(
     public modalService: NgbModal,
     private alertify: AlertifyService,
     private datePipe: DatePipe,
     public ingredientService: IngredientService,
+    private buildingService: BuildingService,
     pipe: DecimalPipe
   ) { }
 
   public ngOnInit(): void {
+    const ROLES = [ADMIN, SUPERVISER];
+    if (ROLES.includes(this.role.id)) {
+      // load all building
+      this.IsAdmin = true;
+      this.getBuilding();
+    } else {
+      this.buildingName = this.building.name;
+    }
     // this.getIngredientInfoReport();
-    this.getIngredientInfoReportByBuilding();
+    // this.getIngredientInfoReportByBuilding();
   }
-  public ngAfterViewInit(): void {
+  public onFilteringBuilding: EmitType<FilteringEventArgs> = (
+    e: FilteringEventArgs
+  ) => {
+    let query: Query = new Query();
+    // frame the query based on search string with filter type.
+    query =
+      e.text !== '' ? query.where('name', 'contains', e.text, true) : query;
+    // pass the filter data source, filter query to updateData method.
+    e.updateData(this.buildings as any, query);
+  }
+  onChangeBuilding(args) {
+    this.buildingID = args.itemData.id;
+    this.buildingName = args.itemData.name;
+    localStorage.setItem('buildingID', args.itemData.id);
+    this.searchWithBuilding(this.startDate, this.endDate);
+  }
 
+  private getBuilding(): void {
+    this.buildingService.getBuildings().subscribe(async (buildingData) => {
+      this.buildings = buildingData.filter(item => item.level === BUILDING_LEVEL);
+    });
   }
   resetSearch() {
     this.searchText = null ;
@@ -64,13 +104,7 @@ export class InventoryComponent implements OnInit {
     });
   }
   getIngredientInfoReportByBuilding() {
-    const levels = [1, 2, 3, 4];
-    const building = JSON.parse(localStorage.getItem('level'));
-    let buildingName = building.name;
-    if (levels.includes(building.level)) {
-      buildingName = 'E';
-    }
-    this.ingredientService.getAllIngredientInfoReportByBuildingName(buildingName).subscribe((res: any) => {
+    this.ingredientService.getAllIngredientInfoReportByBuildingName(this.buildingName).subscribe((res: any) => {
       this.data = res ;
     });
   }
@@ -91,26 +125,10 @@ export class InventoryComponent implements OnInit {
     this.startDate = new Date();
     this.endDate = new Date();
     // this.getIngredientInfoReport();
-    this.getIngredientInfoReportByBuilding();
+    this.searchWithBuilding(this.startDate, this.endDate);
   }
-
-  search(startDate, endDate) {
-    this.ingredientService.searchInventory(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
-      this.data = res ;
-    });
-  }
-
   searchWithBuilding(startDate, endDate) {
-    // this.ingredientService.searchInventory(startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
-    //   this.data = res ;
-    // });
-    const levels = [1, 2, 3, 4];
-    const building = JSON.parse(localStorage.getItem('level'));
-    let buildingName = building.name;
-    if (levels.includes(building.level)) {
-      buildingName = 'E';
-    }
-    this.ingredientService.searchInventoryByBuildingName(startDate.toDateString(), endDate.toDateString(), buildingName)
+    this.ingredientService.searchInventoryByBuildingName(startDate.toDateString(), endDate.toDateString(), this.buildingName)
     .subscribe((res: any) => {
       this.data = res ;
     });

@@ -57,6 +57,12 @@ export class BPFCEstablishService {
   getAllBPFCStatus() { // filterByFinishedStatus
     return this.http.get(this.baseUrl + 'BPFCEstablish/getAllBPFCStatus', {});
   }
+  defaultFilter() { // DefaultFilter
+    return this.http.get(this.baseUrl + 'BPFCEstablish/DefaultFilter', {});
+  }
+  rejectedFilter() { // DefaultFilter
+    return this.http.get(this.baseUrl + 'BPFCEstablish/RejectedFilter', {});
+  }
   getAllBPFCRecord() { // filterByFinishedStatus
     return this.http.get(this.baseUrl + 'BPFCEstablish/getAllBPFCRecord', {});
   }

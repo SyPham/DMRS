@@ -3,8 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { MakeGlueService } from 'src/app/_core/_service/make-glue.service';
 import { BuildingUserService } from 'src/app/_core/_service/building.user.service';
 import { GridComponent } from '@syncfusion/ej2-angular-grids';
-import {  QRCodeGeneratorComponent } from '@syncfusion/ej2-angular-barcode-generator';
+import { DisplayTextModel, QRCodeGeneratorComponent } from '@syncfusion/ej2-angular-barcode-generator';
 import { DatePipe } from '@angular/common';
+import { AlertifyService } from 'src/app/_core/_service/alertify.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-glue-history',
@@ -15,19 +17,23 @@ import { DatePipe } from '@angular/common';
 export class GlueHistoryComponent implements OnInit {
   glueID: any;
   data: any;
-  toolbarOptions = ['ExcelExport', 'Search', 'Print QR Code' ];
+  toolbarOptions = ['ExcelExport', 'Search', 'Print QR Code'];
   pageSettings = { pageCount: 20, pageSizes: true, pageSize: 5 };
   filterSettings: { type: string; };
   users: { ID: any; Username: any; Email: any; }[];
   @ViewChildren('barcode') barcode: QueryList<QRCodeGeneratorComponent>;
   @ViewChild('barcode') qrCode: QRCodeGeneratorComponent;
   @ViewChild('grid') grid: GridComponent;
-  dataSelected: any;
+  public displayTextMethod: DisplayTextModel = {
+    visibility: false
+  };
   constructor(
     private route: ActivatedRoute,
+    private alertify: AlertifyService,
     private datePipe: DatePipe,
     private buildingUserService: BuildingUserService,
     private makeGlueService: MakeGlueService,
+    private spinner: NgxSpinnerService
   ) { }
 
   ngOnInit() {
@@ -79,6 +85,7 @@ export class GlueHistoryComponent implements OnInit {
      .content {
         height: 221px;
         display:block;
+        clear:both;
          border: 1px #D3D3D3 solid;
     }
     .content .qrcode {
@@ -134,32 +141,43 @@ export class GlueHistoryComponent implements OnInit {
     WindowPrt.document.close();
   }
   printData() {
-    if (this.dataSelected === []) {
-      alert('Please select a glue first!');
-      return;
-    }
-    let html = '';
-    for (const item of this.dataSelected) {
-      const content = document.getElementById(item.code);
-      html += `
+    const data = this.grid.getSelectedRecords() as any[];
+    if (data.length > 0) {
+      let html = '';
+      for (const item of data) {
+        let content;
+        this.barcode.forEach(qrcode => {
+          if (qrcode.value === item.code) {
+            content = qrcode.element;
+          }
+        });
+        // tslint:disable-next-line:max-line-length
+        const exp = item.expiredTime === '0001-01-01T00:00:00' ? 'N/A' : this.datePipe.transform(new Date(item.expiredTime), 'yyyyMMdd HH:mm');
+        html += `
        <div class='content'>
         <div class='qrcode'>
          ${content.innerHTML}
          </div>
           <div class='info'>
           <ul>
-              <li class='subInfo'>Name: ${ item.glue}</li>
-              <li class='subInfo'>QR Code: ${ item.code}</li>
-              <li class='subInfo'>MFG: ${ this.datePipe.transform(new Date(item.createdTime), 'yyyyMMdd HH:mm')}</li>
-              <li class='subInfo'>EXP: ${ this.datePipe.transform(new Date(item.expiredTime), 'yyyyMMdd HH:mm')}</li>
+              <li class='subInfo'>Name: ${item.glue}</li>
+              <li class='subInfo'>QR Code: ${item.code}</li>
+              <li class='subInfo'>Batch: ${item.batchA}</li>
+              <li class='subInfo'>MFG: ${this.datePipe.transform(new Date(item.createdTime), 'yyyyMMdd HH:mm')}</li>
+              <li class='subInfo'>EXP: ${exp}</li>
           </ul>
          </div>
       </div>
       `;
+      }
+      this.configurePrint(html);
+    } else {
+      this.alertify.warning('Please select some glue first!', true);
+      return;
     }
-    this.configurePrint(html);
   }
   getUsers() {
+    this.spinner.show();
     this.buildingUserService.getAllUsers(1, 1000).subscribe(res => {
       const data = res.result.map((i: any) => {
         return {
@@ -184,20 +202,15 @@ export class GlueHistoryComponent implements OnInit {
           expiredTime: item.expiredTime,
           glue: item.glue.name,
           mixBy: this.username(item.mixBy),
-          realTotal: +parseFloat(item.realTotal).toFixed(3) ,
+          realTotal: +parseFloat(item.realTotal).toFixed(3),
           batchA: item.batchA
         };
       });
+      this.spinner.hide();
     });
   }
   count(index) {
     return Number(index) + 1;
-  }
-  rowSelected(args) {
-    this.dataSelected = this.grid.getSelectedRecords();
-  }
-  rowDeselected(args) {
-    this.dataSelected = this.grid.getSelectedRecords();
   }
   toolbarClick(args) {
     switch (args.item.text) {

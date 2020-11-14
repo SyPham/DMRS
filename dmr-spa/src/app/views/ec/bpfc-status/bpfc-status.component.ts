@@ -68,13 +68,13 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.pageSettings = { currentPage: 1, pageSize: 10, pageCount: 20 };
+    this.pageSettings = { pageSizes: true, currentPage: 1, pageSize: 10, pageCount: 20 };
     this.editparams = { params: { popupHeight: '300px' } };
     this.editSettings = { showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
-    this.toolbar = ['ExcelExport', 'Search', 'Default',
+    this.toolbar = ['Default',
+      { text: 'Rejected', tooltipText: 'Rejected', prefixIcon: 'fa fa-times', id: 'Rejected' },
       { text: 'Approved', tooltipText: 'Approved', prefixIcon: 'fa fa-check', id: 'Approved' },
-      { text: 'Not Approved', tooltipText: 'Not Approved', prefixIcon: 'fa fa-times', id: 'Not Approved' },
-      'All'
+      'All', 'ExcelExport', 'Search'
     ];
     this.getAllUsers();
   }
@@ -94,6 +94,7 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
   }
 
   dataBound() {
+    this.gridModel.autoFitColumns();
   }
 
   no(item: any): number {
@@ -158,7 +159,32 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
       });
     });
   }
-
+  filterRejected() {
+    this.bPFCEstablishService.rejectedFilter().subscribe((res: any) => {
+      this.data = res.map(item => {
+        return {
+          id: item.id,
+          modelNameID: item.modelNameID,
+          modelNoID: item.modelNoID,
+          articleNoID: item.articleNoID,
+          artProcessID: item.artProcessID,
+          modelName: item.modelName,
+          modelNo: item.modelNo,
+          articleNo: item.articleNo,
+          artProcess: item.artProcess,
+          approvalStatus: item.approvalStatus,
+          finishedStatus: item.finishedStatus,
+          approvalBy: this.createdBy(item.approvalBy),
+          createdBy: this.createdBy(item.createdBy),
+          season: item.season,
+          createdDate: item.createdDate,
+          modifiedDate: item.modifiedDate,
+          updateTime: item.updateTime,
+          bpfcName: `${item.modelName} - ${item.modelNo} - ${item.articleNo} - ${item.artProcess}`,
+        };
+      });
+    });
+  }
   filterByApprovedStatus() {
     this.bPFCEstablishService.filterByApprovedStatus().subscribe((res: any) => {
       this.data = res.map(item => {
@@ -212,7 +238,32 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
       });
     });
   }
-
+  defaultFilter() {
+    this.bPFCEstablishService.defaultFilter().subscribe((res: any) => {
+      this.data = res.map(item => {
+        return {
+          id: item.id,
+          modelNameID: item.modelNameID,
+          modelNoID: item.modelNoID,
+          articleNoID: item.articleNoID,
+          artProcessID: item.artProcessID,
+          modelName: item.modelName,
+          modelNo: item.modelNo,
+          articleNo: item.articleNo,
+          artProcess: item.artProcess,
+          approvalStatus: item.approvalStatus,
+          finishedStatus: item.finishedStatus,
+          approvalBy: this.createdBy(item.approvalBy),
+          createdBy: this.createdBy(item.createdBy),
+          season: item.season,
+          createdDate: item.createdDate,
+          modifiedDate: item.modifiedDate,
+          updateTime: item.updateTime,
+          bpfcName: `${item.modelName} - ${item.modelNo} - ${item.articleNo} - ${item.artProcess}`,
+        };
+      });
+    });
+  }
   filterByNotApprovedStatus() {
     this.bPFCEstablishService.filterByNotApprovedStatus().subscribe((res: any) => {
       this.data = res.map(item => {
@@ -364,8 +415,8 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
       case 'Approved':
         this.filterByApprovedStatus();
         break;
-      case 'Not Approved':
-        this.filterByNotApprovedStatus();
+      case 'Rejected':
+        this.filterRejected();
         break;
       case 'All':
         this.getAllBPFCStatus();
@@ -374,7 +425,7 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
         this.gridModel.excelExport();
         break;
       case 'Default':
-        this.filterByFinishedStatus();
+        this.defaultFilter();
         break;
     }
   }
@@ -382,7 +433,7 @@ export class BpfcStatusComponent implements OnInit, AfterViewInit {
   getAllUsers() {
     this.userService.getAllUserInfo().subscribe((res: any) => {
       this.users = res;
-      this.filterByFinishedStatus();
+      this.defaultFilter();
     });
   }
 

@@ -25,6 +25,7 @@ export class PlanOutputQuantityComponent implements OnInit {
   public editSettings: object;
   startDate = new Date();
   endDate = new Date();
+  sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
   public role = JSON.parse(localStorage.getItem('level'));
   public building = JSON.parse(localStorage.getItem('building'));
   bpfcID: number;

@@ -81,8 +81,9 @@ namespace DMR_API.Helpers.AutoMapper
            .ForMember(d => d.ArtProcess, o => o.MapFrom(x => x.ArtProcess.Process.Name));
 
             CreateMap<MixingInfo, MixingInfoDto>()
-            .ForMember(d => d.ExpiredTime, o => o.MapFrom(x => x.Glue.GlueIngredients.ExpriedTime()))
+            .ForMember(d => d.ExpiredTime, o => o.MapFrom(x => x.ExpriedTime()))
              .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble())); 
+           
             CreateMap<MixingInfoForCreateDto, MixingInfo>();
 
             CreateMap<BPFCEstablish, BPFCEstablish>()

@@ -23,6 +23,8 @@ namespace DMR_API._Services.Interface
         Task<List<BPFCStatusDto>> FilterByApprovedStatus();
         Task<List<BPFCStatusDto>> FilterByFinishedStatus();
         Task<List<BPFCStatusDto>> FilterByNotApprovedStatus();
+        Task<List<BPFCStatusDto>> DefaultFilter();
+        Task<List<BPFCStatusDto>> RejectedFilter();
         Task<List<BPFCRecordDto>> GetAllBPFCRecord(Status status, string startBuildingDate, string endBuildingDate);
         Task<List<BPFCStatusDto>> GetAllBPFCStatus();
         Task<object> GetAllBPFCByBuildingID(int buildingID);

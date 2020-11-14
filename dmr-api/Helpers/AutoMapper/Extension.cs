@@ -6,10 +6,11 @@ namespace DMR_API.Helpers.AutoMapper
 {
     public static class Extension
     {
-        public static DateTime ExpriedTime(this ICollection<GlueIngredient> glueIngredients)
+        public static DateTime ExpriedTime(this MixingInfo mixing)
         {
-            if (glueIngredients.FirstOrDefault(a => a.Position == "A") == null) return DateTime.MinValue;
-            var ingredient = glueIngredients.FirstOrDefault(a => a.Position == "A").Ingredient;
+            if (mixing.Glue.GlueIngredients.Count == 0) return DateTime.MinValue;
+            if (mixing.Glue.GlueIngredients.FirstOrDefault(a => a.Position == "A") == null) return DateTime.MinValue;
+            var ingredient = mixing.Glue.GlueIngredients.FirstOrDefault(a => a.Position == "A").Ingredient;
             if (ingredient.ExpiredTime == 600)
             {
                 return DateTime.MinValue;
@@ -21,7 +22,7 @@ namespace DMR_API.Helpers.AutoMapper
                     return DateTime.MinValue;
                 }
 
-                var createdTime = Convert.ToDateTime(ingredient.CreatedDate);
+                var createdTime = mixing.CreatedTime;
                 return createdTime.AddMinutes(ingredient.ExpiredTime);
             }
         }

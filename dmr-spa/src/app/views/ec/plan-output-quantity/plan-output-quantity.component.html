@@ -33,7 +33,7 @@
         </div>
         <ejs-grid #grid [dataSource]='data' [searchSettings]="searchSettings" showColumnMenu='true'
           [allowExcelExport]='true' allowPaging='true' allowSorting='true' allowResizing='true' gridLines='Both'
-          (actionBegin)="actionBegin($event)" (created)="created()" (actionComplete)="actionComplete($event)" (recordDoubleClick)='onDoubleClick($event)'
+          (actionBegin)="actionBegin($event)" [sortSettings]="sortSettings" (created)="created()" (actionComplete)="actionComplete($event)" (recordDoubleClick)='onDoubleClick($event)'
           (rowSelected)="rowSelected($event)" [toolbar]='toolbarOptions' (toolbarClick)='toolbarClick($event)'
           [pageSettings]='pageSettings' [editSettings]='editSettings'>
           <e-columns>

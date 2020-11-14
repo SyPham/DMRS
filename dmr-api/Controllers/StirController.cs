@@ -24,10 +24,20 @@ namespace DMR_API.Controllers
         {
             return Ok(await _mixingInfoService.Stir(glueName));
         }
+        [HttpGet("{stirID}")]
+        public async Task<IActionResult> GetRPM(int stirID)
+        {
+            return Ok(await _mixingInfoService.GetRPM(stirID));
+        }
         [HttpGet("{mixingInfoID}/{building}/{start}/{end}")]
         public async Task<IActionResult> GetRPM(int mixingInfoID, string building, string start, string end)
         {
             return Ok(await _mixingInfoService.GetRPM(mixingInfoID, building, start, end));
+        }
+        [HttpGet("{mixingInfoID}/{start}/{end}")]
+        public IActionResult GetRawData(int mixingInfoID, string start, string end)
+        {
+            return Ok( _mixingInfoService.GetRawData(mixingInfoID, start, end));
         }
         [HttpGet("{machineCode}/{start}/{end}")]
         public async Task<IActionResult> GetRPMByMachineCode(string machineCode, string start, string end)

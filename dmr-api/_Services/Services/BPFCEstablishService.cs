@@ -596,15 +596,22 @@ namespace DMR_API._Services.Services
             var lists = await _repoBPFCEstablish.FindAll().Where(x => x.ApprovalStatus == true).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
             return lists;
         }
+        public async Task<List<BPFCStatusDto>> DefaultFilter()
+        {
+            var lists = await _repoBPFCEstablish.FindAll().Where(x => x.FinishedStatus == true && x.ApprovalStatus == false).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            return lists;
+        }
+        public async Task<List<BPFCStatusDto>> RejectedFilter()
+        {
+            var lists = await _repoBPFCEstablish.FindAll().Where(x => x.FinishedStatus == false && x.ApprovalStatus == false && x.ApprovalBy > 0).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            return lists;
+        }
         public async Task<List<BPFCStatusDto>> GetAllBPFCStatus()
         {
-            return await _repoBPFCEstablish
-                .FindAll()
-                .Include(x => x.ModelName)
-                .Include(x => x.ModelNo)
-                .Include(x => x.ArticleNo)
-                .Include(x => x.ArtProcess).ThenInclude(x => x.Process)
-                .ProjectTo<BPFCStatusDto>(_configMapper).OrderBy(x => x.ID).ToListAsync();
+            var defaults = await _repoBPFCEstablish.FindAll().Where(x => x.FinishedStatus == true && x.ApprovalStatus == false).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            var rejected = await _repoBPFCEstablish.FindAll().Where(x => x.FinishedStatus == false && x.ApprovalStatus == false && x.ApprovalBy > 0).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            var approval = await _repoBPFCEstablish.FindAll().Where(x => x.ApprovalStatus == true && x.FinishedStatus == true).ProjectTo<BPFCStatusDto>(_configMapper).OrderByDescending(x => x.ID).ToListAsync();
+            return defaults.Union(rejected).Union(approval).ToList();
 
         }
 

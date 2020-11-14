@@ -1,22 +1,13 @@
-import { ModalNameService } from './../../../_core/_service/modal-name.service';
-import { GlueService } from './../../../_core/_service/glue.service';
-import { GlueIngredientService } from './../../../_core/_service/glue-ingredient.service';
-import { LineService } from './../../../_core/_service/line.service';
 import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { PageSettingsModel, GridComponent, CellEditArgs } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { EditService, ToolbarService, PageService } from '@syncfusion/ej2-angular-grids';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { ModelNoService } from 'src/app/_core/_service/model-no.service';
-import { ArticleNoService } from 'src/app/_core/_service/article-no.service';
-import { ArtProcessService } from 'src/app/_core/_service/art-process.service';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
-import { Tooltip } from '@syncfusion/ej2-popups';
 import { NgxSpinnerService } from 'ngx-spinner';
 const WORKER = 4;
 @Component({
@@ -36,6 +27,7 @@ export class ConsumptionComponent implements OnInit {
   bpfcID: number;
   level: number;
   hasWorker: boolean;
+  sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
   public bpfcData: object;
   public plansSelected: any;
   public date = new Date();

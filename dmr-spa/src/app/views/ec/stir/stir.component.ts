@@ -111,8 +111,8 @@ export class StirComponent implements OnInit {
   getStirInfo(glueName): Promise<any> {
     return this.stirService.getStirInfo(glueName).toPromise();
   }
-  getRPM(mixingInfoID, building, startTime, endTime ): Promise<any> {
-    return this.stirService.getRPM(mixingInfoID, 'E', startTime, endTime ).toPromise();
+  getRPM(stirID): Promise<any> {
+    return this.stirService.getRPM(stirID).toPromise();
   }
   getRPMByMachineCode(machineCode, startTime, endTime): Promise<any> {
     return this.stirService.getRPMByMachineCode(machineCode, startTime, endTime).toPromise();
@@ -144,9 +144,9 @@ export class StirComponent implements OnInit {
       this.alertify.error(error + '');
     }
   }
-  async loadRPM(mixingInfoID, building, startTime, endTime) {
+  async loadRPM(stirID) {
     try {
-      const obj = await this.getRPM(mixingInfoID, building, startTime, endTime );
+      const obj = await this.getRPM(stirID);
       if (obj.rpm === 0) {
         this.alertify.warning('Không tìm thấy rpm trong khoản thời gian này!', true);
         this.modalReference.close();
@@ -234,14 +234,14 @@ export class StirComponent implements OnInit {
   async showModal(name, data) {
     this.stir = data;
     this.modalReference = this.modalService.open(name, { size: 'lg' });
-    const startTime = this.datePipe.transform(data.startTime, 'yyyy-MM-dd HH:mm:ss');
-    const endTime = this.datePipe.transform(data.endTime, 'yyyy-MM-dd HH:mm:ss');
+    // const startTime = this.datePipe.transform(data.startTime, 'yyyy-MM-dd HH:mm:ss');
+    // const endTime = this.datePipe.transform(data.endTime, 'yyyy-MM-dd HH:mm:ss');
     if (data.settingID === 1) {
       this.status = this.totalMinutes <= 4 ? true : false;
     }
     if (data.settingID === 2) {
       this.status = this.totalMinutes <= 6 ? true : false;
     }
-    await this.loadRPMByMachineCode(data.machineCode, startTime, endTime);
+    await this.loadRPM(data.stirID);
   }
 }

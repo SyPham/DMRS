@@ -13,6 +13,8 @@ namespace DMR_API._Services.Interface
         Task<List<MixingInfoDto>> GetMixingInfoByGlueName(string glueName);
         Task<object> Stir(string glueName);
         Task<object> GetRPM(int mixingInfoID, string building, string startTime, string endTime);
+        Task<object> GetRPM(int stirID);
+        object GetRawData(int machineID, string startTime, string endTime);
         Task<object> GetRPMByMachineID(int machineID, string startTime, string endTime);
         Task<object> GetRPMByMachineCode(string machineCode, string startTime, string endTime);
 
