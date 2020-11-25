@@ -86,11 +86,14 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     enAjax.onSuccess = (value) => {
       // Assigning locale text value for Essential JS 2 components
       this.en = value;
+      L10n.load(this.en);
+
     };
     enAjax.send();
     viAjax.onSuccess = (value) => {
       this.vi = value;
       // Assigning locale text value for Essential JS 2 components
+      L10n.load(this.vi);
     };
     viAjax.send();
     this.langsData = [{ id: 'vi', name: 'VI' }, { id: 'en', name: 'EN' }];
@@ -131,13 +134,15 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       localStorage.removeItem('lang');
       localStorage.setItem('lang', args.itemData.id);
       this.translate.use(args.itemData.id);
-      // if (args.itemData.id === 'vi') {
-      //   setCulture('vi');
-      //   L10n.load(this.vi);
-      // } else {
-      //   setCulture('en-US');
-      //   L10n.load(this.en);
-      // }
+      if (args.itemData.id === 'vi') {
+        setTimeout(() => {
+          setCulture('vi');
+        });
+      } else {
+        setTimeout(() => {
+          setCulture('en-US');
+        });
+      }
     }
   }
   getBuilding() {

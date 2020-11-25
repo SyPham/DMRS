@@ -85,7 +85,7 @@
             {{ 'REPORT' | translate }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" *ngIf="level === ADMIN" [routerLink]="[ '/ec/report/consumption']" >Cost</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR" [routerLink]="[ '/ec/report/consumption']" >Cost</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/consumption-1']" >{{ 'CONSUMPTION_LABEL' | translate }} 1</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/consumption-2']" >{{ 'CONSUMPTION_LABEL' | translate }} 2</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/inventory']">{{'INVENTORY_LABEL' | translate}}</a>

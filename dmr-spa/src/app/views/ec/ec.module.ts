@@ -115,12 +115,16 @@ loadCldr(
   require('cldr-data/supplemental/weekdata.json')); // To load the culture based first day of week
 if (lang === 'vi') {
   defaultLang = lang;
-  // setCulture('vi');
-  // L10n.load(vi);
+  setTimeout(() => {
+    L10n.load(vi);
+    setCulture('vi');
+  });
 } else {
   defaultLang = 'en';
-  // setCulture('en');
-  // L10n.load(en);
+  setTimeout(() => {
+    L10n.load(en);
+    setCulture('en');
+  });
 }
 @NgModule({
   providers: [
