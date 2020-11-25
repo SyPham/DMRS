@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DMR_API.Helpers;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Tls;
+using EC_API.DTO;
 
 namespace DMR_API.Controllers
 {
@@ -21,7 +22,7 @@ namespace DMR_API.Controllers
             _planService = planService;
         }
         [HttpPost]
-        public async Task<IActionResult> GetBPFCByGlue([FromBody]TooltipParams tooltip)
+        public async Task<IActionResult> GetBPFCByGlue([FromBody] TooltipParams tooltip)
         {
             var plans = await _planService.GetBPFCByGlue(tooltip);
             return Ok(plans);
@@ -88,7 +89,7 @@ namespace DMR_API.Controllers
             var lists = await _planService.GetLines(buildingID);
             return Ok(lists);
         }
-       
+
         [HttpPost]
         public async Task<IActionResult> Create(PlanDto create)
         {
@@ -148,8 +149,8 @@ namespace DMR_API.Controllers
             var lists = await _planService.GetAllPlanByRange(building, min, max);
             return Ok(lists);
         }
-        
-         [HttpGet("{id}/{qty}")]
+
+        [HttpGet("{id}/{qty}")]
         public async Task<IActionResult> EditDelivered(int id, string qty)
         {
             var lists = await _planService.EditDelivered(id, qty);
@@ -168,11 +169,23 @@ namespace DMR_API.Controllers
             var lists = await _planService.DeleteDelivered(id);
             return Ok(lists);
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAllPlanByDefaultRange()
         {
             var lists = await _planService.GetAllPlanByDefaultRange();
+            return Ok(lists);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ConsumptionByLineCase1(ReportParams reportParams)
+        {
+            var lists = await _planService.ConsumptionByLineCase1(reportParams);
+            return Ok(lists);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ConsumptionByLineCase2(ReportParams reportParams)
+        {
+            var lists = await _planService.ConsumptionByLineCase2(reportParams);
             return Ok(lists);
         }
         [HttpGet("{startDate}/{endDate}")]
@@ -182,18 +195,54 @@ namespace DMR_API.Controllers
             return File(bin, "application/octet-stream", "report.xlsx");
         }
         [HttpPost]
+        public async Task<IActionResult> ReportConsumptionCase1(ReportParams reportParams)
+        {
+
+            var delta = reportParams.EndDate - reportParams.StartDate;
+            var str = Math.Abs(delta.TotalDays);
+            if (str > 31)
+            {
+                var error = $"Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>The report data can only be exported for 30 days!!!";
+                return BadRequest(error);
+            }
+            else
+            {
+                var bin = await _planService.ReportConsumptionCase1(reportParams);
+                return File(bin, "application/octet-stream", "reportConsumption1.xlsx");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> ReportConsumptionCase2(ReportParams reportParams)
+        {
+            var delta = reportParams.EndDate - reportParams.StartDate;
+            var str = Math.Abs(delta.TotalDays);
+            if (str > 31)
+            {
+                var error = $"Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>The report data can only be exported for 30 days!!!";
+                return BadRequest(error);
+            }
+            else
+            {
+                var bin = await _planService.ReportConsumptionCase2(reportParams);
+                return File(bin, "application/octet-stream", "reportConsumption2.xlsx");
+            }
+        }
+        [HttpPost]
         public async Task<IActionResult> GetReport(GetReportDto getReportDto)
         {
             var delta = getReportDto.EndDate - getReportDto.StartDate;
             var str = Math.Abs(delta.TotalDays);
             if (str > 31)
             {
-                return NotFound();
-            } else
+                var error = $"Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>The report data can only be exported for 30 days!!!";
+                return BadRequest(error);
+            }
+            else
             {
                 var bin = await _planService.Report(getReportDto.StartDate, getReportDto.EndDate);
                 return File(bin, "application/octet-stream", "report.xlsx");
             }
         }
+
     }
 }

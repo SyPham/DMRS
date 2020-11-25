@@ -146,6 +146,9 @@
     "Not Stir Yet": "Not Stirred Yet",
     "#N/A": "#N/A",
     "OUTPUT_QUANTITY": "Output Quantity",
-    "Scaling Setting": "Scaling Setting"
+    "Scaling Setting": "Scaling Setting",
+    "UPDATE_TIME": "Update Time",
+    "Solvent": "Solvent",
+    "Water": "Water"
 
 }

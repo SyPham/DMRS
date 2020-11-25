@@ -10,6 +10,8 @@ import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 const WORKER = 4;
+const BUILDING_LEVEL = 2;
+
 @Component({
   selector: 'app-consumption',
   templateUrl: './consumption.component.html',
@@ -75,7 +77,7 @@ export class ConsumptionComponent implements OnInit {
 
   ngOnInit(): void {
     const now = new Date();
-    this.endDate = new Date(now.setDate(now.getDate() + 15));
+    this.endDate = new Date();
     this.level = JSON.parse(localStorage.getItem('level')).level;
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.editparams = { params: { popupHeight: '300px' } };
@@ -105,6 +107,12 @@ export class ConsumptionComponent implements OnInit {
     });
   }
   getReport(obj: { startDate: Date, endDate: Date }) {
+    const days = Math.floor((obj.endDate.getTime() - obj.startDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (days > 31) {
+      const error = 'Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>The report data can only be exported for 30 days!!!';
+      this.alertify.error(error, true);
+      return;
+    }
     this.spinner.show();
     this.planService.getReport(obj).subscribe((data: any) => {
       const blob = new Blob([data],
@@ -115,10 +123,6 @@ export class ConsumptionComponent implements OnInit {
       link.href = downloadURL;
       link.download = 'report.xlsx';
       link.click();
-      this.spinner.hide();
-    }, err => {
-      this.alertify.error(`Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>
-        The report data can only be exported for 30 days !!!`, true);
       this.spinner.hide();
     });
   }
@@ -329,7 +333,7 @@ export class ConsumptionComponent implements OnInit {
 
   onClickDefault() {
     this.startDate = new Date();
-    this.endDate = new Date(new Date().setDate(15));
+    this.endDate = new Date();
     this.getAll(this.startDate, this.endDate);
   }
   startDateOnchange(args) {

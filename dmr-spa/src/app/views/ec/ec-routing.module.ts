@@ -28,6 +28,8 @@ import { PlanOutputQuantityComponent } from './plan-output-quantity/plan-output-
 import { CostingComponent } from './costing/costing.component';
 import { ConsumptionComponent } from './consumption/consumption.component';
 import { ScalingSettingComponent } from './scaling-setting/scaling-setting.component';
+import { Consumption1Component } from './consumption-1/consumption-1.component';
+import { Consumption2Component } from './consumption-2/consumption-2.component';
 
 const routes: Routes = [
   {
@@ -315,8 +317,24 @@ const routes: Routes = [
             path: 'consumption',
             component: ConsumptionComponent,
             data: {
-              title: 'Consumption',
-              breadcrumb: 'Consumption'
+              title: 'Cost',
+              breadcrumb: 'Cost'
+            }
+          },
+          {
+            path: 'consumption-1',
+            component: Consumption1Component,
+            data: {
+              title: 'Consumption 1',
+              breadcrumb: 'Consumption 1'
+            }
+          },
+          {
+            path: 'consumption-2',
+            component: Consumption2Component,
+            data: {
+              title: 'Consumption 2',
+              breadcrumb: 'Consumption 2'
             }
           },
           {

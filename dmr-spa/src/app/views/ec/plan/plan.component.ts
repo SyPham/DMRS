@@ -2,7 +2,7 @@ import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { PageSettingsModel, GridComponent, CellEditArgs, actionBegin, actionComplete } from '@syncfusion/ej2-angular-grids';
+import { PageSettingsModel, GridComponent} from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { DatePipe } from '@angular/common';
@@ -10,7 +10,17 @@ import { DatePipe } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { BuildingService } from 'src/app/_core/_service/building.service';
-const WORKER = 4;
+import { AuthService } from 'src/app/_core/_service/auth.service';
+import { IRole } from 'src/app/_core/_model/role';
+import { IBuilding } from 'src/app/_core/_model/building';
+import { FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
+import { Query } from '@syncfusion/ej2-data/';
+import { EmitType } from '@syncfusion/ej2-base';
+
+const ADMIN = 1;
+const SUPERVISER = 2;
+const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
+const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
 @Component({
   selector: 'app-plan',
   templateUrl: './plan.component.html',
@@ -22,28 +32,28 @@ const WORKER = 4;
 export class PlanComponent implements OnInit {
   @ViewChild('cloneModal') public cloneModal: TemplateRef<any>;
   @ViewChild('planForm')
-  public orderForm: FormGroup;
-  public pageSettings: PageSettingsModel;
-  public toolbarOptions: object;
-  public editSettings: object;
+  orderForm: FormGroup;
+  pageSettings: PageSettingsModel;
+  toolbarOptions: object;
+  editSettings: object;
   sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
-  startDate: object = new Date();
-  endDate: object;
+  startDate: Date;
+  endDate: Date;
+  date: Date;
   bpfcID: number;
   level: number;
   hasWorker: boolean;
-  public role = JSON.parse(localStorage.getItem('level'));
-  public building = JSON.parse(localStorage.getItem('building'));
-  public bpfcData: object;
-  public plansSelected: any;
-  public date = new Date();
-  public toolbar: string[];
-  public editparams: object;
+  role: IRole;
+  building: IBuilding;
+  bpfcData: object;
+  plansSelected: any;
+  toolbar: string[];
+  editparams: object;
   @ViewChild('grid')
-  public grid: GridComponent;
+  grid: GridComponent;
   dueDate: any;
   modalReference: NgbModalRef;
-  public data: object[];
+  data: object[];
   searchSettings: any = { hierarchyMode: 'Parent' };
   modalPlan: Plan = {
     id: 0,
@@ -72,39 +82,54 @@ export class PlanComponent implements OnInit {
     public modalService: NgbModal,
     private planService: PlanService,
     private buildingService: BuildingService,
+    private authService: AuthService,
     private bPFCEstablishService: BPFCEstablishService,
     public datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
-    const now = new Date();
-    this.endDate = new Date(now.setDate(now.getDate() + 15));
-    this.level = JSON.parse(localStorage.getItem('level')).level;
+    this.date = new Date();
+    this.endDate = new Date();
+    this.startDate = new Date();
+    this.hasWorker = false;
+    this.role = ROLE;
+    this.building = BUIDLING;
+    this.gridConfig();
+    this.getAll();
+    this.getAllBPFC();
+    this.checkRole();
+    this.ClearForm();
+  }
+  public onFiltering: EmitType<FilteringEventArgs> = (
+    e: FilteringEventArgs
+  ) => {
+    let query: Query = new Query();
+    // frame the query based on search string with filter type.
+    query =
+      e.text !== '' ? query.where('name', 'contains', e.text, true) : query;
+    // pass the filter data source, filter query to updateData method.
+    e.updateData(this.BPFCs, query);
+  }
+  checkRole(): void {
+    const ROLES = [ADMIN, SUPERVISER];
+    if (ROLES.includes(this.role.id)) {
+      this.buildingService.getBuildings().subscribe(async (buildingData) => {
+        const lines = buildingData.filter(item => item.level === 3);
+        this.buildingName = lines;
+      });
+    } else {
+      this.getAllLine(this.building.id);
+    }
+  }
+  gridConfig(): void {
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.editparams = { params: { popupHeight: '300px' } };
-    this.hasWorker = false;
     this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
     this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
       { text: 'Delete Range', tooltipText: 'Delete Range', prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
       { text: 'Clone', tooltipText: 'Copy', prefixIcon: 'fa fa-copy', id: 'Clone' }
     ];
     this.toolbar = ['ExcelExport', 'Add', 'Delete', 'Search', 'Copy'];
-    this.getAll(this.startDate, this.endDate);
-    this.getAllBPFC();
-    // tslint:disable-next-line:one-variable-per-declaration
-    const ADMIN = 1, SUPERVISER = 2;
-    const ROLES = [ADMIN, SUPERVISER];
-    const building = JSON.parse(localStorage.getItem('building'));
-    const role = JSON.parse(localStorage.getItem('level')).id;
-    if (ROLES.includes(role)) {
-      this.buildingService.getBuildings().subscribe(async (buildingData) => {
-        const lines = buildingData.filter(item => item.level === 3);
-        this.buildingName = lines;
-      });
-    } else {
-      this.getAllLine(building.id);
-    }
-    this.ClearForm();
   }
   count(index) {
     return Number(index) + 1;
@@ -112,29 +137,11 @@ export class PlanComponent implements OnInit {
   onDoubleClick(args: any): void {
     this.setFocus = args.column; // Get the column from Double click event
   }
-  async sweetalertSelect(inputOptions): Promise<any> {
-    const { value: buildingID } = await this.alertify.$swal.fire({
-      title: 'Select a building',
-      input: 'select',
-      inputOptions,
-      inputPlaceholder: 'Select a building',
-      showCancelButton: true,
-    });
-    const buildID = Number(buildingID);
-    return new Promise((resolve, rejects) => {
-      if (buildID > 0) {
-        resolve(buildID);
-      } else {
-        rejects('Error');
-      }
-    });
-  }
   getAllLine(buildingID) {
     this.planService.getLines(buildingID).subscribe((res: any) => {
       this.buildingName = res;
     });
   }
-
   onChangeBuildingNameEdit(args) {
     this.buildingNameEdit = args.itemData.id;
   }
@@ -174,7 +181,7 @@ export class PlanComponent implements OnInit {
         this.planService.update(this.modalPlan).subscribe(res => {
           this.alertify.success('Updated succeeded!');
           this.ClearForm();
-          this.getAll(this.startDate, this.endDate);
+          this.getAll();
         });
       }
       if (args.action === 'add') {
@@ -187,13 +194,17 @@ export class PlanComponent implements OnInit {
         this.planService.create(this.modalPlan).subscribe(res => {
           if (res) {
             this.alertify.success('Created succeeded!');
-            this.getAll(this.startDate, this.endDate);
+            this.getAll();
             this.ClearForm();
           } else {
             this.alertify.warning('This plan has already existed!!!');
-            this.getAll(this.startDate, this.endDate);
+            this.getAll();
             this.ClearForm();
           }
+        }, error => {
+            this.grid.refresh();
+            this.getAll();
+            this.ClearForm();
         });
       }
     }
@@ -238,8 +249,8 @@ export class PlanComponent implements OnInit {
     });
   }
 
-  getAll(startDate, endDate) {
-    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+  getAll() {
+    this.planService.search(this.building.id, this.startDate.toDateString(), this.endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,
@@ -259,7 +270,7 @@ export class PlanComponent implements OnInit {
   deleteRange(plans) {
     this.alertify.confirm('Delete Plan', 'Are you sure you want to delete this Plans ?', () => {
       this.planService.deleteRange(plans).subscribe(() => {
-        this.getAll(this.startDate, this.endDate);
+        this.getAll();
         this.alertify.success('Plans has been deleted');
       }, error => {
         this.alertify.error('Failed to delete the Modal Name');
@@ -299,7 +310,6 @@ export class PlanComponent implements OnInit {
           const selectedRecords = this.grid.getSelectedRecords().map((item: any) => {
             return item.id;
           });
-          console.log('Delete Range', selectedRecords);
           this.deleteRange(selectedRecords);
         }
         break;
@@ -321,7 +331,7 @@ export class PlanComponent implements OnInit {
         this.alertify.success('Successfully!');
         this.startDate = this.date;
         this.endDate = this.date;
-        this.getAll(this.date, this.date);
+        this.getAll();
         this.modalService.dismissAll();
       } else {
         this.alertify.warning('the plans have already existed!');
@@ -352,8 +362,8 @@ export class PlanComponent implements OnInit {
 
   onClickDefault() {
     this.startDate = new Date();
-    this.endDate = new Date(new Date().setDate(15));
-    this.getAll(this.startDate, this.endDate);
+    this.endDate = new Date();
+    this.getAll();
   }
   startDateOnchange(args) {
     this.startDate = (args.value as Date);

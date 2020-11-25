@@ -7,6 +7,7 @@ import { SettingService } from 'src/app/_core/_service/setting.service';
 import { StirService } from 'src/app/_core/_service/stir.service';
 import { GridComponent } from '@syncfusion/ej2-angular-grids';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 
 declare const $: any;
 
@@ -30,18 +31,18 @@ export class StirComponent implements OnInit {
   pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
   @ViewChild('grid') public grid: GridComponent;
   toolbarOptions = ['Excel Export', 'Search'];
-  public value: any =  '';
-  public dateValue: any =  '';
-  public Envalue: any =  '';
+  public value: any = '';
+  public dateValue: any = '';
+  public Envalue: any = '';
   public interval = 1;
   public customFormat = 'HH:mm:ss a';
   public ingredients: any = [];
-  public building = JSON.parse(localStorage.getItem('building'));
-  public role = JSON.parse(localStorage.getItem('level'));
-  timeStir = 0 ;
+  public building: any;
+  public role: any;
+  timeStir = 0;
   glueID: number;
-  settingID: number ;
-  settingData: object = [];
+  settingID: number;
+  settingData = [];
   glues: any;
   glueName: any;
   rpm = 0;
@@ -57,8 +58,11 @@ export class StirComponent implements OnInit {
     public ingredientService: IngredientService,
     public settingService: SettingService,
     public stirService: StirService,
+    private translate: TranslateService
   ) { }
   public ngOnInit(): void {
+    this.building = JSON.parse(localStorage.getItem('building'));
+    this.role = JSON.parse(localStorage.getItem('level'));
     this.getAllSetting();
     this.onRouteChange();
   }
@@ -79,29 +83,27 @@ export class StirComponent implements OnInit {
         break;
     }
   }
-  onChange(args, data) {
-    this.settingID = args.value ;
+  onChange(args, data, item) {
+    this.settingID = args.target.checked ? +args.target.value : null;
     const minTime = '0001-01-01T00:00:00';
-    const startTime = new Date();
-    const endTime = new Date ();
-    if (this.settingID === 1) {
-      endTime.setMinutes(startTime.getMinutes() + 4);
+    const startTime =  new Date();
+    const endTime = new Date();
+    if (item.machineType === 'Water') {
+      endTime.setMinutes(startTime.getMinutes() + 3);
     } else {
-      endTime.setMinutes(startTime.getMinutes() + 6);
+      endTime.setMinutes(startTime.getMinutes() + 3);
     }
     for (const key in this.glues) {
       if (this.glues[key].id === data.id) {
-        if (args.value === 'NA') {
+        if (+args.target.value === 0) {
           this.glues[key].startTime = minTime;
           this.glues[key].endTime = minTime;
-          this.glues[key].settingID = null;
-          this.glues[key].x = true;
+          this.glues[key].settingID = args.target.checked ? 0 : null;
           break;
         } else {
-          this.glues[key].startTime = startTime;
-          this.glues[key].endTime = endTime;
-          this.glues[key].settingID = args.value;
-          this.glues[key].x = false;
+          this.glues[key].startTime = args.target.checked ? startTime : minTime;
+          this.glues[key].endTime = args.target.checked ? endTime : minTime;
+          this.glues[key].settingID = this.settingID;
           break;
         }
       }
@@ -135,8 +137,8 @@ export class StirComponent implements OnInit {
           status: item.status,
           totalMinutes: item.totalMinutes,
           rpm: item.rpm,
-          machineType: item.machineType,
-          x: false
+          setting: item.setting,
+          machineType: item.machineType
         };
       });
       this.glues = res;
@@ -152,9 +154,16 @@ export class StirComponent implements OnInit {
         this.modalReference.close();
         return;
       }
-      this.rpm = obj.rpm;
-      this.minutes = obj.minutes;
-      this.totalMinutes = obj.totalMinutes;
+      if (this.stir.stirID > 0 && this.stir.rpm > 0) {
+        this.rpm = this.stir.rpm;
+        this.minutes = this.stir.totalMinutes;
+        this.totalMinutes = this.stir.totalMinutes;
+      } else {
+        this.rpm = obj.rpm;
+        this.minutes = obj.minutes;
+        this.totalMinutes = obj.totalMinutes;
+      }
+      this.status = this.rpm >= this.stir.setting.minRPM && this.rpm <= this.stir.setting.maxRPM ? true : false;
     } catch (error) {
       this.alertify.error(error + '');
     }
@@ -184,9 +193,9 @@ export class StirComponent implements OnInit {
       id: 0,
       rpm: 0,
       totalMinutes: 0,
-      status: false,
+      status: this.status,
       glueName: data.glueName,
-      settingID: data.settingID,
+      settingID: data.settingID === 0 ? null : data.settingID,
       mixingInfoID: data.id,
       startTime: this.datePipe.transform(data.startTime as Date, 'yyyy-MM-dd HH:mm:ss'),
       endTime: this.datePipe.transform(data.endTime as Date, 'yyyy-MM-dd HH:mm:ss')
@@ -219,13 +228,24 @@ export class StirComponent implements OnInit {
   }
 
   getAllSetting() {
-    let buildingId = this.building.level;
+    let buildingId = this.building.id;
     const roles = [this.ADMIN, this.SUPERVISOR];
     if (roles.includes(this.role.id)) {
       buildingId = 8;
     }
-    this.settingService.getSettingByBuilding(buildingId).subscribe((res) => {
-    this.settingData = res ;
+    const item = {
+      building: null,
+      buildingID: 8,
+      id: 0,
+      machineCode: '',
+      machineType: 'X',
+      maxRPM: 350,
+      minRPM: 250,
+      name: null
+    };
+    this.settingService.getSettingByBuilding(buildingId).subscribe((res: []) => {
+      this.settingData = res;
+      this.settingData.push(item);
     });
   }
   NO(index) {
@@ -234,14 +254,6 @@ export class StirComponent implements OnInit {
   async showModal(name, data) {
     this.stir = data;
     this.modalReference = this.modalService.open(name, { size: 'lg' });
-    // const startTime = this.datePipe.transform(data.startTime, 'yyyy-MM-dd HH:mm:ss');
-    // const endTime = this.datePipe.transform(data.endTime, 'yyyy-MM-dd HH:mm:ss');
-    if (data.settingID === 1) {
-      this.status = this.totalMinutes <= 4 ? true : false;
-    }
-    if (data.settingID === 2) {
-      this.status = this.totalMinutes <= 6 ? true : false;
-    }
     await this.loadRPM(data.stirID);
   }
 }

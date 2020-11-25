@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using EC_API.DTO;
 
 namespace DMR_API.Controllers
 {
@@ -69,11 +70,13 @@ namespace DMR_API.Controllers
         {
             return Ok(await _mixingInfoService.Mixing(update));
         }
-        [HttpGet("GetMixingInfoByGlueID/{glueName}")]
-        public async Task<IActionResult> GetMixingInfoByGlueName(string glueName)
+
+        [HttpPost("GetMixingInfoByGlueID")]
+        public async Task<IActionResult> GetMixingInfoByGlueName([FromBody]HistoryParams historyParams)
         {
-            return Ok(await _mixingInfoService.GetMixingInfoByGlueName(glueName));
+            return Ok(await _mixingInfoService.GetMixingInfoByGlueName(historyParams.GlueName));
         }
+      
         [HttpGet("DeliveredHistory")]
         public IActionResult DeliveredHistory()
         {

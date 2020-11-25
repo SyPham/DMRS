@@ -27,6 +27,7 @@ namespace DMR_API._Services.Interface
         Task<List<BPFCStatusDto>> RejectedFilter();
         Task<List<BPFCRecordDto>> GetAllBPFCRecord(Status status, string startBuildingDate, string endBuildingDate);
         Task<List<BPFCStatusDto>> GetAllBPFCStatus();
+        Task<List<BPFCStatusDto>> GetAllBPFCEstablish();
         Task<object> GetAllBPFCByBuildingID(int buildingID);
         Task<BPFCEstablishDto> GetBPFCID(GetBPFCIDDto bpfcInfo);
         Task<bool> UpdateSeason(BPFCEstablishUpdateSeason entity);

@@ -2,14 +2,17 @@ import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
-import { PageSettingsModel, GridComponent, CellEditArgs } from '@syncfusion/ej2-angular-grids';
+import { PageSettingsModel, GridComponent } from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DatePipe } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { DataService } from 'src/app/_core/_service/data.service';
-
+import { IBuilding } from 'src/app/_core/_model/building';
+import { IRole } from 'src/app/_core/_model/role';
+import { AuthService } from 'src/app/_core/_service/auth.service';
+const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
+const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
 const WORKER = 4;
 @Component({
   selector: 'app-plan-output-quantity',
@@ -17,6 +20,8 @@ const WORKER = 4;
   styleUrls: ['./plan-output-quantity.component.scss']
 })
 export class PlanOutputQuantityComponent implements OnInit {
+  role: IRole;
+  building: IBuilding;
   @ViewChild('cloneModal') public cloneModal: TemplateRef<any>;
   @ViewChild('planForm')
   public orderForm: FormGroup;
@@ -25,16 +30,13 @@ export class PlanOutputQuantityComponent implements OnInit {
   public editSettings: object;
   startDate = new Date();
   endDate = new Date();
-  sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
-  public role = JSON.parse(localStorage.getItem('level'));
-  public building = JSON.parse(localStorage.getItem('building'));
+  sortSettings: object;
   bpfcID: number;
   level: number;
   hasWorker: boolean;
   public bpfcData: object;
   public plansSelected: any;
   public date = new Date();
-  public toolbar: string[];
   public editparams: object;
   @ViewChild('grid')
   public grid: GridComponent;
@@ -67,23 +69,32 @@ export class PlanOutputQuantityComponent implements OnInit {
   locale: string;
 
   constructor(
-    private langService: DataService,
     private alertify: AlertifyService,
     public modalService: NgbModal,
     private planService: PlanService,
     private bPFCEstablishService: BPFCEstablishService,
+    public authService: AuthService,
     public datePipe: DatePipe,
     private spinner: NgxSpinnerService
   ) { }
 
   ngOnInit(): void {
-    this.locale = localStorage.getItem('lang');
-    const now = new Date();
-    this.endDate = new Date(now.setDate(now.getDate() + 15));
-    this.level = JSON.parse(localStorage.getItem('level')).level;
+    this.date = new Date();
+    this.endDate = new Date();
+    this.endDate = new Date();
+    this.role = ROLE;
+    this.building = BUIDLING;
+    this.gridConfig();
+    this.getAll();
+    this.getAllBPFC();
+    this.getAllLine(this.building.id);
+    this.ClearForm();
+  }
+  gridConfig(): void {
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
+    this.sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
     this.editparams = { params: { popupHeight: '300px' } };
-    if (this.level === WORKER) {
+    if (this.role.id === WORKER) {
       this.hasWorker = true;
       this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
       this.toolbarOptions = ['Search'];
@@ -92,12 +103,6 @@ export class PlanOutputQuantityComponent implements OnInit {
       this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
       this.toolbarOptions = ['Cancel', 'Search'];
     }
-    this.toolbar = ['Delete', 'Search', 'Copy'];
-    this.getAll(this.startDate, this.endDate);
-    this.getAllBPFC();
-    const buildingID = JSON.parse(localStorage.getItem('level')).id;
-    this.getAllLine(buildingID);
-    this.ClearForm();
   }
   count(index) {
     return Number(index) + 1;
@@ -107,23 +112,23 @@ export class PlanOutputQuantityComponent implements OnInit {
       this.buildingName = res;
     });
   }
-  created() {}
+  created() { }
   getReport(obj: { startDate: Date, endDate: Date }) {
     this.spinner.show();
     this.planService.getReport(obj).subscribe((data: any) => {
-        const blob = new Blob([data],
+      const blob = new Blob([data],
         { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-        const downloadURL = window.URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = downloadURL;
-        link.download = 'report.xlsx';
-        link.click();
-        this.spinner.hide();
+      const downloadURL = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = 'report.xlsx';
+      link.click();
+      this.spinner.hide();
     }, err => {
-        this.alertify.error(`Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>
+      this.alertify.error(`Chỉ được xuất dữ liệu báo cáo trong 30 ngày!!!<br>
         The report data can only be exported for 30 days !!!`, true);
-        this.spinner.hide();
+      this.spinner.hide();
     });
   }
   // Method is use to download file.
@@ -154,7 +159,6 @@ export class PlanOutputQuantityComponent implements OnInit {
   }
 
   actionComplete(e) {
-    console.log(e);
     if (e.requestType === 'beginEdit') {
       if (this.setFocus?.field) {
         e.form.elements.namedItem('quantity').focus(); // Set focus to the Target element
@@ -171,13 +175,17 @@ export class PlanOutputQuantityComponent implements OnInit {
 
     if (args.requestType === 'save') {
       if (args.action === 'edit') {
-        const planId = args.data.id || 0;
-        const quantity = args.data.quantity;
-        this.planService.editQuantity(planId, quantity).subscribe(res => {
-          this.alertify.success('Updated succeeded!');
-          this.ClearForm();
-          this.getAll(this.startDate, this.endDate);
-        });
+        const previousData = args.previousData;
+        const data = args.data;
+        if (data.quantity !== previousData.quantity) {
+          const planId = args.data.id || 0;
+          const quantity = args.data.quantity;
+          this.planService.editQuantity(planId, quantity).subscribe(res => {
+            this.alertify.success('Updated succeeded!');
+            this.ClearForm();
+            this.getAll();
+          });
+        } else { args.cancel = true; }
       }
     }
   }
@@ -221,31 +229,29 @@ export class PlanOutputQuantityComponent implements OnInit {
     });
   }
 
-  getAll(startDate, endDate) {
-    if (startDate instanceof Date && endDate instanceof Date) {
-      this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
-        this.data = res.map(item => {
-          return {
-            id: item.id,
-            bpfcName: `${item.modelName} - ${item.modelNoName} - ${item.articleName} - ${item.processName}`,
-            dueDate: item.dueDate,
-            createdDate: item.createdDate,
-            workingHour: item.workingHour,
-            hourlyOutput: item.hourlyOutput,
-            buildingName: item.buildingName,
-            buildingID: item.buildingID,
-            quantity: item.quantity,
-            bpfcEstablishID: item.bpfcEstablishID,
-            glues: item.glues || []
-          };
-        });
+  getAll() {
+    this.planService.search(this.building.id, this.startDate.toDateString(), this.endDate.toDateString()).subscribe((res: any) => {
+      this.data = res.map(item => {
+        return {
+          id: item.id,
+          bpfcName: `${item.modelName} - ${item.modelNoName} - ${item.articleName} - ${item.processName}`,
+          dueDate: item.dueDate,
+          createdDate: item.createdDate,
+          workingHour: item.workingHour,
+          hourlyOutput: item.hourlyOutput,
+          buildingName: item.buildingName,
+          buildingID: item.buildingID,
+          quantity: item.quantity,
+          bpfcEstablishID: item.bpfcEstablishID,
+          glues: item.glues || []
+        };
       });
-    }
+    });
   }
   deleteRange(plans) {
     this.alertify.confirm('Delete Plan', 'Are you sure you want to delete this Plans ?', () => {
       this.planService.deleteRange(plans).subscribe(() => {
-        this.getAll(this.startDate, this.endDate);
+        this.getAll();
         this.alertify.success('Plans has been deleted');
       }, error => {
         this.alertify.error('Failed to delete the Modal Name');
@@ -290,7 +296,7 @@ export class PlanOutputQuantityComponent implements OnInit {
         }
         break;
       case 'Excel Export':
-        this.getReport({startDate: this.startDate, endDate: this.endDate});
+        this.getReport({ startDate: this.startDate, endDate: this.endDate });
         break;
       default:
         break;
@@ -307,7 +313,7 @@ export class PlanOutputQuantityComponent implements OnInit {
         this.alertify.success('Successfully!');
         this.startDate = this.date;
         this.endDate = this.date;
-        this.getAll(this.date, this.date);
+        this.getAll();
         this.modalService.dismissAll();
       } else {
         this.alertify.warning('the plans have already existed!');
@@ -316,8 +322,8 @@ export class PlanOutputQuantityComponent implements OnInit {
     });
   }
 
-  search(startDate, endDate) {
-    this.planService.search(this.building.id, startDate.toDateString(), endDate.toDateString()).subscribe((res: any) => {
+  search() {
+    this.planService.search(this.building.id, this.startDate.toDateString(), this.endDate.toDateString()).subscribe((res: any) => {
       this.data = res.map(item => {
         return {
           id: item.id,
@@ -339,16 +345,16 @@ export class PlanOutputQuantityComponent implements OnInit {
 
   onClickDefault() {
     this.startDate = new Date();
-    this.endDate = new Date(new Date().setDate(15));
-    this.getAll(this.startDate, this.endDate);
+    this.endDate = new Date();
+    this.getAll();
   }
   startDateOnchange(args) {
     this.startDate = (args.value as Date);
-    this.search(this.startDate, this.endDate);
+    this.search();
   }
   endDateOnchange(args) {
     this.endDate = (args.value as Date);
-    this.search(this.startDate, this.endDate);
+    this.search();
   }
   tooltip(data) {
     if (data) {
@@ -361,7 +367,7 @@ export class PlanOutputQuantityComponent implements OnInit {
     this.planService.editQuantity(id, qty);
   }
   onClickFilter() {
-    this.search(this.startDate, this.endDate);
+    this.search();
   }
 
   // End API

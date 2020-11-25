@@ -30,7 +30,7 @@ namespace DMR_API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _bPFCEstablishService.GetAllAsync());
+            return Ok(await _bPFCEstablishService.GetAllBPFCEstablish());
         }
 
         [HttpGet]
@@ -94,15 +94,23 @@ namespace DMR_API.Controllers
 
                     for (int rowIterator = 2; rowIterator <= noOfRow; rowIterator++)
                     {
-                        datasList.Add(new BPFCEstablishDtoForImportExcel()
+                        var modelName = workSheet.Cells[rowIterator, 1].Value.ToSafetyString();
+                        var modelNo = workSheet.Cells[rowIterator, 2].Value.ToSafetyString();
+                        var articleNo = workSheet.Cells[rowIterator, 3].Value.ToSafetyString();
+                        var process = workSheet.Cells[rowIterator, 4].Value.ToSafetyString();
+                        if (!modelName.IsNullOrEmpty() && !modelNo.IsNullOrEmpty() && !articleNo.IsNullOrEmpty() && !process.IsNullOrEmpty())
                         {
-                            ModelName = workSheet.Cells[rowIterator, 1].Value.ToSafetyString(),
-                            ModelNo = workSheet.Cells[rowIterator, 2].Value.ToSafetyString(),
-                            ArticleNo = workSheet.Cells[rowIterator, 3].Value.ToSafetyString(),
-                            Process = workSheet.Cells[rowIterator, 4].Value.ToSafetyString(),
-                            CreatedDate = DateTime.Now,
-                            CreatedBy = userid
-                        });
+                            datasList.Add(new BPFCEstablishDtoForImportExcel()
+                            {
+                                ModelName = modelName,
+                                ModelNo = modelNo,
+                                ArticleNo = articleNo,
+                                Process = process,
+                                CreatedDate = DateTime.Now,
+                                CreatedBy = userid
+                            });
+                        }
+                        
                     }
                 }
 

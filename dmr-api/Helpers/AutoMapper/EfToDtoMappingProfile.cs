@@ -8,10 +8,10 @@ namespace DMR_API.Helpers.AutoMapper
     public class EfToDtoMappingProfile : Profile
     {
         char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-       
+
         public EfToDtoMappingProfile()
         {
-            
+
             CreateMap<User, UserForDetailDto>();
             CreateMap<Glue, GlueDto>().ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
             CreateMap<Glue, GlueCreateDto>().ForMember(d => d.CreatedDate, o => o.MapFrom(s => s.CreatedDate.ToParseStringDateTime()));
@@ -36,7 +36,7 @@ namespace DMR_API.Helpers.AutoMapper
 
             CreateMap<Line, LineDto>();
             CreateMap<Plan, PlanDto>()
-                 .ForMember(d => d.Glues, o => o.MapFrom(x => x.BPFCEstablish.Glues.Where(x=>x.isShow).Select(x=>x.Name)))
+                 .ForMember(d => d.Glues, o => o.MapFrom(x => x.BPFCEstablish.Glues.Where(x => x.isShow).Select(x => x.Name)))
                  .ForMember(d => d.ModelName, o => o.MapFrom(x => x.BPFCEstablish.ModelName.Name))
                 .ForMember(d => d.ModelNoName, o => o.MapFrom(x => x.BPFCEstablish.ModelNo.Name))
                 .ForMember(d => d.ArticleName, o => o.MapFrom(x => x.BPFCEstablish.ArticleNo.Name))
@@ -82,8 +82,8 @@ namespace DMR_API.Helpers.AutoMapper
 
             CreateMap<MixingInfo, MixingInfoDto>()
             .ForMember(d => d.ExpiredTime, o => o.MapFrom(x => x.ExpriedTime()))
-             .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble())); 
-           
+             .ForMember(d => d.RealTotal, o => o.MapFrom(real => real.ChemicalA.ToDouble() + real.ChemicalB.ToDouble() + real.ChemicalC.ToDouble() + real.ChemicalD.ToDouble() + real.ChemicalE.ToDouble()));
+
             CreateMap<MixingInfoForCreateDto, MixingInfo>();
 
             CreateMap<BPFCEstablish, BPFCEstablish>()
@@ -98,6 +98,13 @@ namespace DMR_API.Helpers.AutoMapper
             CreateMap<SettingDTO, Setting>();
             CreateMap<PlanForCloneDto, Plan>();
             CreateMap<ScaleMachineDto, ScaleMachine>();
+
+            CreateMap<Glue, ConsumtionDto>()
+           .ForMember(d => d.ModelName, o => o.MapFrom(x => x.BPFCEstablish.ModelName.Name))
+           .ForMember(d => d.ModelNo, o => o.MapFrom(x => x.BPFCEstablish.ModelNo.Name))
+           .ForMember(d => d.Std, o => o.MapFrom(x => x.Consumption.ToFloat()))
+           .ForMember(d => d.ArticleNo, o => o.MapFrom(x => x.BPFCEstablish.ArticleNo.Name))
+           .ForMember(d => d.ArticleNo, o => o.MapFrom(x => x.BPFCEstablish.ArticleNo.Name));
         }
 
     }

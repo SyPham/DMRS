@@ -50,6 +50,7 @@ export class BPFCScheduleComponent implements OnInit {
   }
 
   actionBegin(args) {
+    console.log(args.requestType + ' ' + args.type); // custom Action
     if (args.requestType === 'save') {
       const entity = {
         id: args.data.id,

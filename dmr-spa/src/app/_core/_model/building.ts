@@ -15,4 +15,6 @@ export interface IBuilding {
     level: number;
     name: string;
     parentID: number;
+    plans: any;
+    settings: any;
 }

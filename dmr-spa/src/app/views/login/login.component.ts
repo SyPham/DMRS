@@ -6,7 +6,8 @@ import { CookieService } from 'ngx-cookie-service';
 import { UserForLogin } from 'src/app/_core/_model/user';
 import { environment } from 'src/environments/environment';
 import { RoleService } from 'src/app/_core/_service/role.service';
-import { IUserRole } from 'src/app/_core/_model/role';
+import { IRole, IUserRole } from 'src/app/_core/_model/role';
+import { IBuilding } from 'src/app/_core/_model/building';
 const ADMIN = 1;
 const ADMIN_COSTING = 5;
 const SUPERVISOR = 2;
@@ -190,6 +191,7 @@ export class LoginComponent implements OnInit {
                 this.cookieService.set('systemCode', '');
               }
               localStorage.setItem('level', JSON.stringify(res));
+              this.authService.setRoleValue(res as IRole);
               this.level = res.id;
               if (this.level === WORKER) {
                 const currentLang = localStorage.getItem('lang');
@@ -206,7 +208,6 @@ export class LoginComponent implements OnInit {
                   localStorage.setItem('lang', 'en');
                 }
               }
-              this.authService.getBuildingByUserID(userId).subscribe((line: any) => localStorage.setItem('building', JSON.stringify(line)));
               this.checkRole();
             }
           });

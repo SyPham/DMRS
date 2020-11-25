@@ -72,14 +72,55 @@ import { ConsumptionComponent } from './consumption/consumption.component';
 import { TreeGridModule } from '@syncfusion/ej2-angular-treegrid';
 import { GridAllModule, GridModule } from '@syncfusion/ej2-angular-grids';
 import { ScalingSettingComponent } from './scaling-setting/scaling-setting.component';
+import { Consumption1Component } from './consumption-1/consumption-1.component';
+import { Consumption2Component } from './consumption-2/consumption-2.component';
+import { L10n, loadCldr, setCulture, Ajax } from '@syncfusion/ej2-base';
 
-
+let zh: any;
+let vi: any;
+let en: any;
+const viAjax = new Ajax('./assets/ej2-lang/vi.json', 'GET', true);
+const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
+const zhAjax = new Ajax('./assets/ej2-lang/zh.json', 'GET', true);
+zhAjax.onSuccess = (value) => {
+  // Assigning locale text value for Essential JS 2 components
+  zh = value;
+};
+zhAjax.send();
+enAjax.onSuccess = (value) => {
+  // Assigning locale text value for Essential JS 2 components
+  en = value;
+};
+enAjax.send();
+viAjax.onSuccess = (value) => {
+  vi = value;
+  // Assigning locale text value for Essential JS 2 components
+};
+viAjax.send();
+declare var require: any;
 let defaultLang: string;
 const lang = localStorage.getItem('lang');
-if (lang) {
+loadCldr(
+  require('cldr-data/supplemental/numberingSystems.json'),
+  require('cldr-data/main/en/ca-gregorian.json'),
+  require('cldr-data/main/en/numbers.json'),
+  require('cldr-data/main/en/timeZoneNames.json'),
+  require('cldr-data/supplemental/weekdata.json')); // To load the culture based first day of week
+
+loadCldr(
+  require('cldr-data/supplemental/numberingSystems.json'),
+  require('cldr-data/main/vi/ca-gregorian.json'),
+  require('cldr-data/main/vi/numbers.json'),
+  require('cldr-data/main/vi/timeZoneNames.json'),
+  require('cldr-data/supplemental/weekdata.json')); // To load the culture based first day of week
+if (lang === 'vi') {
   defaultLang = lang;
+  // setCulture('vi');
+  // L10n.load(vi);
 } else {
   defaultLang = 'en';
+  // setCulture('en');
+  // L10n.load(en);
 }
 @NgModule({
   providers: [
@@ -160,7 +201,9 @@ if (lang) {
     PlanOutputQuantityComponent,
     CostingComponent,
     BuildingSettingComponent,
-    ConsumptionComponent
+    ConsumptionComponent,
+    Consumption1Component,
+    Consumption2Component,
   ]
 })
 export class ECModule { }

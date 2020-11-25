@@ -725,5 +725,17 @@ namespace DMR_API._Services.Services
             item.Remark = entity.Remark;
             return await _repoBPFCHistory.SaveAll();
         }
+
+        public async Task<List<BPFCStatusDto>> GetAllBPFCEstablish()
+        {
+            var undone = await _repoBPFCEstablish.FindAll()
+                .Where(x => x.FinishedStatus == false)
+                .ProjectTo<BPFCStatusDto>(_configMapper).OrderBy(x => x.CreatedDate).ToListAsync();
+            var done = await _repoBPFCEstablish.FindAll()
+              .Where(x => x.FinishedStatus == true)
+              .ProjectTo<BPFCStatusDto>(_configMapper).OrderBy(x => x.CreatedDate).ToListAsync();
+            var model = undone.Union(done);
+            return model.ToList();
+        }
     }
 }

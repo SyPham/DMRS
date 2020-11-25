@@ -1,4 +1,5 @@
 ﻿using DMR_API.DTO;
+using EC_API.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace DMR_API._Services.Interface
         Task<object> GetAllPlansByDate(string from, string to);
         Task<object> Summary(int building);
         Task<object> GetLines(int buildingID);
-        Task<Byte[]> Report(DateTime startDate, DateTime endDate);
+        Task<byte[]> Report(DateTime startDate, DateTime endDate);
+        Task<byte[]> ReportConsumptionCase2(ReportParams reportParams);
+        Task<byte[]> ReportConsumptionCase1(ReportParams reportParams);
         Task<List<GlueCreateDto1>> GetGlueByBuilding(int buildingID);
         Task<List<GlueCreateDto1>> GetGlueByBuildingModelName(int buildingID, int modelName);
 
@@ -28,6 +31,8 @@ namespace DMR_API._Services.Interface
         Task<bool> EditQuantity(int id, int qty );
         Task<bool> DeleteDelivered(int id);
         Task<object> OldSummary(int building);
+        Task<List<ConsumtionDto>> ConsumptionByLineCase1(ReportParams reportParams);
+        Task<List<ConsumtionDto>> ConsumptionByLineCase2(ReportParams reportParams);
 
     }
 }

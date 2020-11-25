@@ -105,6 +105,7 @@ namespace DMR_API._Services.Services
                             ab.StartTime,
                             ab.EndTime,
                             ab.SettingID,
+                            ab.Setting,
                             MachineType = ab.SettingID == null ? string.Empty : ab.Setting.MachineType,
                             ab.Status,
                             ab.RPM,
@@ -186,50 +187,64 @@ namespace DMR_API._Services.Services
             var stir = await _repoStir.GetAll().Include(x => x.Setting).FirstOrDefaultAsync(x => x.ID == stirID);
             if (stir == null) return new
             {
-                rpm = 0,
-                totalMinutes = 0,
-                minutes
+               rpm = 0,
+               totalMinutes = 0,
+               minutes
             };
             if (stir.Setting == null) return new
             {
-                rpm = 0,
-                totalMinutes = 0,
-                minutes
+               rpm = 0,
+               totalMinutes = 0,
+               minutes
             };
             var machineID = stir.Setting.MachineCode.ToInt();
             var start = stir.StartTime;
             var end = stir.EndTime;
-            var model = _rowDataRepository.FilterBy(x => x.MachineID == machineID).Select(x => new { x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList().Where(x => x.CreatedDateTime >= start && x.CreatedDateTime <= end);
+            var model = _rowDataRepository.AsQueryable().Select(x => new { x.MachineID, x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList().Where(x => x.MachineID == machineID && x.CreatedDateTime >= start && x.CreatedDateTime <= end).ToList();
+            // var model = _rowDataRepository.AsQueryable().Where(x => x.MachineID == machineID).Select(x => new { x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList().Where(x => x.CreatedDateTime >= start && x.CreatedDateTime <= end);
             if (model.Count() > 0)
             {
-                var max = model.Select(x => x.CreatedDateTime).FirstOrDefault();
-                var min = model.Select(x => x.CreatedDateTime).LastOrDefault();
-                if (min != DateTime.MinValue && max != DateTime.MinValue)
-                {
-                    minutes = max - min;
-                }
-                return new
-                {
-                    rpm = Math.Round(model.Select(x => x.RPM).Average()),
-                    totalMinutes = Math.Round(minutes.TotalMinutes, 2),
-                    minutes
-                };
+               var max = model.Select(x => x.CreatedDateTime).FirstOrDefault();
+               var min = model.Select(x => x.CreatedDateTime).LastOrDefault();
+               if (min != DateTime.MinValue && max != DateTime.MinValue)
+               {
+                   minutes = max - min;
+               }
+               return new
+               {
+                   rpm = Math.Round(model.Select(x => x.RPM).Average()),
+                   totalMinutes = Math.Round(minutes.TotalMinutes, 2),
+                   minutes
+               };
             }
             return new
             {
-                rpm = 0,
-                totalMinutes = 0,
-                minutes
+               rpm = 0,
+               totalMinutes = 0,
+               minutes
             };
+            // var min = Math.Round(RandomNumber(3.33, 3.35), 2);
+            // return new
+            // {
+            //     rpm = Math.Round(RandomNumber(361, 398)), // 361 tới 398
+            //     totalMinutes = min,
+            //     minutes = min
+            // };
         }
-
+        private double RandomNumber(double minimum, double maximum)
+        {
+            Random random = new Random();
+            return random.NextDouble() * (maximum - minimum) + minimum;
+        }
         public object GetRawData(int machineID, string startTime, string endTime)
         {
             var start = DateTime.Parse(startTime, CultureInfo.CurrentCulture,
                                     DateTimeStyles.None);
             var end = DateTime.Parse(endTime, CultureInfo.CurrentCulture,
                                     DateTimeStyles.None);
-            var model = _rowDataRepository.AsQueryable().Select(x => new {x.MachineID, x.RPM, x.CreatedDateTime }).OrderByDescending(x=>x.CreatedDateTime).ToList();
+            var model = _rowDataRepository.AsQueryable().Select(x => new { x.MachineID, x.RPM, x.CreatedDateTime }).OrderByDescending(x => x.CreatedDateTime).ToList().Where(x => x.MachineID == machineID && x.CreatedDateTime >= start && x.CreatedDateTime <= end).ToList();
+
+            // var model = _rowDataRepository.AsQueryable().Select(x => new {x.MachineID, x.RPM, x.CreatedDateTime }).OrderByDescending(x=>x.CreatedDateTime).ToList();
             return model;
         }
     }

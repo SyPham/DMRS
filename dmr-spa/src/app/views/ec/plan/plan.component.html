@@ -71,6 +71,7 @@
                               <ejs-dropdownlist
                                 [dataSource]='BPFCs'
                                 [(ngModel)]="data.bpfcName"
+                                (filtering)='onFiltering($event)'
                                 popupHeight='300px'
                                 popupWidth='450px'
                                 [fields]='fieldsBPFC'

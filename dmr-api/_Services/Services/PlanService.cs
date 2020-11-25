@@ -21,11 +21,13 @@ using System.IO;
 using OfficeOpenXml.Style;
 using System.Drawing;
 using Microsoft.AspNetCore.Http;
+using EC_API.DTO;
 
 namespace DMR_API._Services.Services
 {
     public class PlanService : IPlanService
     {
+        private readonly int LINE_LEVEL = 3;
         private readonly IPlanRepository _repoPlan;
         private readonly IPlanDetailRepository _repoPlanDetail;
         private readonly IGlueRepository _repoGlue;
@@ -1032,6 +1034,320 @@ namespace DMR_API._Services.Services
                 result += arrayA[i] * arrayB[i];
             return result;
         }
+        private Byte[] ExportExcelConsumptionCase2(List<ConsumtionDto> consumtionDtos)
+        {
+            try
+            {
+                consumtionDtos = consumtionDtos.OrderByDescending(x => x.DueDate).OrderBy(x => x.DueDate).ThenBy(x => x.Line).ThenBy(x => x.ID).ThenByDescending(x => x.Percentage).ToList();
+                ExcelPackage.LicenseContext = LicenseContext.Commercial;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var memoryStream = new MemoryStream();
+                using (ExcelPackage p = new ExcelPackage(memoryStream))
+                {
+                    // đặt tên người tạo file
+                    p.Workbook.Properties.Author = "Henry Pham";
+
+                    // đặt tiêu đề cho file
+                    p.Workbook.Properties.Title = "ReportConsumption";
+                    //Tạo một sheet để làm việc trên đó
+                    p.Workbook.Worksheets.Add("ReportConsumption");
+
+                    // lấy sheet vừa add ra để thao tác
+                    ExcelWorksheet ws = p.Workbook.Worksheets["ReportConsumption"];
+
+                    // đặt tên cho sheet
+                    ws.Name = "ReportConsumption";
+                    // fontsize mặc định cho cả sheet
+                    ws.Cells.Style.Font.Size = 12;
+                    // font family mặc định cho cả sheet
+                    ws.Cells.Style.Font.Name = "Calibri";
+                    var headers = new string[]{
+                        "Line", "Model Name", "Model No.", "Article No.",
+                        "Process", "Qty", "Glue", "Std.(g)", "Real Consumption(g)pr.", "Diff.", "%"
+                    };
+
+                    int headerRowIndex = 1;
+                    int headerColIndex = 1;
+                    foreach (var header in headers)
+                    {
+                        int col = headerRowIndex++;
+                        ws.Cells[headerColIndex, col].Value = header;
+                        ws.Cells[headerColIndex, col].Style.Font.Bold = true;
+                        ws.Cells[headerColIndex, col].Style.Font.Size = 12;
+                    }
+
+                    // end Style
+                    int colIndex = 1;
+                    int rowIndex = 1;
+                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
+                    foreach (var body in consumtionDtos)
+                    {
+                        // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0 #c0514d
+                        colIndex = 1;
+
+                        // rowIndex tương ứng từng dòng dữ liệu
+                        rowIndex++;
+
+
+                        //gán giá trị cho từng cell                      
+                        ws.Cells[rowIndex, colIndex++].Value = body.Line;
+                        ws.Cells[rowIndex, colIndex++].Value = body.ModelName;
+                        ws.Cells[rowIndex, colIndex++].Value = body.ModelNo;
+                        ws.Cells[rowIndex, colIndex++].Value = body.ArticleNo;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Process;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Qty;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Glue;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Std;
+                        ws.Cells[rowIndex, colIndex++].Value = Math.Round(body.RealConsumption, 2);
+                        ws.Cells[rowIndex, colIndex++].Value = body.Diff;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Percentage + "%";
+                    }
+                    int colPatternIndex = 1;
+                    int rowPatternIndex = 1;
+
+                    int colColorIndex = 1;
+                    int rowColorIndex = 1;
+                    foreach (var body in consumtionDtos)
+                    {
+                        rowColorIndex++;
+                        rowPatternIndex++;
+
+                        if (body.Percentage > 0)
+                        {
+                            colPatternIndex = 7;
+                            colColorIndex = 7;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                        }
+                    }
+                    int mergeFromColIndex = 1;
+                    int mergeToColIndex = 1;
+                    int mergeFromRowIndex = 2;
+                    int mergeToRowIndex = 1;
+                    foreach (var item in consumtionDtos.GroupBy(x => new
+                    {
+                        x.ID,
+                        x.Line,
+                        x.ModelName,
+                        x.ModelNo,
+                        x.ArticleNo,
+                        x.Process,
+                        x.Qty
+                    }))
+                    {
+                        mergeToRowIndex += item.Count();
+                        ws.Cells[mergeFromRowIndex, mergeFromColIndex, mergeToRowIndex, mergeToColIndex].Merge = true;
+                        ws.Cells[mergeFromRowIndex, mergeFromColIndex, mergeToRowIndex, mergeToColIndex].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, mergeFromColIndex, mergeToRowIndex, mergeToColIndex].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        ws.Cells[mergeFromRowIndex, 2, mergeToRowIndex, 2].Merge = true;
+                        ws.Cells[mergeFromRowIndex, 2, mergeToRowIndex, 2].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, 2, mergeToRowIndex, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        ws.Cells[mergeFromRowIndex, 3, mergeToRowIndex, 3].Merge = true;
+                        ws.Cells[mergeFromRowIndex, 3, mergeToRowIndex, 3].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, 3, mergeToRowIndex, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        ws.Cells[mergeFromRowIndex, 4, mergeToRowIndex, 4].Merge = true;
+                        ws.Cells[mergeFromRowIndex, 4, mergeToRowIndex, 4].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, 4, mergeToRowIndex, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        ws.Cells[mergeFromRowIndex, 5, mergeToRowIndex, 5].Merge = true;
+                        ws.Cells[mergeFromRowIndex, 5, mergeToRowIndex, 5].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, 5, mergeToRowIndex, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+
+                        ws.Cells[mergeFromRowIndex, 6, mergeToRowIndex, 6].Merge = true;
+                        ws.Cells[mergeFromRowIndex, 6, mergeToRowIndex, 6].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Cells[mergeFromRowIndex, 6, mergeToRowIndex, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        mergeFromRowIndex = mergeToRowIndex + 1;
+                    }
+                    //make the borders of cell F6 thick
+                    ws.Cells[ws.Dimension.Address].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    foreach (var item in headers.Select((x, i) => new { Value = x, Index = i }))
+                    {
+                        var col = item.Index + 1;
+                        ws.Column(col).Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Column(col).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        if (col == 2 || col == 7)
+                        {
+                            ws.Column(col).AutoFit(30);
+                        }
+                        else
+                        {
+                            ws.Column(col).AutoFit();
+                        }
+                    }
+
+                    //Lưu file lại
+                    Byte[] bin = p.GetAsByteArray();
+                    return bin;
+                }
+            }
+            catch (Exception ex)
+            {
+                var mes = ex.Message;
+                Console.Write(mes);
+                return new Byte[] { };
+            }
+        }
+        private Byte[] ExportExcelConsumptionCase1(List<ConsumtionDto> consumtionDtos)
+        {
+            try
+            {
+                consumtionDtos = consumtionDtos.OrderByDescending(x => x.Percentage).ToList();
+                ExcelPackage.LicenseContext = LicenseContext.Commercial;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var memoryStream = new MemoryStream();
+                using (ExcelPackage p = new ExcelPackage(memoryStream))
+                {
+                    // đặt tên người tạo file
+                    p.Workbook.Properties.Author = "Henry Pham";
+
+                    // đặt tiêu đề cho file
+                    p.Workbook.Properties.Title = "ReportConsumption";
+                    //Tạo một sheet để làm việc trên đó
+                    p.Workbook.Worksheets.Add("ReportConsumption");
+
+                    // lấy sheet vừa add ra để thao tác
+                    ExcelWorksheet ws = p.Workbook.Worksheets["ReportConsumption"];
+
+                    // đặt tên cho sheet
+                    ws.Name = "ReportConsumption";
+                    // fontsize mặc định cho cả sheet
+                    ws.Cells.Style.Font.Size = 12;
+                    // font family mặc định cho cả sheet
+                    ws.Cells.Style.Font.Name = "Calibri";
+                    var headers = new string[]{
+                        "Model Name", "Model No.", "Article No.",
+                        "Process", "Glue", "Std.(g)", "Glue Mixing Date", "Line", "Qty",
+                        "Total Consumption(kg)", "Real Consumption(g)pr.", "Diff.", "%"
+                    };
+
+                    int headerRowIndex = 1;
+                    int headerColIndex = 1;
+                    foreach (var header in headers)
+                    {
+                        int col = headerRowIndex++;
+                        ws.Cells[headerColIndex, col].Value = header;
+                        ws.Cells[headerColIndex, col].Style.Font.Bold = true;
+                        ws.Cells[headerColIndex, col].Style.Font.Size = 12;
+                    }
+                    // end Style
+                    int colIndex = 1;
+                    int rowIndex = 1;
+                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
+                    foreach (var body in consumtionDtos)
+                    {
+                        // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0 #c0514d
+                        colIndex = 1;
+
+                        // rowIndex tương ứng từng dòng dữ liệu
+                        rowIndex++;
+
+
+                        //gán giá trị cho từng cell                      
+                        ws.Cells[rowIndex, colIndex++].Value = body.ModelName;
+                        ws.Cells[rowIndex, colIndex++].Value = body.ModelNo;
+                        ws.Cells[rowIndex, colIndex++].Value = body.ArticleNo;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Process;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Glue;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Std;
+                        ws.Cells[rowIndex, colIndex++].Value = body.MixingDate == DateTime.MinValue ? "N/A" : body.MixingDate.ToString("dd/MM/yyyy");
+                        ws.Cells[rowIndex, colIndex++].Value = body.Line;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Qty;
+                        ws.Cells[rowIndex, colIndex++].Value = Math.Round(body.TotalConsumption, 2);
+                        ws.Cells[rowIndex, colIndex++].Value = Math.Round(body.RealConsumption, 2);
+                        ws.Cells[rowIndex, colIndex++].Value = body.Diff;
+                        ws.Cells[rowIndex, colIndex++].Value = body.Percentage + "%";
+                    }
+
+                    int colPatternIndex = 1;
+                    int rowPatternIndex = 1;
+
+                    int colColorIndex = 1;
+                    int rowColorIndex = 1;
+                    foreach (var body in consumtionDtos)
+                    {
+                        rowColorIndex++;
+                        rowPatternIndex++;
+                        colPatternIndex = 1;
+                        colColorIndex = 1;
+                        if (body.Percentage > 0)
+                        {
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowPatternIndex, colPatternIndex++].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                            ws.Cells[rowColorIndex, colColorIndex++].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#FFFF66"));
+                           
+                        }
+                    }
+                   
+                    //make the borders of cell F6 thick
+                    ws.Cells[ws.Dimension.Address].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[ws.Dimension.Address].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    foreach (var item in headers.Select((x, i) => new { Value = x, Index = i }))
+                    {
+                        var col = item.Index + 1;
+                        ws.Column(col).Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        ws.Column(col).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        if (col == 5 || col == 1)
+                        {
+                            ws.Column(col).AutoFit(30);
+                        }
+                        else
+                        {
+                            ws.Column(col).AutoFit();
+                        }
+                    }
+                    //Lưu file lại
+                    Byte[] bin = p.GetAsByteArray();
+                    return bin;
+                }
+            }
+            catch (Exception ex)
+            {
+                var mes = ex.Message;
+                Console.Write(mes);
+                return new Byte[] { };
+            }
+        }
         private Byte[] ExportExcel(ReportHeaderDto header, List<ReportBodyDto> bodyList, List<IngredientReportDto> ingredients)
         {
             try
@@ -1617,6 +1933,105 @@ namespace DMR_API._Services.Services
             // End Data
             return new { header, rowParents, modelNameList };
 
+        }
+
+        public async Task<List<ConsumtionDto>> ConsumptionByLineCase1(ReportParams reportParams)
+        {
+            var res = await ConsumptionReportByBuilding(reportParams);
+            return res.OrderByDescending(x => x.Percentage).ToList();
+        }
+
+        public async Task<List<ConsumtionDto>> ConsumptionByLineCase2(ReportParams reportParams)
+        {
+            var res = await ConsumptionReportByBuilding(reportParams);
+
+            return res.OrderByDescending(x => x.DueDate).OrderBy(x => x.DueDate).ThenBy(x => x.Line).ThenBy(x => x.ID).ThenByDescending(x => x.Percentage).ToList();
+        }
+        private async Task<List<ConsumtionDto>> ConsumptionReportByBuilding(ReportParams reportParams)
+        {
+            var startDate = reportParams.StartDate.Date;
+            var endDate = reportParams.EndDate.Date;
+            var buildingID = reportParams.BuildingID;
+            var lines = new List<int>();
+            if (buildingID == 0)
+            {
+                lines = await _repoBuilding.FindAll(x => x.Level == LINE_LEVEL).Select(x => x.ID).ToListAsync();
+            }
+            else
+            {
+                lines = await _repoBuilding.FindAll(x => x.ParentID == buildingID).Select(x => x.ID).ToListAsync();
+            }
+            var buildingGlueModel = await _repoBuildingGlue.FindAll(x => x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && lines.Contains(x.BuildingID)).Include(x=>x.MixingInfo).ToListAsync();
+            var model = await _repoPlan.FindAll()
+                 .Include(x => x.BPFCEstablish)
+                 .ThenInclude(x => x.Glues)
+                  .Include(x => x.BPFCEstablish)
+                 .ThenInclude(x => x.Plans)
+                 .ThenInclude(x => x.Building)
+                 .Include(x => x.BPFCEstablish)
+                 .ThenInclude(x => x.ModelName)
+                 .ThenInclude(x => x.ModelNos)
+                 .ThenInclude(x => x.ArticleNos)
+                 .ThenInclude(x => x.ArtProcesses)
+                 .ThenInclude(x => x.Process)
+                 .Select(x => new
+                 {
+                     x.BPFCEstablishID,
+                     x.Quantity,
+                     x.DueDate.Date,
+                     x.BuildingID,
+                     Line = x.Building.Name,
+                     ModelName = x.BPFCEstablish.ModelName.Name,
+                     ModelNo = x.BPFCEstablish.ModelNo.Name,
+                     ArticleNo = x.BPFCEstablish.ArticleNo.Name,
+                     Process = x.BPFCEstablish.ArtProcess.Process.Name,
+                     Plans = x.BPFCEstablish.Plans,
+                     Glues = x.BPFCEstablish.Glues.ToList()
+                 }).Where(x => x.Plans.Any(x => lines.Contains(x.BuildingID)) && x.Date >= startDate && x.Date <= endDate)
+                 .ToListAsync();
+            var list = new List<ConsumtionDto>();
+            foreach (var item in model)
+            {
+                foreach (var glue in item.Glues.Where(x => x.isShow))
+                {
+                    var std = glue.Consumption.ToFloat();
+                    var buildingGlue = buildingGlueModel.FirstOrDefault(x => x.GlueName.Equals(glue.Name) && x.CreatedDate.Date == item.Date && item.BuildingID == x.BuildingID);
+                    var totalConsumption = buildingGlue == null ? 0 : buildingGlue.Qty.ToFloat();
+                    var realConsumption = totalConsumption > 0 && item.Quantity > 0 ? Math.Round(totalConsumption * 1000 / item.Quantity, 2).ToFloat() : 0;
+                    var diff = std > 0 && realConsumption > 0 ? Math.Round(realConsumption - std, 2).ToFloat() : 0;
+                    var percentage = std > 0 ? Math.Round((diff / std) * 100).ToFloat() : 0;
+                    list.Add(new ConsumtionDto
+                    {
+                        ModelName = item.ModelName,
+                        ModelNo = item.ModelNo,
+                        ArticleNo = item.ArticleNo,
+                        Process = item.Process,
+                        Line = item.Line,
+                        Glue = glue.Name,
+                        Std = std,
+                        Qty = item.Quantity,
+                        TotalConsumption = totalConsumption,
+                        RealConsumption = realConsumption,
+                        Diff = diff,
+                        ID = item.BPFCEstablishID,
+                        Percentage = percentage,
+                        DueDate = item.Date,
+                        MixingDate = buildingGlue == null || buildingGlue.MixingInfo == null? DateTime.MinValue : buildingGlue.MixingInfo.CreatedTime
+                    });
+                }
+
+            }
+            return list.ToList();
+        }
+        public async Task<byte[]> ReportConsumptionCase2(ReportParams reportParams)
+        {
+            var res = await ConsumptionReportByBuilding(reportParams);
+            return ExportExcelConsumptionCase2(res);
+        }
+        public async Task<byte[]> ReportConsumptionCase1(ReportParams reportParams)
+        {
+            var res = await ConsumptionReportByBuilding(reportParams);
+            return ExportExcelConsumptionCase1(res);
         }
     }
 }

@@ -75,11 +75,14 @@
             </e-column>
             <e-column field='createdDate' isPrimaryKey='true' type='date' format='dd MMM, yyyy HH:mm'
               headerText='Created Date' width='200' textAlign='Center'>
-              <ng-template #headerTemplate let-data>
-                {{'CREATED_DATE_LABEL' | translate}}
+             <ng-template #headerTemplate let-data>
+                {{'UPDATE_TIME' | translate}}
               </ng-template>
                 <ng-template #editTemplate let-data>
-                  {{data.createdDate| date:'dd MMM, yyyy HH:mm'}}
+                  {{data.quantity === 0 ? '-' : data.createdDate| date:'dd MMM, yyyy HH:mm'}}
+                </ng-template>
+                <ng-template #template let-data>
+                  {{data.quantity === 0 ? '-' : data.createdDate| date:'dd MMM, yyyy HH:mm'}}
                 </ng-template>
             </e-column>
           </e-columns>

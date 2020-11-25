@@ -14,6 +14,7 @@ using DMR_API.Helpers.AutoMapper;
 using DMR_API.SignalrHub;
 using EC_API._Services.Interface;
 using EC_API.Data;
+using EC_API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +43,7 @@ namespace DMR_API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var appsettings = Configuration.GetSection("Appsettings").Get<Appsettings>();
             services.AddSignalR();
             services.AddLogging();
             services.Configure<MongoDbSettings>(Configuration.GetSection("MongoDbSettings"));
@@ -51,16 +53,8 @@ namespace DMR_API
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    builder => builder.WithOrigins(
-                    "http://10.4.4.224:1000",
-                    "http://localhost:1000",
-                    "http://10.4.4.224:1001",
-                    "http://10.4.4.224:106",
-                    "http://10.4.0.76:96",
-                    "http://10.4.0.76:1001",
-                    "http://10.4.4.92:1000",
-                    "http://10.4.0.76:1005",
-                    "http://10.4.0.76:1000") //register for client
+                    builder => builder.WithOrigins(appsettings.CorsPolicy
+                    ) //register for client
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());

@@ -48,8 +48,8 @@ export class MakeGlueService {
   Guidance(guidance) {
     return this.http.post(this.baseUrl + 'MakeGlue/Guidance', guidance);
   }
-  getMixingInfoByGlueID(id) {
-    return this.http.get(this.baseUrl + 'MakeGlue/GetMixingInfoByGlueID/' + id, {});
+  getMixingInfoByGlueID(glueName: string) {
+    return this.http.post(this.baseUrl + 'MakeGlue/GetMixingInfoByGlueID', { glueName} );
 
   }
   deliveredHistory() {

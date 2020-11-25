@@ -13,9 +13,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AvatarModalComponent } from './avatar-modal/avatar-modal.component';
 import { TranslateService } from '@ngx-translate/core';
 import { RoleService } from 'src/app/_core/_service/role.service';
-import { setCulture, L10n } from '@syncfusion/ej2-base';
 import { CookieService } from 'ngx-cookie-service';
-
+import { L10n, loadCldr, setCulture, Ajax } from '@syncfusion/ej2-base';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -41,11 +40,14 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   userid: number;
   level: number;
   roleName: string;
-  role: number;
+  role: any;
   avatar: any;
+  vi: any;
+  en: any;
   langsData: object[];
   public fields = { text: 'name', value: 'id' };
   public value: string;
+  zh: any;
   constructor(
     private authService: AuthService,
     private roleService: RoleService,
@@ -73,13 +75,31 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     }
   }
   ngOnInit(): void {
+    const viAjax = new Ajax('./assets/ej2-lang/vi.json', 'GET', true);
+    const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
+    const zhAjax = new Ajax('./assets/ej2-lang/zh.json', 'GET', true);
+    zhAjax.onSuccess = (value) => {
+      // Assigning locale text value for Essential JS 2 components
+      this.zh = value;
+    };
+    zhAjax.send();
+    enAjax.onSuccess = (value) => {
+      // Assigning locale text value for Essential JS 2 components
+      this.en = value;
+    };
+    enAjax.send();
+    viAjax.onSuccess = (value) => {
+      this.vi = value;
+      // Assigning locale text value for Essential JS 2 components
+    };
+    viAjax.send();
     this.langsData = [{ id: 'vi', name: 'VI' }, { id: 'en', name: 'EN' }];
     this.navAdmin = new Nav().getNavAdmin();
     this.navClient = new Nav().getNavClient();
     this.navEc = new Nav().getNavEc();
     // this.checkTask();
     this.getAvatar();
-    this.role = JSON.parse(localStorage.getItem('user')).User.Role;
+    this.role = JSON.parse(localStorage.getItem('level'));
     this.currentUser = JSON.parse(localStorage.getItem('user')).User.Username;
     this.page = 1;
     this.pageSize = 10;
@@ -99,11 +119,25 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.avatar = this.sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64, ' + img);
     }
   }
+  home() {
+    if (this.role.id === this.STAFF) {
+      return '/ec/establish/bpfc';
+    } else {
+      return'/ec/execution/todolist';
+    }
+  }
   onChange(args) {
     if (args.itemData) {
       localStorage.removeItem('lang');
       localStorage.setItem('lang', args.itemData.id);
       this.translate.use(args.itemData.id);
+      // if (args.itemData.id === 'vi') {
+      //   setCulture('vi');
+      //   L10n.load(this.vi);
+      // } else {
+      //   setCulture('en-US');
+      //   L10n.load(this.en);
+      // }
     }
   }
   getBuilding() {
@@ -162,12 +196,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   logout() {
     this.cookieService.deleteAll();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('avatar');
-    localStorage.removeItem('level');
-    localStorage.removeItem('details');
-    localStorage.removeItem('buildingID');
+    localStorage.clear();
     this.authService.decodedToken = null;
     this.authService.currentUser = null;
     this.alertify.message('Logged out');
@@ -192,16 +221,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.router.navigate(['/todolist']);
     }
   }
-  checkServer() {
-    const user = JSON.parse(localStorage.getItem('user')).User.Username;
-    setInterval(() => {
-      this.checkAlert();
-    }, 30000);
-  }
-  checkAlert() {
-    const userId = JSON.parse(localStorage.getItem('user')).User.ID;
-    this.signalrService.checkAlert(userId);
-  }
+
   getNotifications() {
     this.headerService.getAllNotificationCurrentUser(this.page, this.pageSize, this.userid).subscribe((res: any) => {
       this.data = res.model;

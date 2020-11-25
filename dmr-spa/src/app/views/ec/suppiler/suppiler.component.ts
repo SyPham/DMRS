@@ -47,9 +47,13 @@ export class SuppilerComponent implements OnInit {
         this.update(this.modalSup);
       }
       if (args.action === 'add') {
-        this.modalSup.id = 0;
-        this.modalSup.name = args.data.name;
-        this.add(this.modalSup);
+        if (args.data.name) {
+          this.modalSup.id = 0;
+          this.modalSup.name = args.data.name;
+          this.add(this.modalSup);
+        } else {
+          args.cancel = true;
+        }
       }
     }
     if (args.requestType === 'delete') {
@@ -82,7 +86,7 @@ export class SuppilerComponent implements OnInit {
         this.getAllSupplier();
         this.alertify.success('Supplier has been deleted');
       }, error => {
-          this.alertify.error('Failed to delete the supplier');
+        this.alertify.error('Failed to delete the supplier');
       });
     });
   }

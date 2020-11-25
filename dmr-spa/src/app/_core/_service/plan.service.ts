@@ -1,4 +1,4 @@
-import { Plan } from './../_model/plan';
+import { Consumtion, Plan } from './../_model/plan';
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -74,6 +74,22 @@ export class PlanService {
   }
   summary(buildingID) {
     return this.http.get(this.baseUrl + 'Plan/summary/' + buildingID);
+  }
+  consumptionByLineCase1(buildingID: number, startDate: Date, endDate: Date) {
+    const params = { buildingID, startDate, endDate};
+    return this.http.post<Consumtion[]>(this.baseUrl + 'Plan/ConsumptionByLineCase1', params);
+  }
+  consumptionByLineCase2(buildingID: number, startDate: Date, endDate: Date) {
+    const params = { buildingID, startDate, endDate };
+    return this.http.post<Consumtion[]>(this.baseUrl + 'Plan/ConsumptionByLineCase2', params );
+  }
+  reportConsumptionCase1(buildingID: number, startDate: Date, endDate: Date) {
+    const params = { buildingID, startDate, endDate };
+    return this.http.post(this.baseUrl + 'Plan/ReportConsumptionCase1', params, { responseType: 'blob' });
+  }
+  reportConsumptionCase2(buildingID: number, startDate: Date, endDate: Date) {
+    const params = { buildingID, startDate, endDate };
+    return this.http.post(this.baseUrl + 'Plan/ReportConsumptionCase2', params, { responseType: 'blob' });
   }
   dispatchGlue(obj) {
     return this.http.post(this.baseUrl + 'Plan/DispatchGlue', obj);

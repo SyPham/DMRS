@@ -1,8 +1,10 @@
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../environments/environment';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
-export const CONNECTION_HUB = new signalR.HubConnectionBuilder()
+export const CONNECTION_HUB = new HubConnectionBuilder()
     .withUrl(environment.hub)
+    // .withAutomaticReconnect([1000, 3000, 5000])
     // .configureLogging(signalR.LogLevel.Information)
     .build();
 // Start the connection.
@@ -23,10 +25,9 @@ function start() {
         setTimeout(() => start(), 5000);
     });
 }
-
-export const SCALING_CONNECTION_HUB = new signalR.HubConnectionBuilder()
+export const SCALING_CONNECTION_HUB = new HubConnectionBuilder()
     .withUrl(environment.scalingHub)
-    // .configureLogging(signalR.LogLevel.Information)
+    //  .configureLogging(LogLevel.Information)
     .build();
 // Start the connection.
 function startScalingHub() {
@@ -42,9 +43,9 @@ function startScalingHub() {
 
         console.log("Scaling Hub Signalr connected");
     }).catch(function (err) {
-        setTimeout(() => start(), 5000);
+        setTimeout(() => startScalingHub(), 5000);
     });
+
+ 
 }
 startScalingHub();
-
-

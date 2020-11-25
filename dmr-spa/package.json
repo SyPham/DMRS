@@ -3,14 +3,15 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve  --port 1000 --disableHostCheck",
+    "start": "ng serve --open --host 10.4.4.224 --port 1000 --disableHostCheck",
     "pro": "ng serve --open --host 10.4.0.76 --port 1000 --disableHostCheck",
     "dev_henry": "ng serve --open --host 10.4.4.224 --port 1000 --disableHostCheck",
     "dev_leo": "ng serve --open --host 10.4.4.92 --port 1000 --disableHostCheck",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "prod": "node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng build --prod  --aot --buildOptimizer --commonChunk --vendorChunk --optimization"
   },
   "private": true,
   "dependencies": {
@@ -44,12 +45,14 @@
     "@syncfusion/ej2-angular-popups": "^18.3.35",
     "@syncfusion/ej2-angular-schedule": "^18.3.44",
     "@syncfusion/ej2-angular-treegrid": "^18.3.44",
+    "@syncfusion/ej2-locale": "^18.2.59",
     "admin-lte": "^3.0.2",
     "alertifyjs": "^1.13.1",
     "angular-font-awesome": "^3.1.2",
     "angular-mentions": "^1.1.6",
     "bootstrap4-toggle": "^3.6.1",
     "chartjs-plugin-datalabels": "^0.7.0",
+    "cldr-data": "^36.0.0",
     "moment": "^2.24.0",
     "ng2-charts": "^2.4.2",
     "ng2-search-filter": "^0.5.1",
