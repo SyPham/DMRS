@@ -24,7 +24,7 @@
                     (rowSelected)="rowSelected($event)"
       >
         <e-columns>
-          <e-column field="entity.level" width="80" isPrimaryKey="true" headerText="Level">
+          <e-column field="entity.level" width="80" [allowEditing]= 'false' isPrimaryKey="true" headerText="Level">
           </e-column>
           <e-column field="entity.name" headerText="Building Name"> </e-column>
         </e-columns>

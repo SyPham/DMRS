@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ScalingSettingComponent } from './scaling-setting.component';
 
@@ -6,7 +6,7 @@ describe('ScalingSettingComponent', () => {
   let component: ScalingSettingComponent;
   let fixture: ComponentFixture<ScalingSettingComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ScalingSettingComponent ]
     })

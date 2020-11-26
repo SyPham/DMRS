@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AbnormalListComponent } from './abnormal-list.component';
 
@@ -6,7 +6,7 @@ describe('AbnormalListComponent', () => {
   let component: AbnormalListComponent;
   let fixture: ComponentFixture<AbnormalListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ AbnormalListComponent ]
     })

@@ -77,23 +77,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     const viAjax = new Ajax('./assets/ej2-lang/vi.json', 'GET', true);
     const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
-    const zhAjax = new Ajax('./assets/ej2-lang/zh.json', 'GET', true);
-    zhAjax.onSuccess = (value) => {
-      // Assigning locale text value for Essential JS 2 components
-      this.zh = value;
-    };
-    zhAjax.send();
     enAjax.onSuccess = (value) => {
-      // Assigning locale text value for Essential JS 2 components
-      this.en = value;
-      L10n.load(this.en);
-
+      this.en = JSON.parse(value);
     };
     enAjax.send();
     viAjax.onSuccess = (value) => {
-      this.vi = value;
-      // Assigning locale text value for Essential JS 2 components
-      L10n.load(this.vi);
+      this.vi = JSON.parse(value);
     };
     viAjax.send();
     this.langsData = [{ id: 'vi', name: 'VI' }, { id: 'en', name: 'EN' }];
@@ -136,10 +125,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.translate.use(args.itemData.id);
       if (args.itemData.id === 'vi') {
         setTimeout(() => {
+          L10n.load(JSON.parse(this.vi));
           setCulture('vi');
         });
       } else {
         setTimeout(() => {
+          L10n.load(JSON.parse(this.en));
           setCulture('en-US');
         });
       }

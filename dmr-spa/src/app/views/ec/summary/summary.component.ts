@@ -40,8 +40,6 @@ const BUILDING_LEVEL = 2;
 declare var $: any;
 const ADMIN = 1;
 const SUPERVISOR = 2;
-const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
-const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
 @Component({
   selector: 'app-summary',
   templateUrl: './summary.component.html',
@@ -74,8 +72,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   public glueID: number;
   public glueName: number;
   public quantity: string;
-  public building: any;
-  public role: any;
+  public building: IBuilding = { id: 0, name: '', level: 0, parentID: 0, settings: null, plans: null };
+  public role: IRole = { id: 0, name: ''};
   public A: any;
   public B: any;
   public C: any;
@@ -161,6 +159,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   ) { }
 
   public ngOnInit(): void {
+    const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
+    const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
     this.role = ROLE;
     this.building = BUIDLING;
     // deactivate the change detection for this component and its children

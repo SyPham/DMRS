@@ -146,7 +146,9 @@
     "#N/A": "#N/A",
     "OUTPUT_QUANTITY": "Nhập Số Lượng Đầu Ra",
     "Scaling Setting": "Cài Đặt Cân Theo Tòa Nhà",
-    "UPDATE_TIME": "Ngày Chỉnh Sửa"
+    "UPDATE_TIME": "Ngày Chỉnh Sửa",
+    "Solvent": "Dung Môi",
+    "Water": "Nước"
     
     
 

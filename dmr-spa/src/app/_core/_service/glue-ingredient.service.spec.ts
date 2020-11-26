@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { TestBed, async, inject } from '@angular/core/testing';
+import { TestBed, inject, waitForAsync } from '@angular/core/testing';
 import { GlueIngredientService } from './glue-ingredient.service';
 
 describe('Service: GlueIngredient', () => {

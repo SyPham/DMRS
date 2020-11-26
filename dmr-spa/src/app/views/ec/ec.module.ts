@@ -84,16 +84,16 @@ const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
 const zhAjax = new Ajax('./assets/ej2-lang/zh.json', 'GET', true);
 zhAjax.onSuccess = (value) => {
   // Assigning locale text value for Essential JS 2 components
-  zh = value;
+  zh = JSON.parse(value);
 };
 zhAjax.send();
 enAjax.onSuccess = (value) => {
   // Assigning locale text value for Essential JS 2 components
-  en = value;
+  en = JSON.parse(value);
 };
 enAjax.send();
 viAjax.onSuccess = (value) => {
-  vi = value;
+  vi = JSON.parse(value);
   // Assigning locale text value for Essential JS 2 components
 };
 viAjax.send();
@@ -116,14 +116,14 @@ loadCldr(
 if (lang === 'vi') {
   defaultLang = lang;
   setTimeout(() => {
-    L10n.load(vi);
-    setCulture('vi');
+   L10n.load(vi);
+   setCulture('vi');
   });
 } else {
   defaultLang = 'en';
   setTimeout(() => {
-    L10n.load(en);
-    setCulture('en');
+   L10n.load(en);
+   setCulture('en');
   });
 }
 @NgModule({

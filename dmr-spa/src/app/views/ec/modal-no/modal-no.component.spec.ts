@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ModalNoComponent } from './modal-no.component';
 
@@ -6,7 +6,7 @@ describe('ModalNoComponent', () => {
   let component: ModalNoComponent;
   let fixture: ComponentFixture<ModalNoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ModalNoComponent ]
     })

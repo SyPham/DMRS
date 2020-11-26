@@ -147,6 +147,8 @@
     "#N/A": "#N/A",
     "OUTPUT_QUANTITY": "Output Quantity",
     "Scaling Setting": "Scaling Setting",
-    "UPDATE_TIME": "Update Time"
+    "UPDATE_TIME": "Update Time",
+    "Solvent": "Solvent",
+    "Water": "Water"
 
 }
