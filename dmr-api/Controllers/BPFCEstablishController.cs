@@ -30,8 +30,15 @@ namespace DMR_API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _bPFCEstablishService.GetAllBPFCEstablish());
+            return Ok(await _bPFCEstablishService.GetAllAsync());
         }
+
+        [HttpGet("{bpfcID}")]
+        public async Task<IActionResult> GetDetailBPFC(int bpfcID)
+        {
+            return Ok(await _bPFCEstablishService.GetDetailBPFC(bpfcID));
+        }
+      
 
         [HttpGet]
         public async Task<IActionResult> GetAllHistory()

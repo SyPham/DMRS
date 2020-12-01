@@ -30,6 +30,10 @@ import { ConsumptionComponent } from './consumption/consumption.component';
 import { ScalingSettingComponent } from './scaling-setting/scaling-setting.component';
 import { Consumption1Component } from './consumption-1/consumption-1.component';
 import { Consumption2Component } from './consumption-2/consumption-2.component';
+import { TodolistComponent } from './todolist/todolist.component';
+import { MixingComponent } from './mixing/mixing.component';
+import { DispatchComponent } from './dispatch/dispatch.component';
+import { BpfcDetailComponent } from './bpfc-detail/bpfc-detail.component';
 
 const routes: Routes = [
   {
@@ -213,11 +217,38 @@ const routes: Routes = [
           {
             path: 'bpfc',
             resolve: { glues: GlueResolver },
-            component: BpfcComponent,
+            // component: BpfcComponent,
             data: {
               title: 'bpfc',
               breadcrumb: 'BPFC'
-            }
+            },
+            children: [
+              {
+                path: '',
+                component: BpfcComponent
+              },
+              {
+                path: 'detail',
+                data: {
+                  title: 'Detail',
+                  breadcrumb: 'Detail'
+                },
+                children: [
+                  {
+                    path: '',
+                    component: BpfcDetailComponent,
+                  },
+                  {
+                    path: ':id',
+                    component: BpfcDetailComponent,
+                    // data: {
+                    //   breadcrumb: ''
+                    // }
+                  }
+                ]
+              },
+
+            ]
           },
           {
             path: 'bpfc-status',
@@ -227,8 +258,44 @@ const routes: Routes = [
               breadcrumb: 'BPFC Status'
             }
           }
+
         ]
       },
+      // establish
+      // {
+      //   path: 'establish',
+      //   data: {
+      //     title: 'Establish',
+      //     breadcrumb: 'Establish'
+      //   },
+      //   children: [
+      //     {
+      //       path: 'bpfc-schedule',
+      //       component: BPFCScheduleComponent,
+      //       data: {
+      //         title: 'BPFC Schedule',
+      //         breadcrumb: 'BPFC Schedule'
+      //       }
+      //     },
+      //     {
+      //       path: 'bpfc',
+      //       resolve: { glues: GlueResolver },
+      //       component: BpfcComponent,
+      //       data: {
+      //         title: 'bpfc',
+      //         breadcrumb: 'BPFC'
+      //       }
+      //     },
+      //     {
+      //       path: 'bpfc-status',
+      //       component: BpfcStatusComponent,
+      //       data: {
+      //         title: 'BPFC Status',
+      //         breadcrumb: 'BPFC Status'
+      //       }
+      //     }
+      //   ]
+      // },
       // end establish
 
       // execution
@@ -241,7 +308,6 @@ const routes: Routes = [
         children: [
           {
             path: 'todolist',
-            // component: SummaryComponent,
             data: {
               title: 'todolist',
               breadcrumb: 'Todolist'
@@ -278,6 +344,67 @@ const routes: Routes = [
             ]
           },
           {
+            path: 'todolist-2',
+            data: {
+              title: 'todolist-2',
+              breadcrumb: 'To Do List 2'
+            },
+            children: [
+              {
+                path: '',
+                component: TodolistComponent,
+              },
+              {
+                path: 'stir',
+                component: StirComponent,
+                data: {
+                  title: 'Stir',
+                  breadcrumb: 'Stir'
+                }
+              },
+              {
+                path: 'stir/:glueName',
+                component: StirComponent,
+                data: {
+                  title: 'Stir',
+                  breadcrumb: 'Stir'
+                }
+              },
+              {
+                path: 'mixing',
+                component: MixingComponent,
+                data: {
+                  title: 'Mixing',
+                  breadcrumb: 'Mixing'
+                }
+              },
+              {
+                path: 'mixing/:glueID/:estimatedTime',
+                component: MixingComponent,
+                data: {
+                  title: 'Mixing',
+                  breadcrumb: 'Mixing'
+                }
+              },
+              {
+                path: 'dispatch',
+                component: DispatchComponent,
+                data: {
+                  title: 'dispatch',
+                  breadcrumb: 'Dispatch'
+                }
+              },
+              {
+                path: 'dispatch/:mixingInfoID',
+                component: DispatchComponent,
+                data: {
+                  title: 'dispatch',
+                  breadcrumb: 'Dispatch'
+                }
+              },
+            ]
+          },
+          {
             path: 'workplan',
             component: PlanComponent,
             data: {
@@ -297,8 +424,8 @@ const routes: Routes = [
             path: 'incoming',
             component: IncomingComponent,
             data: {
-              title: 'Incoming',
-              breadcrumb: 'Incoming'
+              title: 'Stock',
+              breadcrumb: 'Stock'
             }
           }
         ]

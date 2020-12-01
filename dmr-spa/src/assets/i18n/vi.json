@@ -36,6 +36,7 @@
     "Work Plan": "Kế Hoạch Làm Việc",
     "TODOLIST": "Danh Sách Việc Làm",
     "Todolist": "Danh Sách Việc Làm",
+    "To Do List 2": "Danh Sách Việc Làm 2",
     "ADDITION": "Pha Trộn",
     "Addition": "Pha Trộn",
     "ESTABLISHED_RECORD": "Lịch Trình Tạo Hồ Sơ",
@@ -148,7 +149,26 @@
     "Scaling Setting": "Cài Đặt Cân Theo Tòa Nhà",
     "UPDATE_TIME": "Ngày Chỉnh Sửa",
     "Solvent": "Dung Môi",
-    "Water": "Nước"
+    "Water": "Nước",
+    "Supplier": "NCC",
+    "Line": "Chuyền",
+    "Delivered/Actual": "Đã Giao/Thực Tế",
+    "Std. Con.": "Tổng Tiêu Thụ",
+    "Status": "Trạng Thái",
+    "Estimated Time": "TG Dự Định",
+    "Estimated Finish Time": "TG Dự Định Kết Thúc",
+    "Estimated Start Time": "TG Dự Định Bắt Đầu",
+    "Option": "Tùy Chọn",
+    "true": "Đã Xong",
+    "false": "Chưa Xong",
+    "Dispatch": "Giao Keo",
+    "Print": "In",
+    "Done": "Đã Xong",
+    "Undone": "Chưa Xong",
+    "Cost": "Giá Cả"
+
+
+
     
     
 

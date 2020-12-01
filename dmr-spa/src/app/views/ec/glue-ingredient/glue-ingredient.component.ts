@@ -101,7 +101,9 @@ export class GlueIngredientComponent implements OnInit, AfterViewInit {
     materialNO: '',
     unit: 0,
     real: 0,
-    cbd: 0
+    cbd: 0,
+    replacementFrequency: 0,
+    prepareTime: 0
   };
   Editpercentage = {
     glueID: 0,
@@ -661,7 +663,9 @@ export class GlueIngredientComponent implements OnInit, AfterViewInit {
             materialNO: '',
             unit: 0,
             real: 0,
-            cbd: 0
+            cbd: 0,
+            replacementFrequency: 0,
+            prepareTime: 0
           };
           return ingredient;
         });

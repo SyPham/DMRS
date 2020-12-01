@@ -22,6 +22,10 @@ namespace DMR_API.SignalrHub
         {
             await Clients.All.SendAsync("Online", CurrentConnections.Count);
         }
+        public async Task Todolist(int buildingID)
+        {
+            await Clients.All.SendAsync("ReceiveTodolist", buildingID);
+        }
         public override async Task OnConnectedAsync()
         {
             var id = Context.ConnectionId;

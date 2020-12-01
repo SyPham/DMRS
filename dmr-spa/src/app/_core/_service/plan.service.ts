@@ -1,4 +1,4 @@
-import { Consumtion, Plan } from './../_model/plan';
+import { Consumtion, DispatchParams, IDispatch, Plan, Todolist } from './../_model/plan';
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -16,11 +16,18 @@ export class PlanService {
   baseUrl = environment.apiUrlEC;
   ModalPlanSource = new BehaviorSubject<number>(0);
   currentModalPlan = this.ModalPlanSource.asObservable();
+  data = new BehaviorSubject<boolean>(null);
+
   constructor(
     private alertify: AlertifyService,
     private http: HttpClient
   ) { }
-
+  setValue(message): void {
+    this.data.next(message);
+  }
+  getValue(): Observable<boolean> {
+    return this.data.asObservable();
+  }
   TroubleShootingSearch(value: string , batchValue: string) {
     return this.http.get(this.baseUrl + `Plan/TroubleShootingSearch/${value}/${batchValue}` );
   }
@@ -47,6 +54,12 @@ export class PlanService {
   }
   getAllGlue() {
     return this.http.get<IGlue[]>(this.baseUrl + 'Glue/GetAll', {});
+  }
+  todolist2(building: number) {
+    return this.http.get<Todolist[]>(this.baseUrl + 'Plan/Todolist2/' + building, {});
+  }
+  todolist2ByDone(building: number) {
+    return this.http.get<Todolist[]>(this.baseUrl + 'Plan/Todolist2ByDone/' + building, {});
   }
   create(modal: Plan) {
     return this.http.post(this.baseUrl + 'Plan/Create', modal);
@@ -113,6 +126,15 @@ export class PlanService {
     return this.http.get(url, {
       responseType: 'arraybuffer'
     });
+  }
+  dispatch(obj: DispatchParams) {
+    return this.http.post<IDispatch[]>(this.baseUrl + 'Plan/Dispatch', obj);
+  }
+  print(obj: DispatchParams) {
+    return this.http.post(this.baseUrl + 'Plan/Print', obj);
+  }
+  finish(mixingID: number) {
+    return this.http.put(this.baseUrl + 'Plan/Finish/' + mixingID, {});
   }
 }
 

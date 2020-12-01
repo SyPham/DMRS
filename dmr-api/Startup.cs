@@ -12,6 +12,7 @@ using DMR_API.Data;
 using DMR_API.Helpers;
 using DMR_API.Helpers.AutoMapper;
 using DMR_API.SignalrHub;
+using EC_API._Repositories;
 using EC_API._Services.Interface;
 using EC_API.Data;
 using EC_API.Helpers;
@@ -166,6 +167,7 @@ namespace DMR_API
             services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IScaleMachineRepository, ScaleMachineRepository>();
+            services.AddScoped<IDispatchRepository, DispatchRepository>();
 
             //Services
             services.AddScoped<IMixingService, MixingService>();
@@ -199,6 +201,9 @@ namespace DMR_API
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddScoped<IScaleMachineService, ScaleMachineService>();
+
+            services.AddScoped<IDispatchService, DispatchService>();
+
             //extension
             services.AddScoped<IMailExtension, MailExtension>();
 

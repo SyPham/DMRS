@@ -19,7 +19,7 @@
             {{ 'SETTING' | translate }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" [routerLink]="[ '/ec/setting/costing']">Costing</a>
+            <a class="dropdown-item" [routerLink]="[ '/ec/setting/costing']">{{ 'Cost' | translate }}</a>
           </div>
         </li>
         <li class="nav-item dropdown" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF">
@@ -37,7 +37,7 @@
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/material']">{{ 'MATERIAL' | translate }}</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/building-setting']">{{ 'Building Setting' | translate }}</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/setting/scaling-setting']">{{ 'Scaling Setting' | translate }}</a>
-            <a class="dropdown-item" *ngIf="level === ADMIN" [routerLink]="[ '/ec/setting/costing']">Costing</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN" [routerLink]="[ '/ec/setting/costing']">{{ 'Cost' | translate }}</a>
             </div>
         </li>
         <li class="nav-item dropdown"
@@ -62,7 +62,8 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/workplan']">{{ 'WORK_PLAN' | translate }}</a>
             <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === STAFF || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/incoming']">{{'INCOMING_LABEL' | translate}}</a>
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/todolist']">{{ 'TODOLIST' | translate }}</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER || level === WORKER2" [routerLink]="[ '/ec/execution/todolist-2']">{{ 'TODOLIST' | translate }} 2</a><a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER || level === WORKER2"
+              [routerLink]="[ '/ec/execution/todolist']">{{ 'TODOLIST' | translate }}</a>
             <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR || level === WORKER || level === STAFF|| level === WORKER2" [routerLink]="[ '/ec/execution/output-quantity']">{{ 'OUTPUT_QUANTITY' | translate }}</a>
           </div>
         </li>
@@ -85,7 +86,7 @@
             {{ 'REPORT' | translate }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR" [routerLink]="[ '/ec/report/consumption']" >Cost</a>
+            <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR" [routerLink]="[ '/ec/report/consumption']" >{{ 'Cost' | translate }}</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/consumption-1']" >{{ 'CONSUMPTION_LABEL' | translate }} 1</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/consumption-2']" >{{ 'CONSUMPTION_LABEL' | translate }} 2</a>
             <a class="dropdown-item" [routerLink]="[ '/ec/report/inventory']">{{'INVENTORY_LABEL' | translate}}</a>

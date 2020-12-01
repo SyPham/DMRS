@@ -37,7 +37,8 @@ namespace DMR_API.DTO
         public bool isShow { get; set; }
         public int ModifiedBy { get; set; }
         public DateTime ModifiedDate { get; set; }
-
+        public int ReplacementFrequency { get; set; }
+        public int PrepareTime { get; set; }
         public int Allow { get; set; }
 
     }

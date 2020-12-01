@@ -45,7 +45,7 @@
     <div class="row">
       <div class="col-md-12">
 
-        <ejs-grid #ingredientinfoGrid  [dataSource]='data'
+        <ejs-grid #ingredientinfoGrid  [dataSource]='data' (dataBound)='dataBound()'
           [allowExcelExport]='true' [allowSorting]='true'  allowResizing='true' allowFiltering='true' [filterSettings]='filterSettings'
           [toolbar]='toolbarOptions' showColumnMenu='true' [pageSettings]='pageSettings'
           allowPaging="true" gridLines='Both' (toolbarClick)='toolbarClick($event)'>

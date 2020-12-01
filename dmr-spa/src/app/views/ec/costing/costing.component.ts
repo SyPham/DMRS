@@ -56,7 +56,9 @@ export class CostingComponent implements OnInit {
         materialNO: data.materialNO,
         unit: data.unit,
         real: data.real,
-        cbd: data.cbd
+        cbd: data.cbd,
+        replacementFrequency: data.replacementFrequency,
+        prepareTime: data.prepareTime
       };
       this.update(ingredient);
     }

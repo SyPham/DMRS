@@ -69,6 +69,9 @@ export class BreadcrumbComponent implements OnInit {
     if (data.label === 'Todolist' ) {
       this.router.navigate(['/ec/execution/todolist']);
     }
+    if (data.label === 'BPFC') {
+      this.router.navigate(['/ec/establish/bpfc']);
+    }
     if (data.label === 'Home') {
       if (this.level === this.ADMIN || this.level === this.SUPERVISOR || this.level === this.STAFF) {
         this.router.navigate(['/ec/establish/bpfc']);

@@ -45,7 +45,5 @@ function startScalingHub() {
     }).catch(function (err) {
         setTimeout(() => startScalingHub(), 5000);
     });
-
- 
 }
 startScalingHub();

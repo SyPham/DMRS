@@ -86,7 +86,7 @@ export class StirComponent implements OnInit {
   onChange(args, data, item) {
     this.settingID = args.target.checked ? +args.target.value : null;
     const minTime = '0001-01-01T00:00:00';
-    const startTime =  new Date();
+    const startTime = new Date();
     const endTime = new Date();
     if (item.machineType === 'Water') {
       endTime.setMinutes(startTime.getMinutes() + 3);

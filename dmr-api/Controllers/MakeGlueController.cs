@@ -68,6 +68,9 @@ namespace DMR_API.Controllers
         [HttpPost("Guidance")]
         public async Task<IActionResult> Guidance(MixingInfoForCreateDto update)
         {
+            update.EstimatedTime = update.EstimatedTime.ToLocalTime();
+            update.EndTime = update.EndTime.ToLocalTime();
+            update.StartTime = update.StartTime.ToLocalTime();
             return Ok(await _mixingInfoService.Mixing(update));
         }
 

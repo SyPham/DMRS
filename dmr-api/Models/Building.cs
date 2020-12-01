@@ -12,6 +12,7 @@ namespace DMR_API.Models
         public int Level { get; set; }
         public int? ParentID { get; set; }
         public ICollection<Plan> Plans { get; set; }
+        public LunchTime LunchTime { get; set; }
         public ICollection<Setting> Settings { get; set; }
     }
 }

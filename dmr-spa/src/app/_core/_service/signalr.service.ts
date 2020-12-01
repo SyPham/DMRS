@@ -9,12 +9,12 @@ export class SignalrService {
   public hubConnection: HubConnection;
   private connectionUrl = environment.scalingHub;
   constructor() {
-    this.connect();
-    this.getConnection().onclose( error => {
-      setTimeout( () => {
-        this.startConnection();
-      }, 3000);
-    });
+    // this.connect();
+    // this.getConnection().onclose( error => {
+    //   setTimeout( () => {
+    //     this.startConnection();
+    //   }, 3000);
+    // });
   }
   public connect = () => {
     this.startConnection();

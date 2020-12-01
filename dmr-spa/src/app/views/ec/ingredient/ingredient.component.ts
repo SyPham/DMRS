@@ -57,7 +57,9 @@ export class IngredientComponent implements OnInit, AfterViewInit {
     materialNO: '',
     unit: 0,
     real: 0,
-    cbd: 0
+    cbd: 0,
+    replacementFrequency: 0,
+    prepareTime: 0
   };
   pagination: Pagination;
   page = 1;
@@ -130,7 +132,9 @@ export class IngredientComponent implements OnInit, AfterViewInit {
           materialNO: '',
           unit: 0,
           real: 0,
-          cbd: 0
+          cbd: 0,
+          replacementFrequency: 0,
+          prepareTime: 0
         };
       }
     });
@@ -177,7 +181,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
         const unitModel: ColumnModel =
         {
           field: 'unit',
-          headerText: 'Unit',
+          headerText: 'Amount',
           textAlign: 'Center',
           autoFit: true,
           width: 80,
@@ -248,7 +252,7 @@ export class IngredientComponent implements OnInit, AfterViewInit {
           const unitModel: ColumnModel =
           {
             field: 'unit',
-            headerText: 'Unit',
+            headerText: 'Amount',
             textAlign: 'Center',
             autoFit: true,
             width: 80,
@@ -506,6 +510,8 @@ export class IngredientComponent implements OnInit, AfterViewInit {
             unit: item.unit,
             real: item.real,
             cbd: item.cbd,
+            replacementFrequency: item.replacementFrequency,
+            prepareTime: item.prepareTime,
             createdDate: new Date(item.createdDate),
           };
         }) || [];
@@ -532,6 +538,8 @@ export class IngredientComponent implements OnInit, AfterViewInit {
             unit: item.unit,
             expiredTime: item.expiredTime,
             daysToExpiration: item.daysToExpiration,
+            replacementFrequency: item.replacementFrequency,
+            prepareTime: item.prepareTime,
             productionDate: new Date(),
             qrCode: `${this.datePipe.transform(new Date(), 'yyyyMMdd')}-DEFAULT-${item.materialNO}`,
             exp: this.datePipe.transform(new Date(new Date().setDate(new Date().getDate() + item.daysToExpiration)), 'yyyyMMdd')
@@ -629,5 +637,8 @@ export class IngredientComponent implements OnInit, AfterViewInit {
   }
   NO(index) {
     return (this.ingredientGrid.pageSettings.currentPage - 1) * this.ingredientGrid.pageSettings.pageSize + Number(index) + 1;
+  }
+  dataBound() {
+    this.ingredientGrid.autoFitColumns();
   }
 }

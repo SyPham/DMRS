@@ -11,8 +11,8 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { IBuilding } from 'src/app/_core/_model/building';
 import { IRole } from 'src/app/_core/_model/role';
 import { AuthService } from 'src/app/_core/_service/auth.service';
-const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
-const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
+import { DataService } from 'src/app/_core/_service/data.service';
+import { Subscription } from 'rxjs';
 const WORKER = 4;
 @Component({
   selector: 'app-plan-output-quantity',
@@ -28,9 +28,9 @@ export class PlanOutputQuantityComponent implements OnInit {
   public pageSettings: PageSettingsModel;
   public toolbarOptions: object;
   public editSettings: object;
+  sortSettings: object;
   startDate = new Date();
   endDate = new Date();
-  sortSettings: object;
   bpfcID: number;
   level: number;
   hasWorker: boolean;
@@ -67,7 +67,7 @@ export class PlanOutputQuantityComponent implements OnInit {
   glueDetails: any;
   setFocus: any;
   locale: string;
-
+  subscription: Subscription[] = [];
   constructor(
     private alertify: AlertifyService,
     public modalService: NgbModal,
@@ -75,6 +75,7 @@ export class PlanOutputQuantityComponent implements OnInit {
     private bPFCEstablishService: BPFCEstablishService,
     public authService: AuthService,
     public datePipe: DatePipe,
+    private dataService: DataService,
     private spinner: NgxSpinnerService
   ) { }
 
@@ -82,6 +83,8 @@ export class PlanOutputQuantityComponent implements OnInit {
     this.date = new Date();
     this.endDate = new Date();
     this.endDate = new Date();
+    const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
+    const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
     this.role = ROLE;
     this.building = BUIDLING;
     this.gridConfig();
@@ -90,19 +93,14 @@ export class PlanOutputQuantityComponent implements OnInit {
     this.getAllLine(this.building.id);
     this.ClearForm();
   }
+
   gridConfig(): void {
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.sortSettings = { columns: [{ field: 'dueDate', direction: 'Ascending' }] };
     this.editparams = { params: { popupHeight: '300px' } };
-    if (this.role.id === WORKER) {
-      this.hasWorker = true;
-      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: false, allowAdding: false, allowDeleting: false, mode: 'Normal' };
-      this.toolbarOptions = ['Search'];
-    } else {
-      this.hasWorker = false;
-      this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
-      this.toolbarOptions = ['Cancel', 'Search'];
-    }
+    this.hasWorker = true;
+    this.editSettings = { showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Normal' };
+    this.toolbarOptions = ['Cancel', 'Search'];
   }
   count(index) {
     return Number(index) + 1;

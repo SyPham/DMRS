@@ -1,3 +1,4 @@
+using dmr_api.Models;
 using DMR_API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,8 @@ namespace DMR_API.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<ScaleMachine> ScaleMachines { get; set; }
+        public DbSet<LunchTime> LunchTime { get; set; }
+        public DbSet<Dispatch> Dispatches { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BPFCEstablish>().HasKey(x => x.ID);

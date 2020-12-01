@@ -15,6 +15,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { RoleService } from 'src/app/_core/_service/role.service';
 import { CookieService } from 'ngx-cookie-service';
 import { L10n, loadCldr, setCulture, Ajax } from '@syncfusion/ej2-base';
+import { DataService } from 'src/app/_core/_service/data.service';
+declare var require: any;
+
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -57,6 +60,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     private calendarsService: CalendarsService,
     private sanitizer: DomSanitizer,
     private router: Router,
+    private dataService: DataService,
     private cookieService: CookieService,
     private modalService: NgbModal,
     public translate: TranslateService
@@ -75,16 +79,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     }
   }
   ngOnInit(): void {
-    const viAjax = new Ajax('./assets/ej2-lang/vi.json', 'GET', true);
-    const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
-    enAjax.onSuccess = (value) => {
-      this.en = JSON.parse(value);
-    };
-    enAjax.send();
-    viAjax.onSuccess = (value) => {
-      this.vi = JSON.parse(value);
-    };
-    viAjax.send();
+    this.vi = require('../../../../assets/ej2-lang/vi.json');
+    this.en = require('../../../../assets/ej2-lang/en-US.json');
     this.langsData = [{ id: 'vi', name: 'VI' }, { id: 'en', name: 'EN' }];
     this.navAdmin = new Nav().getNavAdmin();
     this.navClient = new Nav().getNavClient();
@@ -124,13 +120,15 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       localStorage.setItem('lang', args.itemData.id);
       this.translate.use(args.itemData.id);
       if (args.itemData.id === 'vi') {
+        this.dataService.setValueLocale(args.itemData.id);
         setTimeout(() => {
-          L10n.load(JSON.parse(this.vi));
+          L10n.load(this.vi);
           setCulture('vi');
         });
       } else {
+        this.dataService.setValueLocale(args.itemData.id);
         setTimeout(() => {
-          L10n.load(JSON.parse(this.en));
+          L10n.load(this.en);
           setCulture('en-US');
         });
       }

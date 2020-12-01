@@ -23,6 +23,10 @@ namespace DMR_API.DTO
         public string BatchE { get; set; }
         public string Code { get; set; }
         public int MixBy { get; set; }
+        public bool Status { get; set; }
+        public DateTime EstimatedTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public DateTime ExpiredTime { get; set; }
         public DateTime CreatedTime { get; set; }
     }

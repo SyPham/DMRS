@@ -14,4 +14,9 @@ export interface IIngredient  {
     unit: number;
     real: number;
     cbd: number;
+    replacementFrequency: number;
+    prepareTime: number;
+
+
+
 }

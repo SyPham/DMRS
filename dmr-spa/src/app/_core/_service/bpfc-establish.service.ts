@@ -26,6 +26,9 @@ export class BPFCEstablishService {
   getBPFCID(bpfcInfo) {
     return this.http.post(this.baseUrl + 'BPFCEstablish/GetBPFCID', bpfcInfo);
   }
+  getDetailBPFC(bpfcId) {
+    return this.http.get(this.baseUrl + `BPFCEstablish/GetDetailBPFC/${bpfcId}`);
+  }
   import(file, createdBy) {
     const formData = new FormData();
     formData.append('UploadedFile', file);
@@ -87,10 +90,10 @@ export class BPFCEstablishService {
   }
 
   LoadHistoryBPFC(id?: number) {
-    return this.http.get(this.baseUrl + `BPFCEstablish/LoadBPFCHistory/${id}` , {});
+    return this.http.get(this.baseUrl + `BPFCEstablish/LoadBPFCHistory/${id}`, {});
   }
 
   UpdateHistoryBPFC(entity) {
-    return this.http.put(this.baseUrl + 'BPFCEstablish/UpdateBPFCHistory' , entity);
+    return this.http.put(this.baseUrl + 'BPFCEstablish/UpdateBPFCHistory', entity);
   }
 }

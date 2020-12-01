@@ -26,6 +26,9 @@ namespace DMR_API.Models
 
         public double Real { get; set; }
         public double CBD { get; set; }
+        public int ReplacementFrequency { get; set; }
+        public int PrepareTime { get; set; }
+
 
     }
 }

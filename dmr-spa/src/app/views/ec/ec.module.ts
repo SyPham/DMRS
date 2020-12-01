@@ -75,28 +75,11 @@ import { ScalingSettingComponent } from './scaling-setting/scaling-setting.compo
 import { Consumption1Component } from './consumption-1/consumption-1.component';
 import { Consumption2Component } from './consumption-2/consumption-2.component';
 import { L10n, loadCldr, setCulture, Ajax } from '@syncfusion/ej2-base';
-
-let zh: any;
-let vi: any;
-let en: any;
-const viAjax = new Ajax('./assets/ej2-lang/vi.json', 'GET', true);
-const enAjax = new Ajax('./assets/ej2-lang/en-US.json', 'GET', true);
-const zhAjax = new Ajax('./assets/ej2-lang/zh.json', 'GET', true);
-zhAjax.onSuccess = (value) => {
-  // Assigning locale text value for Essential JS 2 components
-  zh = JSON.parse(value);
-};
-zhAjax.send();
-enAjax.onSuccess = (value) => {
-  // Assigning locale text value for Essential JS 2 components
-  en = JSON.parse(value);
-};
-enAjax.send();
-viAjax.onSuccess = (value) => {
-  vi = JSON.parse(value);
-  // Assigning locale text value for Essential JS 2 components
-};
-viAjax.send();
+import { TodolistComponent } from './todolist/todolist.component';
+import { MixingComponent } from './mixing/mixing.component';
+import { DispatchComponent } from './dispatch/dispatch.component';
+import { PrintGlueComponent } from './print-glue/print-glue.component';
+import { BpfcDetailComponent } from './bpfc-detail/bpfc-detail.component';
 declare var require: any;
 let defaultLang: string;
 const lang = localStorage.getItem('lang');
@@ -115,16 +98,8 @@ loadCldr(
   require('cldr-data/supplemental/weekdata.json')); // To load the culture based first day of week
 if (lang === 'vi') {
   defaultLang = lang;
-  setTimeout(() => {
-   L10n.load(vi);
-   setCulture('vi');
-  });
 } else {
   defaultLang = 'en';
-  setTimeout(() => {
-   L10n.load(en);
-   setCulture('en');
-  });
 }
 @NgModule({
   providers: [
@@ -182,6 +157,7 @@ if (lang === 'vi') {
     BuildingUserComponent,
     AccountComponent,
     BPFCScheduleComponent,
+    TodolistComponent,
     SummaryComponent,
     PrintQRCodeComponent,
     PartComponent,
@@ -208,6 +184,28 @@ if (lang === 'vi') {
     ConsumptionComponent,
     Consumption1Component,
     Consumption2Component,
+    MixingComponent,
+    DispatchComponent,
+    PrintGlueComponent,
+    BpfcDetailComponent
   ]
 })
-export class ECModule { }
+export class ECModule {
+  vi: any;
+  en: any;
+  constructor() {
+    if (lang === 'vi') {
+      defaultLang = 'vi';
+      setTimeout(() => {
+        L10n.load(require('../../../assets/ej2-lang/vi.json'));
+        setCulture('vi');
+      });
+    } else {
+      defaultLang = 'en';
+      setTimeout(() => {
+        L10n.load(require('../../../assets/ej2-lang/en-US.json'));
+        setCulture('en');
+      });
+    }
+  }
+ }

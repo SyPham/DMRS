@@ -40,6 +40,7 @@ const BUILDING_LEVEL = 2;
 declare var $: any;
 const ADMIN = 1;
 const SUPERVISOR = 2;
+
 @Component({
   selector: 'app-summary',
   templateUrl: './summary.component.html',
@@ -72,8 +73,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   public glueID: number;
   public glueName: number;
   public quantity: string;
-  public building: IBuilding = { id: 0, name: '', level: 0, parentID: 0, settings: null, plans: null };
-  public role: IRole = { id: 0, name: ''};
+  public building: IBuilding;
+  public role: IRole;
   public A: any;
   public B: any;
   public C: any;
@@ -97,6 +98,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   qrCode: any;
   scanStatus: boolean;
   dateTimeNow: Date;
+  startTime: Date;
+  endTime: Date;
   code: any;
   disabled = true;
   hasWarning: boolean;
@@ -154,11 +157,12 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     private alertify: AlertifyService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    public signalRService: SignalrService,
+    // public signalRService: SignalrService,
     private spinner: NgxSpinnerService,
   ) { }
 
   public ngOnInit(): void {
+    // this.signalRService.connect();
     const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
     const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
     this.role = ROLE;
@@ -176,14 +180,14 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     this.existGlue = true;
     this.hasWarning = false;
     this.checkRole();
-    if (this.signalRService.hubConnection.state === HubConnectionState.Connected) {
-      this.signalRService.hubConnection.on('summaryRecieve', (status) => {
+    if (signalr.SCALING_CONNECTION_HUB.state === HubConnectionState.Connected) {
+      signalr.SCALING_CONNECTION_HUB.on('summaryRecieve', (status) => {
         if (status === SUMMARY_RECIEVE_SIGNALR) {
           this.summary();
         }
       });
     } else {
-      this.signalRService.connect();
+      // this.signalRService.connect();
     }
   }
   gridConfig(): void {
@@ -223,7 +227,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   onChangeBuilding(args) {
     this.buildingID = args.itemData.id;
     this.buildingName = args.itemData.name;
-    localStorage.setItem('buildingID', args.itemData.id );
+    localStorage.setItem('buildingID', args.itemData.id);
     this.getScalingSetting();
     this.summary();
   }
@@ -371,6 +375,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         this.alertify.message('Please select a building!', true);
       } else {
         this.buildingID = buildingId;
+        this.getScalingSetting();
+        this.summary();
       }
     } else {
       this.buildingID = this.building.id;
@@ -417,6 +423,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     }
     const date = new Date();
     const buildingID = this.building.id;
+    this.endTime = new Date();
     this.guidances = {
       id: 0,
       glueID: this.glueID,
@@ -434,27 +441,29 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       createdTime: date,
       mixBy: JSON.parse(localStorage.getItem('user')).User.ID,
       buildingID,
+      startTime: this.startTime,
+      endTime: this.endTime
     };
     this.onSignalr();
-    // if (this.guidances) {
-    //   this.makeGlueService.Guidance(this.guidances).subscribe((glue: any) => {
-    //       // this.checkValidPosition(item, args);
-    //       // const buildingName = this.building.name;
-    //       // this.UpdateConsumption(item.code, item.batch, item.real);
-    //       // const obj = {
-    //       //   qrCode: ingredient.code,
-    //       //   batch: ingredient.batch,
-    //       //   consump: ingredient.real,
-    //       //   buildingName,
-    //       // };
-    //       // this.UpdateConsumptionWithBuilding(obj);
-    //     this.alertify.success('The Glue has been finished successfully');
-    //     this.showQRCode = true;
-    //     this.code = glue.code;
-    //     this.back();
-    //     this.summary();
-    //   });
-    // }
+    if (this.guidances) {
+      this.makeGlueService.Guidance(this.guidances).subscribe((glue: any) => {
+        // this.checkValidPosition(item, args);
+        // const buildingName = this.building.name;
+        // this.UpdateConsumption(item.code, item.batch, item.real);
+        // const obj = {
+        //   qrCode: ingredient.code,
+        //   batch: ingredient.batch,
+        //   consump: ingredient.real,
+        //   buildingName,
+        // };
+        // this.UpdateConsumptionWithBuilding(obj);
+        this.alertify.success('The Glue has been finished successfully');
+        this.showQRCode = true;
+        this.code = glue.code;
+        this.back();
+        this.summary();
+      });
+    }
   }
 
   gotoStir() {
@@ -493,8 +502,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   }
 
   signal() {
-    if (this.signalRService.hubConnection.state === HubConnectionState.Connected) {
-      this.signalRService.hubConnection.on(
+    if (signalr.SCALING_CONNECTION_HUB.state === HubConnectionState.Connected) {
+      signalr.SCALING_CONNECTION_HUB.on(
         'Welcom',
         (scalingMachineID, message, unit) => {
           if (this.scalingSetting.includes(+scalingMachineID)) {
@@ -543,7 +552,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
         }
       );
     } else {
-      this.signalRService.connect();
+      // this.signalRService.connect();
     }
   }
 
@@ -662,6 +671,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     this.glueID = data.glueID;
     this.glue = data;
     this.scanStatus = true;
+    this.startTime = new Date();
     // Nhan pha keo thi gan mac dinh la can to
     this.scalingKG = UNIT_BIG_MACHINE;
     this.getGlueWithIngredientByGlueID(this.glueID);
@@ -746,10 +756,10 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       }
     }
   }
-/**
- * TODO: Kiểm tra vị trí hợp lệ
- * Gets script version
- */
+  /**
+   * TODO: Kiểm tra vị trí hợp lệ
+   * Gets script version
+   */
   checkValidPosition(ingredient, args) {
     let min;
     let max;
@@ -1199,7 +1209,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     // this.changeReal(ingredient.code, args);
   }
   onSignalr() {
-    this.signalRService.hubConnection.on('Welcom', () => {});
+    signalr.SCALING_CONNECTION_HUB.on('Welcom');
   }
   onKeyupReal(ingredient, args) {
     if (args.keyCode === 13) {
@@ -1328,9 +1338,9 @@ export class SummaryComponent implements OnInit, AfterViewInit {
       this.ingredients[i].focusExpected = false;
     }
   }
-/**
- * TODO: Cập nhật giá trị thực tế từ cân dựa theo vị trí
- */
+  /**
+   * TODO: Cập nhật giá trị thực tế từ cân dựa theo vị trí
+   */
   changeActualByPosition(position, actual, unit) {
     for (const i in this.ingredients) {
       if (this.ingredients[i].position === position) {
@@ -1369,7 +1379,7 @@ export class SummaryComponent implements OnInit, AfterViewInit {
     }
   }
   offSignalr() {
-    this.signalRService.hubConnection.off('Welcom');
+    signalr.SCALING_CONNECTION_HUB.off('Welcom');
   }
   changeScanStatusByLength(length, item) {
     switch (length) {

@@ -1,6 +1,6 @@
 <div class="card">
   <div class="card-header">
-    <h3>Ingredient List</h3>
+    <h3>Chemical List</h3>
   </div>
   <div class="card-body">
     <ejs-grid #ingredientGrid 
@@ -33,7 +33,7 @@
             </ng-template>
           </e-column>
           <e-column field='supplier' headerText='Supplier' textAlign='Center' width='100'></e-column>
-          <e-column field='name' headerText='Ingredient Name' textAlign='Center' width='120'></e-column>
+          <e-column field='name' headerText='Chemical' textAlign='Center' width='120'></e-column>
           <e-column field='real' headerText='Real' textAlign='Center' width='100'>
             <ng-template #template let-data>${{data.real}}</ng-template>
           </e-column>

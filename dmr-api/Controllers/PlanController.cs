@@ -170,6 +170,12 @@ namespace DMR_API.Controllers
             return Ok(lists);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Finish(int id)
+        {
+            var lists = await _planService.Finish(id);
+            return Ok(lists);
+        }
         [HttpGet]
         public async Task<IActionResult> GetAllPlanByDefaultRange()
         {
@@ -243,6 +249,29 @@ namespace DMR_API.Controllers
                 return File(bin, "application/octet-stream", "report.xlsx");
             }
         }
-
+        [HttpGet("{building}")]
+        public async Task<IActionResult> Todolist2(int building)
+        {
+            var batchs = await _planService.Todolist2(building);
+            return Ok(batchs);
+        }
+        [HttpGet("{building}")]
+        public async Task<IActionResult> Todolist2ByDone(int building)
+        {
+            var batchs = await _planService.Todolist2ByDone(building);
+            return Ok(batchs);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Dispatch([FromBody]DispatchParams todolistDto )
+        {
+            var batchs = await _planService.Dispatch(todolistDto);
+            return Ok(batchs);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Print([FromBody] DispatchParams todolistDto)
+        {
+            var batchs = await _planService.Print(todolistDto);
+            return Ok(batchs);
+        }
     }
 }

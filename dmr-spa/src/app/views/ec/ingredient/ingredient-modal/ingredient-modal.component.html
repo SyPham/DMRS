@@ -9,8 +9,12 @@
     <label for="">ID</label>
     <input [(ngModel)]="ingredient.id" type="text" class="form-control">
   </div>
+    <div class="form-group">
+      <label for="">Material #</label>
+      <input type="text" [(ngModel)]="ingredient.materialNO" (blur)="onBlur($event)" class="form-control">
+    </div>
   <div class="form-group">
-    <label for="">Ingredient Name</label>
+    <label for="">Chemical</label>
     <input type="text" [(ngModel)]="ingredient.name" (blur)="onBlur($event)" class="form-control">
   </div>
   <div class="form-group">
@@ -18,20 +22,24 @@
     <input type="text" [(ngModel)]="ingredient.voc" (blur)="onBlur($event)" class="form-control">
   </div>
   <div class="form-group">
-    <label for="">Material #</label>
-    <input type="text" [(ngModel)]="ingredient.materialNO" (blur)="onBlur($event)" class="form-control">
-  </div>
-  <div class="form-group">
-    <label for="">Unit</label>
+    <label for="">Amount</label>
     <input type="text" [(ngModel)]="ingredient.unit" (blur)="onBlur($event)" class="form-control">
   </div>
   <div class="form-group">
-    <label for="">Expired Time (by mins)</label>
+    <label for="">Expiry Period (mins.)</label>
     <input type="text" [(ngModel)]="ingredient.expiredTime" class="form-control">
   </div>
   <div class="form-group">
-    <label for="">Expire After</label>
+    <label for="">Days to Expiry</label>
     <input type="text" [(ngModel)]="ingredient.daysToExpiration" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="">Replacement Frequency(hr.)</label>
+    <input type="text" [(ngModel)]="ingredient.replacementFrequency" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="">Prepare Time(mins.)</label>
+    <input type="text" [(ngModel)]="ingredient.prepareTime" class="form-control">
   </div>
   <div class="form-group">
     <label for="">Choose Supplier</label>

@@ -429,8 +429,14 @@ namespace DMR_API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PrepareTime")
+                        .HasColumnType("int");
+
                     b.Property<double>("Real")
                         .HasColumnType("float");
+
+                    b.Property<int>("ReplacementFrequency")
+                        .HasColumnType("int");
 
                     b.Property<int>("SupplierID")
                         .HasColumnType("int");
@@ -589,6 +595,30 @@ namespace DMR_API.Migrations
                     b.ToTable("Line");
                 });
 
+            modelBuilder.Entity("DMR_API.Models.LunchTime", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BuildingID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BuildingID")
+                        .IsUnique();
+
+                    b.ToTable("LunchTime");
+                });
+
             modelBuilder.Entity("DMR_API.Models.MapModel", b =>
                 {
                     b.Property<int>("ID")
@@ -686,6 +716,12 @@ namespace DMR_API.Migrations
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EstimatedTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("ExpiredTime")
                         .HasColumnType("datetime2");
 
@@ -697,6 +733,12 @@ namespace DMR_API.Migrations
 
                     b.Property<int>("MixBy")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("ID");
 
@@ -1079,6 +1121,37 @@ namespace DMR_API.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("dmr_api.Models.Dispatch", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EstimatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LineID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MixingInfoID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("LineID");
+
+                    b.HasIndex("MixingInfoID");
+
+                    b.ToTable("Dispatches");
+                });
+
             modelBuilder.Entity("DMR_API.Models.ArtProcess", b =>
                 {
                     b.HasOne("DMR_API.Models.ArticleNo", "ArticleNo")
@@ -1203,6 +1276,15 @@ namespace DMR_API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DMR_API.Models.LunchTime", b =>
+                {
+                    b.HasOne("DMR_API.Models.Building", "Building")
+                        .WithOne("LunchTime")
+                        .HasForeignKey("DMR_API.Models.LunchTime", "BuildingID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DMR_API.Models.MixingInfo", b =>
                 {
                     b.HasOne("DMR_API.Models.Glue", "Glue")
@@ -1266,6 +1348,21 @@ namespace DMR_API.Migrations
                     b.HasOne("DMR_API.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("dmr_api.Models.Dispatch", b =>
+                {
+                    b.HasOne("DMR_API.Models.Building", "Building")
+                        .WithMany()
+                        .HasForeignKey("LineID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DMR_API.Models.MixingInfo", "MixingInfo")
+                        .WithMany()
+                        .HasForeignKey("MixingInfoID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

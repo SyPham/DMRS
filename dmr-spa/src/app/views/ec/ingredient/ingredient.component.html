@@ -49,7 +49,7 @@
           <e-columns>
             <e-column type='checkbox' isPrimaryKey='true' width='60'></e-column>
             <e-column field='supplier' isPrimaryKey='true' headerText='Supplier' width='100'></e-column>
-            <e-column field='name' isPrimaryKey='true' headerText='Ingredient Name' width='100'></e-column>
+            <e-column field='name' isPrimaryKey='true' headerText='Chemical' width='100'></e-column>
             <e-column field='batch' headerText='Batch' width='100'>
             </e-column>
             <e-column field='productionDate' type='date' format='yyyyMMdd'editType='datepickeredit' headerText='Production date' width='100'>
@@ -108,33 +108,37 @@
         allowPaging="true"
         allowResizing='true'
         gridLines='Both'
+        (dataBound)='dataBound()'
         (rowDataBound)='rowDB($event)'
         (toolbarClick)='toolbarClick($event)'>
         <e-columns>
-          <e-column field='#' headerText='#' width='40'>
+          <!-- <e-column field='#' headerText='#' width='40'>
             <ng-template let-data #template>
               {{NO(data.index)}}
             </ng-template>
-          </e-column>
+          </e-column> -->
           <e-column field='supplier' headerText='Supplier' textAlign='Center' width='100'></e-column>
-          <e-column field='name' headerText='Ingredient Name' textAlign='Center' width='120'></e-column>
+          <e-column field='materialNO' headerText='Material #' textAlign='Center' width='100'></e-column>
+          <e-column field='name' headerText='Chemical' textAlign='Center' width='120'></e-column>
           <e-column field='voc' headerText='VOC' textAlign='Center' width='80'>
             <ng-template #template let-data>{{data.voc}} %</ng-template>
           </e-column>
-          <e-column field='daysToExpiration' headerText='Expire After' textAlign='Center' width='130'>
+          <e-column field='daysToExpiration' headerText='Days to Expiry' textAlign='Center' width='130'>
             <ng-template #template let-data>{{data.daysToExpiration}} days</ng-template>
           </e-column>
-          <e-column field='expiredTime' headerText='Expired Time' textAlign='Center' width='130'>
+          <e-column field='expiredTime' headerText='Expiry Period' textAlign='Center' width='130'>
             <ng-template #template let-data>{{data.expiredTime}} minutes</ng-template>
           </e-column>
-          <e-column field='materialNO' headerText='Material #' textAlign='Center' width='100'></e-column>
-          <e-column field='unit' headerText='Unit' textAlign='Center' width='100'>
+          <e-column field='unit' headerText='Amount' textAlign='Center' width='100'>
             <ng-template #template let-data>{{data.unit}} kg</ng-template>
           </e-column>
-          <e-column field='createdDate' headerText='Created Date' textAlign='Center' type='dateTime' format='dd MMM, yyyy HH:mm' width='180'></e-column>
-          <e-column field='code' headerText='Code' textAlign='Center' width='130'>
+            <e-column field='unit' headerText='Amount' textAlign='Center' width='100'>
+            </e-column>
+          <e-column field='replacementFrequency' headerText='Replacement Frequency(hr.)' textAlign='Center'  width='180'></e-column>
+          <e-column field='prepareTime' headerText='Prepare Time(mins.)' textAlign='Center' width='180'></e-column>
+          <!-- <e-column field='code' headerText='Code' textAlign='Center' width='130'>
             <ng-template #template let-data>{{data.code}}</ng-template>
-          </e-column>
+          </e-column> -->
           <e-column field='Option' headerText='Option' textAlign='Center' width='130'>
             <ng-template let-data #template >
                 <div class="btn-group" data-toggle="tooltip" data-placement="top" title="Print QRCode">

@@ -70,8 +70,15 @@ namespace DMR_API._Services.Services
             return await _repoBPFCEstablish.SaveAll();
         }
 
-
-
+        public async Task<object> GetDetailBPFC(int bpfcID)
+        {
+            var model =await _repoBPFCEstablish.FindAll().Where(x => x.ID == bpfcID).Include(x => x.ModelName)
+                .Include(x => x.ModelNo)
+                .Include(x => x.ArticleNo)
+                .Include(x => x.ArtProcess).ThenInclude(x => x.Process)
+                .ProjectTo<BPFCEstablishDto>(_configMapper).OrderBy(x => x.ID).ToListAsync();
+            return model;
+        }
         //Lấy danh sách Brand và phân trang
         public async Task<PagedList<BPFCEstablishDto>> GetWithPaginations(PaginationParams param)
         {

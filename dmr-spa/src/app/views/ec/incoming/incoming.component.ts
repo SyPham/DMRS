@@ -51,7 +51,7 @@ export class IncomingComponent implements OnInit {
     return (this.ingredientinfoGrid.pageSettings.currentPage - 1) * this.ingredientinfoGrid.pageSettings.pageSize + Number(index) + 1;
   }
   dataBound() {
-
+    this.ingredientinfoGrid.autoFitColumns();
   }
   OutputChange(args) {
     this.checkin = false;

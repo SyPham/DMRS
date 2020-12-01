@@ -1,6 +1,6 @@
 import { PlanService } from './../../../_core/_service/plan.service';
 import { Plan } from './../../../_core/_model/plan';
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, OnDestroy } from '@angular/core';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { PageSettingsModel, GridComponent} from '@syncfusion/ej2-angular-grids';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -16,11 +16,11 @@ import { IBuilding } from 'src/app/_core/_model/building';
 import { FilteringEventArgs } from '@syncfusion/ej2-angular-dropdowns';
 import { Query } from '@syncfusion/ej2-data/';
 import { EmitType } from '@syncfusion/ej2-base';
+import { Subscription } from 'rxjs';
+import { DataService } from 'src/app/_core/_service/data.service';
 
 const ADMIN = 1;
 const SUPERVISER = 2;
-const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
-const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
 @Component({
   selector: 'app-plan',
   templateUrl: './plan.component.html',
@@ -29,7 +29,7 @@ const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
     DatePipe
   ]
 })
-export class PlanComponent implements OnInit {
+export class PlanComponent implements OnInit, OnDestroy {
   @ViewChild('cloneModal') public cloneModal: TemplateRef<any>;
   @ViewChild('planForm')
   orderForm: FormGroup;
@@ -47,7 +47,6 @@ export class PlanComponent implements OnInit {
   building: IBuilding;
   bpfcData: object;
   plansSelected: any;
-  toolbar: string[];
   editparams: object;
   @ViewChild('grid')
   grid: GridComponent;
@@ -77,12 +76,13 @@ export class PlanComponent implements OnInit {
   bpfcEdit: number;
   glueDetails: any;
   setFocus: any;
+  subscription: Subscription[] = [];
   constructor(
     private alertify: AlertifyService,
     public modalService: NgbModal,
     private planService: PlanService,
     private buildingService: BuildingService,
-    private authService: AuthService,
+    private dataService: DataService,
     private bPFCEstablishService: BPFCEstablishService,
     public datePipe: DatePipe
   ) { }
@@ -92,6 +92,8 @@ export class PlanComponent implements OnInit {
     this.endDate = new Date();
     this.startDate = new Date();
     this.hasWorker = false;
+    const BUIDLING: IBuilding = JSON.parse(localStorage.getItem('building'));
+    const ROLE: IRole = JSON.parse(localStorage.getItem('level'));
     this.role = ROLE;
     this.building = BUIDLING;
     this.gridConfig();
@@ -121,6 +123,9 @@ export class PlanComponent implements OnInit {
       this.getAllLine(this.building.id);
     }
   }
+  ngOnDestroy() {
+    this.subscription.forEach(subscription => subscription.unsubscribe());
+  }
   gridConfig(): void {
     this.pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
     this.editparams = { params: { popupHeight: '300px' } };
@@ -129,7 +134,40 @@ export class PlanComponent implements OnInit {
       { text: 'Delete Range', tooltipText: 'Delete Range', prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
       { text: 'Clone', tooltipText: 'Copy', prefixIcon: 'fa fa-copy', id: 'Clone' }
     ];
-    this.toolbar = ['ExcelExport', 'Add', 'Delete', 'Search', 'Copy'];
+    const deleteRangeEn = 'Delete Range';
+    const cloneEn = 'Clone';
+    const deleteRangeVi = 'Xóa Nhiều';
+    const cloneVi = 'Nhân Bản';
+    this.subscription.push(this.dataService.getValueLocale().subscribe(lang => {
+      if (lang === 'vi') {
+        this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+          { text: deleteRangeVi, tooltipText: deleteRangeVi, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
+          { text: cloneVi, tooltipText: cloneVi, prefixIcon: 'fa fa-copy', id: 'Clone' }
+        ];
+        return;
+      } else if (lang === 'en') {
+        this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+          { text: deleteRangeEn, tooltipText: deleteRangeEn, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
+          { text: cloneEn, tooltipText: cloneEn, prefixIcon: 'fa fa-copy', id: 'Clone' }
+        ];
+        return;
+      } else {
+        const langLocal = localStorage.getItem('lang');
+        if (langLocal === 'vi') {
+          this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+            { text: deleteRangeVi, tooltipText: deleteRangeVi, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
+            { text: cloneVi, tooltipText: cloneVi, prefixIcon: 'fa fa-copy', id: 'Clone' }
+          ];
+          return;
+        } else if (langLocal === 'en') {
+          this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+            { text: deleteRangeEn, tooltipText: deleteRangeEn, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
+            { text: cloneEn, tooltipText: cloneEn, prefixIcon: 'fa fa-copy', id: 'Clone' }
+          ];
+          return;
+        }
+      }
+    }));
   }
   count(index) {
     return Number(index) + 1;
@@ -179,7 +217,7 @@ export class PlanComponent implements OnInit {
         this.modalPlan.BPFCName = args.data.bpfcName;
         this.modalPlan.hourlyOutput = args.data.hourlyOutput;
         this.planService.update(this.modalPlan).subscribe(res => {
-          this.alertify.success('Updated succeeded!');
+          this.alertify.success('Cập nhật thành công! <br>Updated succeeded!');
           this.ClearForm();
           this.getAll();
         });
@@ -193,11 +231,11 @@ export class PlanComponent implements OnInit {
         this.modalPlan.hourlyOutput = args.data.hourlyOutput || 0;
         this.planService.create(this.modalPlan).subscribe(res => {
           if (res) {
-            this.alertify.success('Created succeeded!');
+            this.alertify.success('Tạo thành công!<br>Created succeeded!');
             this.getAll();
             this.ClearForm();
           } else {
-            this.alertify.warning('This plan has already existed!!!');
+            this.alertify.warning('Dữ liệu đã tồn tại! <br>This plan has already existed!!!');
             this.getAll();
             this.ClearForm();
           }
@@ -268,12 +306,12 @@ export class PlanComponent implements OnInit {
     });
   }
   deleteRange(plans) {
-    this.alertify.confirm('Delete Plan', 'Are you sure you want to delete this Plans ?', () => {
+    this.alertify.confirm('Delete Plan <br> Xóa kế hoạc làm việc', 'Are you sure you want to delete this Plans ?<br> Bạn có chắc chắn muốn xóa không?', () => {
       this.planService.deleteRange(plans).subscribe(() => {
         this.getAll();
-        this.alertify.success('Plans has been deleted');
+        this.alertify.success('Xóa thành công! <br>Plans has been deleted');
       }, error => {
-        this.alertify.error('Failed to delete the Modal Name');
+        this.alertify.error('Xóa thất bại! <br>Failed to delete the Model Name');
       });
     });
   }
@@ -294,18 +332,18 @@ export class PlanComponent implements OnInit {
       });
       this.modalReference = this.modalService.open(ref);
     } else {
-      this.alertify.warning('Please select the plan');
+      this.alertify.warning('Hãy chọn 1 hoặc nhiều dòng để nhân bản!<br>Please select the plan!', true);
     }
   }
 
   toolbarClick(args: any): void {
-    switch (args.item.text) {
+    switch (args.item.id) {
       case 'Clone':
         this.openModal(this.cloneModal);
         break;
-      case 'Delete Range':
+      case 'DeleteRange':
         if (this.grid.getSelectedRecords().length === 0) {
-          this.alertify.warning('Please select the plans!!');
+          this.alertify.warning('Hãy chọn 1 hoặc nhiều dòng để xóa <br>Please select the plans!!', true);
         } else {
           const selectedRecords = this.grid.getSelectedRecords().map((item: any) => {
             return item.id;
@@ -313,7 +351,7 @@ export class PlanComponent implements OnInit {
           this.deleteRange(selectedRecords);
         }
         break;
-      case 'Excel Export':
+      case 'ExcelExport':
         this.grid.excelExport();
         break;
       default:
@@ -328,13 +366,13 @@ export class PlanComponent implements OnInit {
 
     this.planService.clonePlan(this.plansSelected).subscribe((res: any) => {
       if (res) {
-        this.alertify.success('Successfully!');
+        this.alertify.success('Nhân bản thành công! <br>Successfully!');
         this.startDate = this.date;
         this.endDate = this.date;
         this.getAll();
         this.modalService.dismissAll();
       } else {
-        this.alertify.warning('the plans have already existed!');
+        this.alertify.warning('Dữ liệu này đã tồn tại!<br>The plans have already existed!');
         this.modalService.dismissAll();
       }
     });
