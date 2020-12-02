@@ -27,6 +27,11 @@ namespace DMR_API.Controllers
             _modelNameService = modelNameService;
             _mailExtension = mailExtension;
         }
+        [HttpPost]
+        public async Task<IActionResult> CloneBPFC(CloneDto clone)
+        {
+            return Ok(await _modelNameService.CloneBPFC(clone));
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetModelNames([FromQuery] PaginationParams param)

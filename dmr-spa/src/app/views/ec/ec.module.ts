@@ -80,6 +80,7 @@ import { MixingComponent } from './mixing/mixing.component';
 import { DispatchComponent } from './dispatch/dispatch.component';
 import { PrintGlueComponent } from './print-glue/print-glue.component';
 import { BpfcDetailComponent } from './bpfc-detail/bpfc-detail.component';
+import { Bpfc1Component } from './bpfc-1/bpfc-1.component';
 declare var require: any;
 let defaultLang: string;
 const lang = localStorage.getItem('lang');
@@ -187,7 +188,8 @@ if (lang === 'vi') {
     MixingComponent,
     DispatchComponent,
     PrintGlueComponent,
-    BpfcDetailComponent
+    BpfcDetailComponent,
+    Bpfc1Component
   ]
 })
 export class ECModule {

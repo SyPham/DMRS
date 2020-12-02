@@ -34,6 +34,7 @@ import { TodolistComponent } from './todolist/todolist.component';
 import { MixingComponent } from './mixing/mixing.component';
 import { DispatchComponent } from './dispatch/dispatch.component';
 import { BpfcDetailComponent } from './bpfc-detail/bpfc-detail.component';
+import { Bpfc1Component } from './bpfc-1/bpfc-1.component';
 
 const routes: Routes = [
   {
@@ -206,26 +207,26 @@ const routes: Routes = [
           breadcrumb: 'Establish'
         },
         children: [
+          // {
+          //   path: 'bpfc-schedule',
+          //   component: BPFCScheduleComponent,
+          //   data: {
+          //     title: 'BPFC Schedule',
+          //     breadcrumb: 'BPFC Schedule'
+          //   }
+          // },
           {
             path: 'bpfc-schedule',
-            component: BPFCScheduleComponent,
-            data: {
-              title: 'BPFC Schedule',
-              breadcrumb: 'BPFC Schedule'
-            }
-          },
-          {
-            path: 'bpfc',
-            resolve: { glues: GlueResolver },
+            // resolve: { glues: GlueResolver },
             // component: BpfcComponent,
             data: {
-              title: 'bpfc',
-              breadcrumb: 'BPFC'
+              title: 'bpfc-schedule',
+              breadcrumb: 'BPFC Schedule'
             },
             children: [
               {
                 path: '',
-                component: BpfcComponent
+                component: BPFCScheduleComponent
               },
               {
                 path: 'detail',
@@ -256,6 +257,14 @@ const routes: Routes = [
             data: {
               title: 'BPFC Status',
               breadcrumb: 'BPFC Status'
+            }
+          },
+          {
+            path: 'bpfc-1',
+            component: Bpfc1Component,
+            data: {
+              title: 'BPFC ',
+              breadcrumb: 'BPFC '
             }
           }
 

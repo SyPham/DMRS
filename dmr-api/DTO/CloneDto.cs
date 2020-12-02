@@ -8,6 +8,7 @@ namespace DMR_API.DTO
     public class CloneDto
     {
         public int ModelNameID { get; set; }
+        public string Name { get; set; }
         public int ModelNOID { get; set; }
         public int ArticleNOID { get; set; }
         public int ArtProcessID { get; set; }

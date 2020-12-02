@@ -49,7 +49,8 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item"
               [routerLink]="[ '/ec/establish/bpfc-schedule']">{{ 'BPFC_SCHEDULE' | translate }}</a>
-              <a class="dropdown-item" [routerLink]="[ '/ec/establish/bpfc']">{{ 'BPFC' | translate }}</a>
+              <a class="dropdown-item" [routerLink]="[ '/ec/establish/bpfc-1']">{{ 'BPFC' | translate }}</a>
+              <!-- <a class="dropdown-item" [routerLink]="[ '/ec/establish/bpfc']">{{ 'New BPFC' | translate }} </a> -->
             <a class="dropdown-item" *ngIf="level === ADMIN || level === SUPERVISOR" [routerLink]="[ '/ec/establish/bpfc-status']">{{ 'BPFC_STATUS' | translate }}</a>
           </div>
         </li>

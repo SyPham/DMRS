@@ -20,7 +20,10 @@ export class ModalNameService {
   constructor(
     private http: HttpClient
   ) { }
-
+  cloneBPFC(clone) {
+    const url = `${this.baseUrl}ModelName/CloneBPFC`;
+    return this.http.post(url, clone);
+  }
   getAllModalName() {
     return this.http.get<ModalName[]>(this.baseUrl + 'ModelName/GetAll', {});
   }
@@ -28,7 +31,7 @@ export class ModalNameService {
     const url = `${this.baseUrl}ModelName/GetAllModelNameForBPFCSchedule`;
     return this.http.get<ModalName[]>(url);
   }
-  getAllModelNameForAdmin() { 
+  getAllModelNameForAdmin() {
     return this.http.get<ModalName[]>(this.baseUrl + 'ModelName/GetAllForAdmin', {});
   }
   filterByApprovedStatus() { // FilterByApprovedStatus

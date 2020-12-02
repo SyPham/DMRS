@@ -13,6 +13,7 @@ namespace DMR_API._Services.Interface
         Task<bool> CloneModelName(int modelNameID, string modelName, string modelNo, int processID);
         Task<bool> CloneModelName(int modelNameID, int modelNOID, int articleNOID, int processID);
         Task<object> CloneModelName(CloneDto clone);
+        Task<object> CloneBPFC(CloneDto clone);
         Task<bool> CloneArticleModelname(int modelNameID, string modelName, string modelNo, string article, int processID);
         Task<bool> ImportExcel(List<ModelNameForImportExcelDto> modelNameForImportExcelDtos);
         Task<List<ModelNameDto>> GetAllAsyncForAdmin();

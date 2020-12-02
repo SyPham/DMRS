@@ -66,7 +66,64 @@ namespace DMR_API._Services.Services
             _mailExtension = mailExtension;
             _repoPlan = repoPlan;
         }
+        public async Task<ArticleNo> FindArticleNoByCloneDto(CloneDto clone)
+        {
+            var artNo = await _repoArticleNo.FindAll().FirstOrDefaultAsync(x => x.ModelNoID == clone.ModelNOID);
+            if (artNo == null)
+                return artNo;
+            else
+            {
+                var artNoData = new ArticleNo();
+                artNoData.ModelNoID = clone.ModelNOID;
+                artNoData.Name = clone.Name;
+                _repoArticleNo.Add(artNoData);
+                await _repoArticleNo.SaveAll();
+                return artNoData;
+            }
+        }
+        public async Task<object> CloneBPFC(CloneDto clone)
+        {
+            try
+            {
+                var bpfc = await _repoBPFC.FindAll()
+                                        .Include(x => x.ModelName)
+                                        .Include(x => x.ModelNo)
+                                        .Include(x => x.ArtProcess)
+                                        .Include(x => x.ArticleNo)
+                                        .Include(x => x.Glues).ThenInclude(x => x.GlueIngredients)
+                                        .Include(x => x.Plans)
+                                        .FirstOrDefaultAsync(x => x.ID == clone.BPFCID);
+                var artNo = await FindArticleNoByCloneDto(clone);
+                clone.ArticleNOID = artNo.ID;
+                var artProcess = await FindArtProcessByCloneDto(clone);
+                var bpfcForClone = await FindBPFCByCloneDto(clone, artProcess);
+                // Not exists bpfc -> add new -> clone
+                if (bpfcForClone == null)
+                {
+                    var bpfcClone = await CreateNewBPFCByCloneDto(clone, artProcess.ID);
+                    await CloneGlueByCloneDto(clone, bpfc, bpfcClone);
+                }
+                else
+                {
+                    await CloneGlueByCloneDto(clone, bpfc, bpfcForClone);
+                }
+                return new
+                {
+                    message = "The BPFC has been cloned!",
+                    status = true
+                };
+            }
+            catch (System.Exception ex)
+            {
 
+                Console.WriteLine("Loi clone model name", ex);
+                return new
+                {
+                    message = "",
+                    status = false
+                };
+            }
+        }
         //Thêm Brand mới vào bảng ModelName
         public async Task<bool> Add(ModelNameDto model)
         {
@@ -751,7 +808,7 @@ namespace DMR_API._Services.Services
                 var list2 = bpfcClone.Glues.Where(x => x.isShow == true).Select(x => x.Name);
                 var list1 = bpfc.Glues.Where(x => x.isShow == true).Select(x => x.Name);
                 var check = list1.Except(list2);
-                gluesData = bpfc.Glues.Where(x =>x.isShow == true && check.Contains(x.Name)).ToList();
+                gluesData = bpfc.Glues.Where(x => x.isShow == true && check.Contains(x.Name)).ToList();
             }
             if (gluesData.Count == 0)
                 return;

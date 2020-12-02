@@ -72,7 +72,7 @@ namespace DMR_API._Services.Services
 
         public async Task<object> GetDetailBPFC(int bpfcID)
         {
-            var model =await _repoBPFCEstablish.FindAll().Where(x => x.ID == bpfcID).Include(x => x.ModelName)
+            var model = await _repoBPFCEstablish.FindAll().Where(x => x.ID == bpfcID).Include(x => x.ModelName)
                 .Include(x => x.ModelNo)
                 .Include(x => x.ArticleNo)
                 .Include(x => x.ArtProcess).ThenInclude(x => x.Process)
@@ -119,7 +119,7 @@ namespace DMR_API._Services.Services
                 .Include(x => x.ModelNo)
                 .Include(x => x.ArticleNo)
                 .Include(x => x.ArtProcess).ThenInclude(x => x.Process)
-                .ProjectTo<BPFCEstablishDto>(_configMapper).OrderBy(x => x.ID).ToListAsync();
+                .ProjectTo<BPFCEstablishDto>(_configMapper).OrderBy(x => x.ID).OrderByDescending(x => x.ID).ToListAsync();
         }
         public async Task<List<BPFCHistoryDto>> GetAllHistoryAsync()
         {
@@ -146,7 +146,9 @@ namespace DMR_API._Services.Services
                         entitys.BPFCEstablishID = entity.BPFCEstablishID;
                         entitys.UserID = entity.UserID;
                         entitys.GlueID = entity.GlueID;
-                    } else if (entity.Action == "Delete") {
+                    }
+                    else if (entity.Action == "Delete")
+                    {
                         entitys.Action = "Delete";
                         entitys.Before = entity.Before;
                         entitys.After = entity.After;
@@ -177,7 +179,9 @@ namespace DMR_API._Services.Services
                         entitys.BPFCEstablishID = entity.BPFCEstablishID;
                         entitys.UserID = entity.UserID;
                         entitys.GlueID = entity.GlueID;
-                    } else if (entity.Action == "Delete") {
+                    }
+                    else if (entity.Action == "Delete")
+                    {
                         entitys.Action = "Delete";
                         entitys.Before = entity.Before;
                         entitys.After = entity.After;
@@ -206,7 +210,9 @@ namespace DMR_API._Services.Services
                         entitys.BPFCEstablishID = entity.BPFCEstablishID;
                         entitys.UserID = entity.UserID;
                         entitys.GlueID = entity.GlueID;
-                    } else if (entity.Action == "Delete") {
+                    }
+                    else if (entity.Action == "Delete")
+                    {
                         entitys.Action = "Delete";
                         entitys.Before = entity.Before;
                         entitys.After = entity.After;
@@ -547,7 +553,7 @@ namespace DMR_API._Services.Services
                 var timePresent = DateTime.Now;
                 var timeLast = Convert.ToDateTime(remark.CreatedDate);
                 var compare = DateTime.Compare(timePresent.Date, timeLast.Date);
-                
+
                 if (compare > 0)
                 {
                     return new
@@ -704,7 +710,7 @@ namespace DMR_API._Services.Services
         {
             var bpfc = await _repoBPFCEstablish
                         .FindAll()
-                        .Include(x=>x.Glues).ThenInclude(x=>x.GlueIngredients)
+                        .Include(x => x.Glues).ThenInclude(x => x.GlueIngredients)
                        .FirstOrDefaultAsync(x =>
                           x.ModelNameID == bpfcInfo.ModelNameID
                          && x.ModelNoID == bpfcInfo.ModelNoID
@@ -743,6 +749,13 @@ namespace DMR_API._Services.Services
               .ProjectTo<BPFCStatusDto>(_configMapper).OrderBy(x => x.CreatedDate).ToListAsync();
             var model = undone.Union(done);
             return model.ToList();
+        }
+
+        public async Task<List<string>> GetGlueByBPFCID(int bpfcID)
+        {
+            List<string> glues = await _repoBPFCEstablish.FindAll(x=> x.ID == bpfcID).Include(x => x.Glues).SelectMany(x => x.Glues.Where(a => a.isShow).Select(a => a.Name))
+                .ToListAsync();
+            return glues;
         }
     }
 }

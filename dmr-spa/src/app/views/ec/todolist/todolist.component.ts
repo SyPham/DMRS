@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { GridComponent, PageSettingsModel } from '@syncfusion/ej2-angular-grids';
 import { Subscription } from 'rxjs';
@@ -29,6 +29,8 @@ const BUILDING_LEVEL = 2;
 })
 export class TodolistComponent implements OnInit, OnDestroy {
   @ViewChild('gridDone') gridDone: GridComponent;
+  @ViewChildren('tooltip') tooltip: QueryList<any>;
+
   @ViewChild('gridUndone') gridUndone: GridComponent;
   sortSettings: object;
   pageSettings: PageSettingsModel;
@@ -59,11 +61,10 @@ export class TodolistComponent implements OnInit, OnDestroy {
     this.subscription.forEach(subscription => subscription.unsubscribe());
   }
   ngOnInit() {
-    if (signalr.SCALING_CONNECTION_HUB.state === HubConnectionState.Connected) {
-      signalr.SCALING_CONNECTION_HUB.on(
+    if (signalr.CONNECTION_HUB.state === HubConnectionState.Connected) {
+      signalr.CONNECTION_HUB.on(
         'ReceiveTodolist',
         (buildingID: number) => {
-          alert(1);
           if (this.buildingID === buildingID) {
             this.buildingID = buildingID;
             this.todolist2();
@@ -90,9 +91,10 @@ export class TodolistComponent implements OnInit, OnDestroy {
       }
     }));
   }
-  getBuilding(): void {
+  getBuilding(callback): void {
     this.buildingService.getBuildings().subscribe(async (buildingData) => {
       this.buildings = buildingData.filter(item => item.level === BUILDING_LEVEL);
+      callback();
     });
   }
   onFilteringBuilding: EmitType<FilteringEventArgs> = (
@@ -107,6 +109,9 @@ export class TodolistComponent implements OnInit, OnDestroy {
   }
   onChangeBuilding(args) {
     this.buildingID = args.itemData.id;
+  }
+  onSelectBuilding(args: any): void {
+    this.buildingID = args.itemData.id;
     this.buildingName = args.itemData.name;
     localStorage.setItem('buildingID', args.itemData.id);
     this.todolist2();
@@ -115,17 +120,20 @@ export class TodolistComponent implements OnInit, OnDestroy {
     const roles = [ADMIN, SUPERVISOR];
     if (roles.includes(this.role.id)) {
       this.IsAdmin = true;
-      this.getBuilding();
       const buildingId = +localStorage.getItem('buildingID');
       if (buildingId === 0) {
         this.alertify.message('Please select a building!', true);
       } else {
-        this.buildingID = buildingId;
-        this.todolist2();
+        this.getBuilding(() => {
+          this.buildingID = buildingId;
+          this.todolist2();
+        });
       }
     } else {
-      this.buildingID = this.building.id;
-      this.todolist2();
+      this.getBuilding(() => {
+        this.buildingID = this.building.id;
+        this.todolist2();
+      });
     }
   }
   todolist2() {
@@ -219,6 +227,18 @@ export class TodolistComponent implements OnInit, OnDestroy {
       }
     }
   }
+  onBeforeRender(args, data, i) {
+    const t = this.tooltip.filter((item, index) => index === +i)[0];
+    t.content = 'Loading...';
+    t.dataBind();
+    this.planService
+      .getBPFCByGlue(data.glue)
+      .subscribe((res: any) => {
+        t.content = res.join('<br>');
+        t.dataBind();
+      });
+  }
+
   // modal
   openDispatchModal(value: Todolist) {
     const modalRef = this.modalService.open(DispatchComponent, { size: 'xl' });

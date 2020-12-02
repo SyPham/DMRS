@@ -93,6 +93,9 @@ export class BPFCEstablishService {
     return this.http.get(this.baseUrl + `BPFCEstablish/LoadBPFCHistory/${id}`, {});
   }
 
+  getGlueByBPFCID(id: number) {
+    return this.http.get(this.baseUrl + `BPFCEstablish/GetGlueByBPFCID/${id}`, {});
+  }
   UpdateHistoryBPFC(entity) {
     return this.http.put(this.baseUrl + 'BPFCEstablish/UpdateBPFCHistory', entity);
   }

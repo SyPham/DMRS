@@ -3,52 +3,73 @@
   <div class="col-md-5">
     <div class="card">
       <div class="col-md-12 card-body table-responsive">
+        <!--  Model Name -->
         <div class="row">
           <div class="col-md-3 mt-2">
             <label>Model Name: </label>
           </div>
           <div class="col-md-8 mt-2">
-            <input type="text" name="" disabled id="input" class="form-control" [value]="modelNameDetail"
-               title="">
+            <ejs-dropdownlist #modelNameDropdownlist (open)='openPopupDropdownlist()' class="w-100 float-left"
+              [dataSource]='modelNameData' [fields]='fieldsBPFCs' [allowFiltering]='true' [(ngModel)]="modelNameID"
+              (filtering)='onFilteringModelName($event)' (select)='onChangeModelName($event)'
+              placeholder="Select a Model Name">
+            </ejs-dropdownlist>
           </div>
-
-          <div class="col-md-1 mt-2">
+          <div *ngIf="modelNameSelect && modelNoSelect && modelArtSelect && modelProcessSelect" class="col-md-1 mt-2">
             <button ejs-button (click)='openModal(cloneModal)' cssClass="e-info" class="float-right ml-1"><i
                 class="fa fa-clone"></i></button>
           </div>
         </div>
+        <!-- End Model Name -->
+
+        <!--  Model No -->
+
         <div class="row">
           <div class="col-md-3 mt-2">
             <label>Model NO: </label>
           </div>
           <div class="col-md-8 mt-2">
-            <input type="text" name="" disabled id="input" class="form-control" [value]="modelNoDetail"
-               title="">
+            <ejs-dropdownlist #modelNoDropdownlist (open)='openPopupDropdownlist()' class="w-100 float-left"
+              [dataSource]='modelNoData' [fields]='fieldsBPFCs' [allowFiltering]='true' [(ngModel)]="modelNoID"
+              (filtering)='onFilteringModelNO($event)' (select)='onChangeModelNo($event)'
+              placeholder="Select a Model NO">
+            </ejs-dropdownlist>
           </div>
-
+          <div class="col-md-1 mt-2">
+          </div>
         </div>
+        <!-- End Model No -->
+
+        <!-- Article No -->
         <div class="row">
           <div class="col-md-3 mt-2">
             <label>Article NO: </label>
           </div>
           <div class="col-md-8 mt-2">
-            <input type="text" name="" disabled id="input" class="form-control" [value]="articleNoDetail"
-               title="">
-
+            <ejs-dropdownlist #modelNameDropdownlist (open)='openPopupDropdownlist()' class="w-100 float-left"
+              [dataSource]='articleNosData' [fields]='fieldsBPFCs' [allowFiltering]='true' [(ngModel)]="articleNoID"
+              (filtering)='onFilteringArticleNO($event)' (select)='onChangeArticleNo($event)'
+              placeholder="Select article NO   ">
+            </ejs-dropdownlist>
           </div>
           <div class="col-md-1 mt-2">
           </div>
         </div>
+        <!-- End Article No -->
+
+        <!-- ArtProcess -->
         <div class="row">
           <div class="col-md-3 mt-2">
             <label>Process: </label>
           </div>
-          <div class="col-md-8 mt-2">
-            <button type="button" class="btn btn-danger rounded-pill">{{artProcessDetail}}</button>
-          </div>
-          <div class="col-md-1 mt-2">
+          <div class="col-md-9 mt-2">
+            <ng-container *ngFor="let item of artProcessData">
+              <ejs-radiobutton [label]="item.name" name="process" [value]="item.id" (click)='onClickProcess($event)'>
+              </ejs-radiobutton>
+            </ng-container>
           </div>
         </div>
+        <!-- End Art Process -->
       </div>
     </div>
     <!-- Glue -->
@@ -151,8 +172,8 @@
             </ejs-switch>
           </ng-container>
           <!-- <button type="button" (click)='save()' ejs-button cssClass="e-small e-warning ml-2"><i
-                class="fas fa-save"></i> {{ 'SAVE' | translate}}
-            </button> -->
+              class="fas fa-save"></i> {{ 'SAVE' | translate}}
+          </button> -->
           <button type="button" (click)='finished()' *ngIf='modelNameID > 0' ejs-button
             cssClass="e-small e-success ml-2"><i class="fas fa-save"></i> {{ 'FINISHED' | translate}}
           </button>
@@ -346,6 +367,75 @@
     </div>
   </ng-template>
 
+  <ng-template #cloneModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">
+        <i class="fas fa-plus"></i> Clone BPFC
+      </h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="Name">Model Name</label>
+            <span style="color:red">(*)</span>
+            <ejs-dropdownlist #modelNameDropdownlist (open)='openPopupDropdownlist()' class="w-100 float-left"
+              [dataSource]='modelNameDataClone' [fields]='fieldsBPFCs' [allowFiltering]='true' [value]='value'
+              (filtering)='onFilteringModelNameClone($event)' (select)='onChangeModelNameClone($event)'
+              placeholder="Select a Model Name">
+            </ejs-dropdownlist>
+            {{modelNameIDClone}}
+            <!-- [(ngModel)]="modelNameIDClone" -->
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="Name">Model NO</label>
+            <span style="color:red">(*)</span>
+            <ejs-dropdownlist #modelNoDropdownlist class="w-100 float-left" [dataSource]='modelNOsDataClone'
+              (dataBound)='OndataBound($event)' [fields]='fieldsBPFCs' [allowFiltering]='true' [value]="valuemodelNo"
+              (filtering)='onFilteringModelNOClone($event)' (select)='onChangeModelNoClone($event)'
+              placeholder="Select a Model NO">
+            </ejs-dropdownlist>
+            {{modelNOIDClone}}
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="Name">Article NO</label>
+            <span style="color:red">(*)</span>
+            <ejs-dropdownlist #modelNameDropdownlist class="w-100 float-left" [dataSource]='articleNosDataClone'
+              [fields]='fieldsBPFCs' [allowFiltering]='true' (filtering)='onFilteringArticleNOClone($event)'
+              [(ngModel)]="articleNOIDClone" (select)='onChangeArticleNoClone($event)'
+              placeholder="Select article NO   ">
+            </ejs-dropdownlist>
+            {{articleNOIDClone}}
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="Name">Process</label>
+            <span style="color:red">(*)</span>
+            <div class="col-md-9 mt-2">
+              <ng-container *ngFor="let item of artProcessDataClone2">
+                <ejs-radiobutton [label]="item.name" name="process2" [value]="item.id" [(ngModel)]="artProcessIDClone">
+                </ejs-radiobutton>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+      <button type="submit" (click)='onClickClone()' class="btn btn-primary">Clone</button>
+    </div>
+  </ng-template>
+
   <ng-template #HistoryModal let-modal>
     <div class="modal-header">
       <h4 class="modal-title">
@@ -396,55 +486,3 @@
   </ng-template>
   <!-- End Modal -->
 </div>
-
-<ng-template #cloneModal let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title">
-      <i class="fas fa-plus"></i> Clone BPFC
-    </h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="Name">Model Name</label>
-          <span style="color:red">(*)</span>
-          <input type="text" name="" disabled id="input" class="form-control" [value]="modelNameLeo" 
-            title="">
-        </div>
-      </div>
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="Name">Model NO</label>
-          <span style="color:red">(*)</span>
-          <input type="text" name="" disabled id="input" class="form-control" [value]="modelNoLeo" 
-            title="">
-        </div>
-      </div>
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="Name">Article NO</label>
-          <span style="color:red">(*)</span>
-          <input type="text" name="" id="input" class="form-control" [(ngModel)]="articleNoNewLeo" [value]="articleNoLeo"
-             title="">
-        </div>
-      </div>
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="Name">Process</label>
-          <span style="color:red">(*)</span>
-          <input type="text" name="" disabled id="input" class="form-control" [value]="artProcessLeo" 
-            title="">
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="submit" (click)='onClickClone()' class="btn btn-primary">Clone</button>
-  </div>
-</ng-template>

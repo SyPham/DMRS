@@ -6,7 +6,7 @@
        <div class="col-md-4">
         <ejs-dropdownlist  [dataSource]='buildings' [fields]='fieldsBuildings'
           [allowFiltering]='true' [(ngModel)]="buildingID" (filtering)='onFilteringBuilding($event)'
-          (select)='onChangeBuilding($event)' placeholder="Select a building">
+          (change)='onChangeBuilding($event)' (select)='onSelectBuilding($event)' placeholder="Select a building">
         </ejs-dropdownlist>
        </div>
        <div class="col-md-4"></div>
@@ -25,6 +25,12 @@
         <e-column field='glue' headerText='Glue' width='170' textAlign='Center'>
           <ng-template #headerTemplate>
             {{ 'Glue' | translate }}
+          </ng-template>
+          <ng-template #template let-data>
+            <ejs-tooltip #tooltip class="fix-css" position='RightCenter' (beforeRender)="onBeforeRender($event, data, data.index)"
+              content="loading...">
+              {{data.glue}}
+            </ejs-tooltip>
           </ng-template>
         </e-column>
         <e-column field='lines' headerText='Line' width='170' textAlign='Center'>
@@ -107,6 +113,12 @@
         <e-column field='glue' headerText='Glue' width='170' textAlign='Center'>
               <ng-template #headerTemplate>
                 {{ 'Glue' | translate }}
+              </ng-template>
+              <ng-template #template let-data>
+                <ejs-tooltip #tooltip class="fix-css" position='RightCenter' (beforeRender)="onBeforeRender($event, data, data.index)"
+                  content="loading...">
+                  {{data.glue}}
+                </ejs-tooltip>
               </ng-template>
         </e-column>
         <e-column field='lines' headerText='Line' width='170' textAlign='Center'>

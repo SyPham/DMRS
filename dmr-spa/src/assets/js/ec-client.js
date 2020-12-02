@@ -4,7 +4,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 
 export const CONNECTION_HUB = new HubConnectionBuilder()
     .withUrl(environment.hub)
-    // .withAutomaticReconnect([1000, 3000, 5000])
+    .withAutomaticReconnect([1000, 3000, 5000, 10000, 30000])
     // .configureLogging(signalR.LogLevel.Information)
     .build();
 // Start the connection.
@@ -27,6 +27,7 @@ function start() {
 }
 export const SCALING_CONNECTION_HUB = new HubConnectionBuilder()
     .withUrl(environment.scalingHub)
+    .withAutomaticReconnect([1000, 3000, 5000, 10000, 30000])
     //  .configureLogging(LogLevel.Information)
     .build();
 // Start the connection.

@@ -21,6 +21,9 @@ namespace TodolistScheduleService
         private readonly ILogger<Worker> _logger;
         private readonly DataContext _context;
         private HubConnection _connection;
+        private bool _flag = true;
+        private List<TodolistDto> _model = new List<TodolistDto>();
+
         public Todolist(ILogger<Worker> logger, DataContext context)
         {
             _connection = new HubConnectionBuilder()
@@ -32,6 +35,7 @@ namespace TodolistScheduleService
         }
         public override Task StopAsync(CancellationToken cancellationToken)
         {
+            _logger.LogError($"Todolist Service StopAsync at: { DateTimeOffset.Now}");
             _context.DisposeAsync();
             return _connection.DisposeAsync();
         }
@@ -45,7 +49,7 @@ namespace TodolistScheduleService
                 try
                 {
                     await _connection.StartAsync(stoppingToken);
-
+                    await CheckTodolist();
                     break;
                 }
                 catch
@@ -53,13 +57,21 @@ namespace TodolistScheduleService
                     await Task.Delay(1000);
                 }
             }
-            Console.WriteLine($"Hub State: {_connection.State}");
-            _connection.On<int>("ReceiveTodolist", building =>
+
+            _logger.LogInformation($"Hub State: {_connection.State}");
+            _connection.On<int>("ReceiveTodolist", (building) =>
+           {
+               _logger.LogInformation($"ReceiveTodolist building: {building}");
+           });
+            _connection.On("ReceiveCreatePlan", async () =>
             {
-                Console.WriteLine($"#### ### Building => {building}");
+                _logger.LogInformation($"ReceiveCreatePlan");
+                _flag = true;
+                await CheckTodolist();
             });
             _connection.Closed += async (error) =>
             {
+                _flag = false;
                 _logger.LogError(error.Message);
                 await Task.Delay(new Random().Next(0, 5) * 1000);
                 await _connection.StartAsync();
@@ -67,38 +79,71 @@ namespace TodolistScheduleService
             _connection.Reconnecting += (error) =>
            {
                _logger.LogError(error.Message);
-               return Task.CompletedTask;
-           };
-            _connection.Reconnected += (connectionId) =>
-           {
-               _logger.LogInformation($"{connectionId} reconnected at: { DateTimeOffset.Now}");
-               return Task.CompletedTask;
-           };
-            var model = (await CheckTodolistAllBuilding()).GroupBy(x=> new { x.BuildingID, x.EstimatedTime}).ToList();
-            var currentTime = DateTime.Now;
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                foreach (var item in model)
-                {
-                    if (item.Key.EstimatedTime >= currentTime)
-                    {
-                        try
-                        {
-                            await _connection.InvokeAsync("Todolist", item.Key.BuildingID);
-                            _logger.LogInformation("Todolist InvokeAsync at: {time}", DateTimeOffset.Now);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError("Todolist error at: {time} {err}", DateTimeOffset.Now, ex.Message);
+               _logger.LogInformation($"Singnalr Reconnecting: { DateTimeOffset.Now} ---- Flag: {_flag}");
 
-                            throw;
+               return Task.CompletedTask;
+           };
+            _connection.Reconnected += async (connectionId) =>
+           {
+               _flag = true;
+               _logger.LogInformation($"{connectionId} reconnected at: { DateTimeOffset.Now} ---- Flag: {_flag}");
+               await CheckTodolist();
+           };
+            while (true)
+            {
+                if (_connection.State == HubConnectionState.Disconnected)
+                {
+                    try
+                    {
+                        await _connection.StartAsync(stoppingToken);
+                        if (_connection.State == HubConnectionState.Connected)
+                        {
+                            _logger.LogInformation($"Hub: {_connection.State}");
+                            _flag = true;
+                            await CheckTodolist();
                         }
                     }
+                    catch
+                    {
+                        await Task.Delay(3000);
+                    }
                 }
-                await Task.Delay(30000, stoppingToken);
+
             }
         }
+        async Task CheckTodolist()
+        {
 
+            var currentTime = DateTime.Now.Subtract(new TimeSpan(00, 00, 30));
+            _model = await CheckTodolistAllBuilding();
+            _logger.LogInformation($"Get all todolist: { DateTimeOffset.Now} ---- Flag: {_flag} -- Start loop -- Count: {_model.Count}");
+            var model = _model.GroupBy(x => new { x.BuildingID, x.EstimatedTime }).Where(x => x.Key.EstimatedTime.Subtract(new TimeSpan(00, 00, 30)) == currentTime).ToList();
+            _logger.LogInformation($"So luong todolist can load: { model.Count()}");
+
+            while (_flag)
+            {
+                if (_connection.State == HubConnectionState.Disconnected)
+                {
+                    _flag = false;
+                    _logger.LogInformation($"Hub Disconnected at: { DateTimeOffset.Now} ---- Flag: {_flag} -- Stop loop");
+                }
+                //_logger.LogInformation($"Todolist loop at: { DateTimeOffset.Now} ---- Flag: {_flag}");
+
+                foreach (var item in model)
+                {
+                    try
+                    {
+                        await _connection.InvokeAsync("Todolist", item.Key.BuildingID);
+                        _logger.LogInformation("Todolist InvokeAsync at: {time}", DateTimeOffset.Now);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Todolist error at: {time} {err}", DateTimeOffset.Now, ex.Message);
+                    }
+                }
+                await Task.Delay(30000);
+            }
+        }
         async Task<List<TodolistDto>> CheckTodolistAllBuilding()
         {
             var currentTime = DateTime.Now;
@@ -123,7 +168,7 @@ namespace TodolistScheduleService
                                                 x.ID,
                                                 x.BPFCEstablishID,
                                                 Building = x.Building,
-                                              
+
                                             })
                         on b.ID equals p.BPFCEstablishID
                         join g in _context.Glues.Where(x => x.isShow)

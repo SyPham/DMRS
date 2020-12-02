@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ViewChildren, QueryList } from '@angular/core';
 import { ModalNameService } from 'src/app/_core/_service/modal-name.service';
 import { AlertifyService } from 'src/app/_core/_service/alertify.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -8,6 +8,7 @@ import { environment } from '../../../../environments/environment';
 import { BPFCEstablishService } from 'src/app/_core/_service/bpfc-establish.service';
 import { DatePipe } from '@angular/common';
 import { UserService } from 'src/app/_core/_service/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -17,7 +18,9 @@ import { UserService } from 'src/app/_core/_service/user.service';
   providers: [DatePipe]
 })
 export class BPFCScheduleComponent implements OnInit {
-  pageSettings = { pageCount: 20, pageSizes: true, pageSize: 10 };
+  @ViewChildren('tooltip') tooltip: QueryList<any>;
+
+  pageSettings = { pageCount: 20, pageSizes: [50, 100, 150, 200, 'All'], pageSize: 50 };
   data: any[];
   editSettings: object;
   toolbar: object;
@@ -31,13 +34,23 @@ export class BPFCScheduleComponent implements OnInit {
   excelDownloadUrl: string;
   users: any[];
   filterSettings: { type: string; };
+  modelName: string = null;
+  modelNo: string = null;
+  articleNo: string = null;
+  articleNoNew: string = null;
+  artProcess: string = null;
+  modelNameID = 0;
+  modelNoID = 0;
+  articleNoID = 0;
+  artProcessID = 0;
+  BPFCID = 0;
   constructor(
-    private modelNameService: ModalNameService,
+    private modalNameService: ModalNameService,
     private alertify: AlertifyService,
-    private buildingUserService: BuildingUserService,
     private userService: UserService,
     private bPFCEstablishService: BPFCEstablishService,
     public modalService: NgbModal,
+    private router: Router,
     private datePipe: DatePipe
   ) { }
 
@@ -48,7 +61,67 @@ export class BPFCScheduleComponent implements OnInit {
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, newRowPosition: 'Normal' };
     this.getAllUsers();
   }
+  onBeforeRender(args, data, i) {
+    const t = this.tooltip.filter((item, index) => index === +i)[0];
+    t.content = 'Loading...';
+    t.dataBind();
+    this.bPFCEstablishService
+      .getGlueByBPFCID(data.id)
+      .subscribe((res: any) => {
+        t.content = res.join('<br>');
+        t.dataBind();
+      });
+  }
 
+  onClickClone() {
+    const clone = {
+      modelNameID: this.modelNameID,
+      modelNOID: this.modelNoID,
+      articleNOID: this.articleNoID,
+      artProcessID: Number(this.artProcessID),
+      bpfcID: this.BPFCID,
+      name: this.articleNoNew,
+      cloneBy: JSON.parse(localStorage.getItem('user')).User.ID,
+    };
+
+    this.clone(clone);
+  }
+  clone(clone) {
+    if (this.articleNoNew !== this.articleNo) {
+      this.modalNameService.cloneBPFC(clone).subscribe((res: any) => {
+        if (res.status === true) {
+          this.alertify.success('Đã sao chép thành công!');
+          this.modalService.dismissAll();
+          this.getAllUsers();
+        } else {
+          this.alertify.error('The BPFC exists!');
+        }
+      });
+    } else {
+      this.alertify.error('The BPFC exists!');
+    }
+  }
+  openModal(ref, data) {
+    this.modalReference = this.modalService.open(ref);
+    this.BPFCID = data.id;
+    this.modelName = data.modelName;
+    this.modelNo = data.modelNo;
+    this.articleNo = data.articleNo;
+    this.artProcess = data.artProcess;
+    this.articleNoNew = data.articleNo;
+
+    this.modelNameID = data.modelNameID;
+    this.modelNoID = data.modelNoID;
+    this.articleNoID = data.articleNoID;
+    if (data.artProcess === 'ASY') {
+      this.artProcessID = 1;
+    } else {
+      this.artProcessID = 2;
+    }
+  }
+  detail(data) {
+    return this.router.navigate([`/ec/establish/bpfc-schedule/detail/${data.id}`]);
+  }
   actionBegin(args) {
     console.log(args.requestType + ' ' + args.type); // custom Action
     if (args.requestType === 'save') {
@@ -62,7 +135,9 @@ export class BPFCScheduleComponent implements OnInit {
       });
     }
   }
-
+  dataBound() {
+   this.gridObj.autoFitColumns();
+  }
   toolbarClick(args) {
     switch (args.item.text) {
       case 'Excel Import':
@@ -118,6 +193,10 @@ export class BPFCScheduleComponent implements OnInit {
       this.data = res.map( (item: any) => {
         return {
           id: item.id,
+          modelNameID: item.modelNameID,
+          modelNoID: item.modelNoID,
+          articleNoID: item.articleNoID,
+          artProcessID: item.artProcessID,
           modelName: item.modelName,
           modelNo: item.modelNo,
           createdDate: new Date(item.createdDate),

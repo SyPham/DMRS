@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Tls;
 using EC_API.DTO;
+using DMR_API.SignalrHub;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DMR_API.Controllers
 {
@@ -17,9 +19,11 @@ namespace DMR_API.Controllers
     public class PlanController : ControllerBase
     {
         private readonly IPlanService _planService;
-        public PlanController(IPlanService planService)
+        private readonly IHubContext<ECHub> _hubContext;
+        public PlanController(IPlanService planService, IHubContext<ECHub> hubContext)
         {
             _planService = planService;
+            _hubContext = hubContext;
         }
         [HttpPost]
         public async Task<IActionResult> GetBPFCByGlue([FromBody] TooltipParams tooltip)
@@ -97,22 +101,34 @@ namespace DMR_API.Controllers
             if (_planService.GetById(create.ID) != null)
                 return BadRequest("Plan ID already exists!");
             create.CreatedDate = DateTime.Now;
-            return Ok(await _planService.Add(create));
+            var model = await _planService.Add(create);
+            if (model)
+                await _hubContext.Clients.All.SendAsync("ReceiveCreatePlan");
+            return Ok(model);
         }
 
         [HttpPut]
         public async Task<IActionResult> Update(PlanDto update)
         {
-            if (await _planService.Update(update))
+            var model = await _planService.Update(update);
+            if (model)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveCreatePlan");
                 return NoContent();
+            }
             return BadRequest($"Updating model no {update.ID} failed on save");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (await _planService.Delete(id))
+            var model = await _planService.Delete(id);
+
+            if (model)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveCreatePlan");
                 return NoContent();
+            }
             throw new Exception("Error deleting the model no");
         }
         [AllowAnonymous]
@@ -131,12 +147,16 @@ namespace DMR_API.Controllers
         [HttpPost]
         public async Task<IActionResult> ClonePlan(List<PlanForCloneDto> create)
         {
-            return Ok(await _planService.ClonePlan(create));
+            var model = await _planService.ClonePlan(create);
+            await _hubContext.Clients.All.SendAsync("ReceiveCreatePlan");
+            return Ok(model);
         }
         [HttpPost]
         public async Task<IActionResult> DeleteRange(List<int> delete)
         {
-            return Ok(await _planService.DeleteRange(delete));
+            var model = await _planService.DeleteRange(delete);
+            await _hubContext.Clients.All.SendAsync("ReceiveCreatePlan");
+            return Ok(model);
         }
         [HttpPost]
         public async Task<IActionResult> DispatchGlue(BuildingGlueForCreateDto create)
@@ -262,7 +282,7 @@ namespace DMR_API.Controllers
             return Ok(batchs);
         }
         [HttpPost]
-        public async Task<IActionResult> Dispatch([FromBody]DispatchParams todolistDto )
+        public async Task<IActionResult> Dispatch([FromBody] DispatchParams todolistDto)
         {
             var batchs = await _planService.Dispatch(todolistDto);
             return Ok(batchs);

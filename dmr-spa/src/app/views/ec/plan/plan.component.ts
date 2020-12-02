@@ -140,13 +140,15 @@ export class PlanComponent implements OnInit, OnDestroy {
     const cloneVi = 'Nhân Bản';
     this.subscription.push(this.dataService.getValueLocale().subscribe(lang => {
       if (lang === 'vi') {
-        this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+        this.toolbarOptions = ['Add', 'Update', 'Cancel',
+          { text: 'ExcelExport', tooltipText: 'ExcelExport', prefixIcon: 'fa fa-remove', id: 'ExcelExport' },
           { text: deleteRangeVi, tooltipText: deleteRangeVi, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
           { text: cloneVi, tooltipText: cloneVi, prefixIcon: 'fa fa-copy', id: 'Clone' }
         ];
         return;
       } else if (lang === 'en') {
-        this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+        this.toolbarOptions = ['Add', 'Update', 'Cancel',
+          { text: 'ExcelExport', tooltipText: 'ExcelExport', prefixIcon: 'fa fa-remove', id: 'ExcelExport' },
           { text: deleteRangeEn, tooltipText: deleteRangeEn, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
           { text: cloneEn, tooltipText: cloneEn, prefixIcon: 'fa fa-copy', id: 'Clone' }
         ];
@@ -154,13 +156,15 @@ export class PlanComponent implements OnInit, OnDestroy {
       } else {
         const langLocal = localStorage.getItem('lang');
         if (langLocal === 'vi') {
-          this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+          this.toolbarOptions = ['Add', 'Update', 'Cancel',
+            { text: 'ExcelExport', tooltipText: 'ExcelExport', prefixIcon: 'fa fa-remove', id: 'ExcelExport' },
             { text: deleteRangeVi, tooltipText: deleteRangeVi, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
             { text: cloneVi, tooltipText: cloneVi, prefixIcon: 'fa fa-copy', id: 'Clone' }
           ];
           return;
         } else if (langLocal === 'en') {
-          this.toolbarOptions = ['ExcelExport', 'Add', 'Update', 'Cancel',
+          this.toolbarOptions = ['Add', 'Update', 'Cancel',
+            { text: 'ExcelExport', tooltipText: 'ExcelExport', prefixIcon: 'fa fa-remove', id: 'ExcelExport' },
             { text: deleteRangeEn, tooltipText: deleteRangeEn, prefixIcon: 'fa fa-trash', id: 'DeleteRange' }, 'Search',
             { text: cloneEn, tooltipText: cloneEn, prefixIcon: 'fa fa-copy', id: 'Clone' }
           ];

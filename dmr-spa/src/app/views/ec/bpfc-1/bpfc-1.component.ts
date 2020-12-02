@@ -50,14 +50,13 @@ import { SwitchComponent } from '@syncfusion/ej2-angular-buttons';
 
 declare const $: any;
 const LEVEL_1 = 3;
-
 @Component({
-  selector: 'app-bpfc-detail',
-  templateUrl: './bpfc-detail.component.html',
-  styleUrls: ['./bpfc-detail.component.css'],
+  selector: 'app-glue-ingredient',
+  templateUrl: './bpfc-1.component.html',
+  styleUrls: ['./bpfc-1.component.css'],
   providers: [ToolbarService, EditService, PageService],
 })
-export class BpfcDetailComponent implements OnInit, AfterViewInit {
+export class Bpfc1Component implements OnInit, AfterViewInit {
   modalReference: NgbModalRef;
   @ViewChild('switch') public switch: SwitchComponent;
   data: IGlue[];
@@ -100,7 +99,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     expiredTime: 0,
     createdBy: 0,
   };
-  ingredient = {
+  ingredient: IIngredient = {
     id: 0,
     name: '',
     code: '',
@@ -115,7 +114,9 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     materialNO: '',
     unit: 0,
     real: 0,
-    cbd: 0
+    cbd: 0,
+    replacementFrequency: 0,
+    prepareTime: 0
   };
   editPercentage = {
     glueID: 0,
@@ -312,24 +313,9 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   userData: any[] = [];
   public value: any;
   public valuemodelNo: any;
-  modelNameDetail: string;
-  modelNoDetail: string;
-  articleNoDetail: string;
-  artProcessDetail: string;
   materialID: any;
   partID: any;
   kindID: any;
-
-  modelNameLeo: string = null;
-  modelNoLeo: string = null;
-  articleNoLeo: string = null;
-  articleNoNewLeo: string = null;
-  artProcessLeo: string = null;
-  modelNameIDLeo = 0;
-  modelNoIDLeo = 0;
-  articleNoIDLeo = 0;
-  artProcessIDLeo = 0;
-  BPFCIDLeo = 0;
   constructor(
     private glueIngredientService: GlueIngredientService,
     private modalNameService: ModalNameService,
@@ -363,7 +349,6 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     this.glueid = 0;
     this.onService();
     this.getAllSupllier();
-    this.GetDetailBPFC();
     this.sortOptions = { columns: [{ field: 'item', direction: 'Decending' }] };
     this.editParams = { params: { value: '' } };
     if (this.glue.id === 0) {
@@ -408,52 +393,6 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     this.customeridrules = { required: true };
     this.freightrules = { required: true };
     this.editparams = { paramss: { popupHeight: '300px' } };
-  }
-
-
-  GetDetailBPFC() {
-    this.BPFCID = this.route.snapshot.params.id;
-    this.bPFCEstablishService.getDetailBPFC(this.BPFCID).subscribe((res: any) => {
-      const data = res[0];
-      this.BPFCIDLeo = data.id;
-      this.modelNameLeo = data.modelName;
-      this.modelNoLeo = data.modelNo;
-      this.articleNoLeo = data.articleNo;
-      this.artProcessLeo = data.artProcess;
-      this.articleNoNewLeo = data.articleNo;
-
-      this.modelNameID = data.modelNameID;
-      this.modelNoID = data.modelNoID;
-      this.articleNoID = data.articleNoID;
-      if (data.artProcess === 'ASY') {
-        this.artProcessIDLeo = 1;
-      } else {
-        this.artProcessIDLeo = 2;
-      }
-
-      this.modelNameDetail = res[0].modelName;
-      this.modelNameID = res[0].modelNameID;
-      this.modelNoDetail = res[0].modelNo;
-      this.articleNoDetail = res[0].articleNo;
-      this.artProcessDetail = res[0].artProcess;
-      this.modelNameIDClone = res[0].modelNameID;
-      this.value = res[0].modelNameID;
-      this.valuemodelNo = res[0].modelNoID;
-      this.articleNoID = res[0].articleNoID;
-      this.resetLifeCycleBPFC();
-      this.BPFCID = res[0]?.id;
-      this.approvalStatus = res[0].approvalStatus;
-      this.createdStatus = res[0].finishedStatus;
-      localStorage.removeItem('details');
-      this.glue.BPFCEstablishID = this.BPFCID;
-      this.getAllGluesByBPFCID(this.BPFCID);
-      this.getAllPart();
-      this.getAllKind();
-      this.getAllMaterial();
-      this.getAllIngredient();
-      this.existGlue = true;
-      this.modified = true;
-    });
   }
   public onFiltering: EmitType<FilteringEventArgs> = (
     e: FilteringEventArgs
@@ -537,10 +476,10 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     // document.querySelectorAll(
     //   'button[aria-label=Update] > span.e-tbar-btn-text'
     // )[0].innerHTML = 'Save';
-    // $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="tooltip"]').tooltip();
     if (this.selectedRow.length) {
       this.gridglue.selectRows(this.selectedRow);
-      // this.selectedRow = [];
+      this.selectedRow = [];
     } else {
       this.gridglue.selectRows(this.selIndex);
     }
@@ -588,7 +527,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
           articleNoID: this.articleNoID,
           artProcessID: this.artProcessID,
         };
-        // this.getBPFCID(bpfcInfo);
+        this.getBPFCID(bpfcInfo);
       });
       this.saveGlue();
     }
@@ -1215,7 +1154,6 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
       this.deleteIngredient();
     }
   }
-
   updateGlueIngredient() {
     // if (this.gridglue.getSelectedRecords()[0])
   }
@@ -1335,7 +1273,6 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   openPopupDropdownlist() {
     $('[data-toggle="tooltip"]').tooltip();
   }
-
   toolbarClick(args: any): void {
     switch (args.item.text) {
       case 'Add New':
@@ -1395,6 +1332,8 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   }
 
   openModal(ref) {
+    this.getModelNamesClone();
+    this.getAllProcess();
     this.modalReference = this.modalService.open(ref);
   }
 
@@ -1645,7 +1584,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
           if (id === 0) {
             const details = this.getLocalStore('details');
             this.ingredients1 = details.map((item) => {
-              const ingredient = {
+              const ingredient: IIngredient = {
                 id: item.ingredientID,
                 name: item.ingredientName,
                 code: '',
@@ -1660,7 +1599,9 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
                 materialNO: item.materialNO,
                 unit: item.unit,
                 real: item.real,
-                cbd: item.cbd
+                cbd: item.cbd,
+                replacementFrequency: 0,
+                prepareTime: 0
               };
               return ingredient;
             });
@@ -2066,7 +2007,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
     });
   }
   OndataBound(args) {
-    // this.modelNoDropdownlist.value = this.value;
+    this.modelNoDropdownlist.value = this.value;
   }
   /// API Clone
   getModelNamesClone() {
@@ -2109,13 +2050,24 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
         });
       });
   }
-
+  clone(clone) {
+    this.modalNameService.clone(clone).subscribe((res: any) => {
+      if (res.status === true) {
+        this.alertify.success('Đã sao chép thành công!');
+        this.modalService.dismissAll();
+        this.getArtProcessByArticleNoID(this.articleNoID);
+        this.clearFormClone();
+      } else {
+        this.alertify.error('The BPFC exists!');
+      }
+    });
+  }
   // END CLone
   // End API ------------------------------------------------------------------------------
 
   onChangeModelName(args) {
     this.resetLifeCycleBPFC();
-    this.modelNameID = args.value;
+    this.modelNameID = args.itemData.id;
     this.getModelNoByModelNameID(this.modelNameID);
     this.existGlue = false;
     this.modelNameIDClone = args.value;
@@ -2133,8 +2085,8 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   }
   onChangeModelNo(args) {
     if (args.isInteracted) {
-      this.modelNoID = args.value;
-      this.valuemodelNo = args.value;
+      this.modelNoID = args.itemData.id;
+      this.valuemodelNo = args.itemData.id;
       this.getArticleNoByModelNoID(this.modelNoID);
       this.existGlue = false;
       this.modified = false;
@@ -2145,7 +2097,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   }
   onChangeArticleNo(args) {
     if (args.isInteracted) {
-      this.articleNoID = args.value;
+      this.articleNoID = args.itemData.id;
       this.getArtProcessByArticleNoID(this.articleNoID);
       this.existGlue = false;
       this.modified = false;
@@ -2164,7 +2116,7 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
         articleNoID: this.articleNoID,
         artProcessID: this.artProcessID,
       };
-      // this.getBPFCID(bpfcInfo);
+      this.getBPFCID(bpfcInfo);
     }
   }
   ClickProcessData(args) { }
@@ -2181,44 +2133,27 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   }
   onClickClone() {
     const clone = {
-      modelNameID: this.modelNameIDLeo,
-      modelNOID: this.modelNoIDLeo,
-      articleNOID: this.articleNoIDLeo,
-      artProcessID: Number(this.artProcessIDLeo),
-      bpfcID: this.BPFCIDLeo,
-      name: this.articleNoNewLeo,
+      modelNameID: this.modelNameIDClone,
+      modelNOID: this.modelNOIDClone,
+      articleNOID: this.articleNOIDClone,
+      artProcessID: Number(this.artProcessIDClone),
+      bpfcID: this.BPFCID,
       cloneBy: JSON.parse(localStorage.getItem('user')).User.ID,
     };
-
     this.clone(clone);
   }
-  clone(clone) {
-    if (this.articleNoNewLeo !== this.articleNoLeo) {
-      this.modalNameService.cloneBPFC(clone).subscribe((res: any) => {
-        if (res.status === true) {
-          this.alertify.success('Đã sao chép thành công!');
-          this.modalService.dismissAll();
-          this.getAllUsers();
-        } else {
-          this.alertify.error('The BPFC exists!');
-        }
-      });
-    } else {
-      this.alertify.error('The BPFC exists!');
-    }
-  }
   onChangeModelNameClone(args) {
-    const valueChange = args.value;
+    const valueChange = args.itemData.id;
     if (this.value !== valueChange) {
       this.modelNOsDataClone = [];
-      this.modelNameIDClone = args.value;
+      this.modelNameIDClone = args.itemData.id;
       this.getModelNoByModelNameIDClone(this.modelNameIDClone);
     }
-    this.modelNameIDClone = args.value;
+    this.modelNameIDClone = args.itemData.id;
     this.getModelNoByModelNameIDClone(this.modelNameIDClone);
   }
   onChangeModelNoClone(args) {
-    this.modelNOIDClone = args.value;
+    this.modelNOIDClone = args.itemData.id;
     if (this.modelNOIDClone !== null) {
       this.getArticleNoByModelNameIDClone(this.modelNOIDClone);
     }
@@ -2227,13 +2162,13 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
   }
   onChangeArticleNoClone(args) {
     if (args.isInteracted) {
-      this.articleNOIDClone = args.value;
+      this.articleNOIDClone = args.itemData.id;
       this.getArtProcessByArticleNoIDClone(this.articleNOIDClone);
     }
   }
   onChangeProcessClone(args) {
     if (args.isInteracted) {
-      this.artProcessIDClone = args.value;
+      this.artProcessIDClone = args.itemData.id;
     }
   }
 
@@ -2296,5 +2231,4 @@ export class BpfcDetailComponent implements OnInit, AfterViewInit {
       return 'font-weight-bold text-white p-2 rounded-circle warning-text';
     }
   }
-
 }

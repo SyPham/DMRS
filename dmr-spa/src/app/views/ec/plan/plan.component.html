@@ -58,7 +58,7 @@
                                     popupHeight='200px' popupWidth='250px'
                                     [fields]='fieldsLine'
                                     [allowFiltering]='true'
-                                    (change)='onChangeBuildingNameEdit($event)'
+                                    (select)='onChangeBuildingNameEdit($event)'
                                     >
                                 </ejs-dropdownlist>
                             </ng-template>
@@ -76,7 +76,7 @@
                                 popupWidth='450px'
                                 [fields]='fieldsBPFC'
                                 [allowFiltering]='true'
-                                (change)='onChangeBPFCEdit($event)'
+                                (select)='onChangeBPFCEdit($event)'
                                 >
                               </ejs-dropdownlist>
                             </ng-template>

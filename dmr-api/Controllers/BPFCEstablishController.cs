@@ -38,7 +38,13 @@ namespace DMR_API.Controllers
         {
             return Ok(await _bPFCEstablishService.GetDetailBPFC(bpfcID));
         }
-      
+
+
+        [HttpGet("{bpfcID}")]
+        public async Task<IActionResult> GetGlueByBPFCID(int bpfcID)
+        {
+            return Ok(await _bPFCEstablishService.GetGlueByBPFCID(bpfcID));
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAllHistory()
